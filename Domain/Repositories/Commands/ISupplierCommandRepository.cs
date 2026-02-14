@@ -1,0 +1,13 @@
+using Domain.Entities.Products;
+using Domain.Entities.Purchasing;
+using Domain.Repositories.Commands.Base;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Domain.Repositories.Commands
+{
+    public interface ISupplierCommandRepository : ICommandRepository<Supplier>
+    {
+    }
+}
