@@ -1,15 +1,15 @@
-using Application.Dtos.Sales;
-using Domain.Entities.Sales;
+using Application.Dtos.Orders;
+using Domain.Entities.Orders;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Application.QueryRepositories
 {
-    public interface ISaleQueryRepository
+    public interface IOrderQueryRepository
     {
-        Task<SaleDto?> GetByIdAsync(Guid id);
-        Task<IEnumerable<SaleDto>> GetAllTableAsync();
-        Task<IEnumerable<SaleDto>> GetAllByBrandIdAsync(Guid brandId);
+        Task<OrderDto?> GetByIdAsync(Guid id);
+        Task<IEnumerable<OrderDto>> GetAllTableAsync();
+        Task<IEnumerable<OrderDto>> GetAllByBrandIdAsync(Guid brandId);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Core;
+using Domain.ValueObjects;
 using Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -28,7 +29,7 @@ namespace Infrastructure.Configurations
             builder.HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(m => m.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

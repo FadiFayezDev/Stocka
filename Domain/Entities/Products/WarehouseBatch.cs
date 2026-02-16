@@ -1,18 +1,12 @@
 ﻿using Domain.Bases;
 using Domain.Entities.Core;
-using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities.Products;
 
 public partial class WarehouseBatch : IEntity<Guid>
 {
-    public Guid GetKey() => Id;
-
-    public void SetKey(Guid key) => Id = key;
-
     public Guid Id { get; set; }
 
     public Guid WarehouseId { get; set; }
@@ -25,4 +19,42 @@ public partial class WarehouseBatch : IEntity<Guid>
     public virtual Batch Batch { get; set; } = null!;
 
     public virtual Brand Brand { get; set; } = null!;
+
+    private WarehouseBatch() { }
+
+    public WarehouseBatch(Guid warehouseId, Guid batchId, Guid brandId, int quantity)
+    {
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
+        WarehouseId = warehouseId;
+        BatchId = batchId;
+        BrandId = brandId;
+        Quantity = quantity;
+    }
+
+    public void AddQuantity(int quantityToAdd)
+    {
+        if (quantityToAdd <= 0)
+            throw new ArgumentException("Quantity to add must be greater than zero.", nameof(quantityToAdd));
+
+        Quantity += quantityToAdd;
+    }
+
+    public void DeductQuantity(int quantityToDeduct)
+    {
+        if (quantityToDeduct <= 0)
+            throw new ArgumentException("Quantity to deduct must be greater than zero.", nameof(quantityToDeduct));
+
+        if (quantityToDeduct > Quantity)
+            throw new InvalidOperationException("Insufficient quantity in warehouse batch.");
+
+        Quantity -= quantityToDeduct;
+    }
+
+    public bool IsEmpty => Quantity == 0;
+
+    public Guid GetKey() => Id;
+
+    public void SetKey(Guid key) => Id = key;
 }

@@ -1,4 +1,5 @@
 ﻿using Authentication.Application.Commands.Role.Create;
+using Authentication.Application.Commands.Role.Delete;
 using Authentication.Application.Commands.Role.Update;
 using Authentication.Application.DTOs;
 using Authentication.Application.Queries.Role;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace Authentication.Api.Controllers
+namespace API.Controllers
 {
     [Authorize(Roles = "Admin")]
     [Route("[controller]")]
@@ -51,7 +52,7 @@ namespace Authentication.Api.Controllers
         [ProducesDefaultResponseType(typeof(int))]
         public async Task<IActionResult> DeleteRoleAsync(Guid id)
         {
-            return Ok(await _mediator.Send(new Application.Commands.Role.Delete.DeleteRoleCommand()
+            return Ok(await _mediator.Send(new DeleteRoleCommand()
             {
                 RoleId = id
             }));

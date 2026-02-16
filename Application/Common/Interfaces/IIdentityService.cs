@@ -1,5 +1,5 @@
 ﻿using Application.Dtos.Auth;
-using Application.Dtos.Sales;
+using Application.Dtos.Orders;
 using System;
 using System.Collections.Generic;
 using System.Text;

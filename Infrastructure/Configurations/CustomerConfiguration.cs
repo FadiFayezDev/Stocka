@@ -2,9 +2,6 @@
 using Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Configurations
 {
@@ -16,9 +13,10 @@ namespace Infrastructure.Configurations
 
             builder.HasKey(c => c.Id);
 
-            builder.Property(c => c.LoyaltyPoints);
+            builder.Property(c => c.LoyaltyPoints)
+                .HasDefaultValue(0);
 
-            // ✅ Optional One-to-One
+            // Optional One-to-One with ApplicationUser
             builder.HasOne<ApplicationUser>()
                 .WithOne()
                 .HasForeignKey<Customer>(c => c.UserId)
@@ -26,7 +24,15 @@ namespace Infrastructure.Configurations
 
             builder.HasIndex(c => c.UserId)
                 .IsUnique()
-                .HasFilter("[UserId] IS NOT NULL");
+                .HasFilter("\"UserId\" IS NOT NULL");  // ✅ تغيير من [UserId] إلى "UserId" (PostgreSQL syntax)
+
+            // Configure Orders collection
+            builder.HasMany(d => d.Orders)
+                .WithOne(d => d.Customer)
+                .HasForeignKey(d => d.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Navigation(d => d.Orders).AutoInclude();
         }
     }
 }

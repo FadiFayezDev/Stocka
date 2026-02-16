@@ -1,11 +1,11 @@
 using System;
 
-namespace Application.Dtos.Sales
+namespace Application.Dtos.Orders
 {
-    public class SaleItemDto
+    public class OrderItemDto
     {
         public Guid Id { get; set; }
-        public Guid SaleId { get; set; }
+        public Guid OrderId { get; set; }
         public Guid ProductId { get; set; }
         public Guid BatchId { get; set; }
         public int Quantity { get; set; }

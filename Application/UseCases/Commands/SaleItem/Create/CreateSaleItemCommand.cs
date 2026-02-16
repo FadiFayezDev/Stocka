@@ -1,14 +1,14 @@
 using Application.Bases;
-using Application.Dtos.Sales;
+using Application.Dtos.Orders;
 using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
-namespace Application.Features.Commands.SaleItem.Create
+namespace Application.Features.Commands.OrderItem.Create
 {
-    public class CreateSaleItemCommand : IRequest<Response<SaleItemDto>>
+    public class CreateOrderItemCommand : IRequest<Response<OrderItemDto>>
     {
-        public Guid SaleId { get; set; }
+        public Guid OrderId { get; set; }
         public Guid ProductId { get; set; }
         public Guid BatchId { get; set; }
         public int Quantity { get; set; }
@@ -16,19 +16,19 @@ namespace Application.Features.Commands.SaleItem.Create
         public decimal CostPrice { get; set; }
     }
 
-    public class CreateSaleItemCommandHandler : BaseHandler<ISaleItemCommandRepository>, IRequestHandler<CreateSaleItemCommand, Response<SaleItemDto>>
+    public class CreateOrderItemCommandHandler : BaseHandler<IOrderItemCommandRepository>, IRequestHandler<CreateOrderItemCommand, Response<OrderItemDto>>
     {
-        public CreateSaleItemCommandHandler(ISaleItemCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreateOrderItemCommandHandler(IOrderItemCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
         {
         }
 
-        public async Task<Response<SaleItemDto>> Handle(CreateSaleItemCommand request, CancellationToken cancellationToken)
+        public async Task<Response<OrderItemDto>> Handle(CreateOrderItemCommand request, CancellationToken cancellationToken)
         {
-            var entity = _mapper.Map<Domain.Entities.Sales.SaleItem>(request);
+            var entity = _mapper.Map<Domain.Entities.Orders.OrderItem>(request);
 
             await _repo.CreateAsync(entity);
 
-            return new Response<SaleItemDto>();
+            return new Response<OrderItemDto>();
         }
     }
 }

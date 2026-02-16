@@ -1,5 +1,5 @@
 using Domain.Entities.Accounting;
-using Domain.Entities.Sales;
+using Domain.Entities.Orders;
 using Domain.Repositories.Commands;
 using Infrastructure.Contexts;
 using Infrastructure.Repositories.Base;
@@ -10,10 +10,10 @@ using System.Text;
 
 namespace Infrastructure.Repositories.Commands
 {
-    public class SaleItemCommandRepository : CommandRepository<SaleItem>, ISaleItemCommandRepository
+    public class OrderCommandRepository : CommandRepository<Order>, IOrderCommandRepository
     {
         private readonly AppDbContext _context;
-        public SaleItemCommandRepository(AppDbContext context) : base(context) 
+        public OrderCommandRepository(AppDbContext context) : base(context)
         {
             _context = context;
         }

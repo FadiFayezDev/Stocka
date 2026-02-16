@@ -1,9 +1,6 @@
 using Domain.Entities.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Configurations
 {
@@ -13,19 +10,27 @@ namespace Infrastructure.Configurations
         {
             builder.HasKey(e => e.Id).HasName("PK_WarehouseBatches");
 
-            builder.HasIndex(e => new { e.WarehouseId, e.BatchId }, "UQ_WarehouseBatches_WarehouseId_BatchId").IsUnique();
-
             builder.Property(e => e.Id).ValueGeneratedNever();
+            builder.Property(e => e.Quantity)
+                .IsRequired();
+
+            // Unique constraint on WarehouseId + BatchId
+            builder.HasIndex(e => new { e.WarehouseId, e.BatchId }, "UQ_WarehouseBatches_WarehouseId_BatchId")
+                .IsUnique();
 
             builder.HasOne(d => d.Batch).WithMany(p => p.WarehouseBatches)
                 .HasForeignKey(d => d.BatchId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_WarehouseBatches_Batches_BatchId");
 
             builder.HasOne(d => d.Warehouse).WithMany(p => p.WarehouseBatches)
                 .HasForeignKey(d => d.WarehouseId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_WarehouseBatches_Warehouses_WarehouseId");
+
+            builder.HasOne(d => d.Brand).WithMany()
+                .HasForeignKey(d => d.BrandId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

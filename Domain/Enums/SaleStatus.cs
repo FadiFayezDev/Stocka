@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Domain.Enums
 {
-    public enum SaleStatus
+    public enum OrderStatus
     {
         Completed,
         Cancelled,

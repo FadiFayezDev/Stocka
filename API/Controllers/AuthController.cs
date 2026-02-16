@@ -3,7 +3,7 @@ using Authentication.Application.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Authentication.Api.Controllers
+namespace API.Controllers
 {
     [Route("[controller]")]
     [ApiController]

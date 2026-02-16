@@ -64,8 +64,8 @@ namespace Infrastructure
             services.AddScoped<ISupplierCommandRepository, SupplierCommandRepository>();
             services.AddScoped<IPurchaseCommandRepository, PurchaseCommandRepository>();
             services.AddScoped<IPurchaseItemCommandRepository, PurchaseItemCommandRepository>();
-            services.AddScoped<ISaleCommandRepository, SaleCommandRepository>();
-            services.AddScoped<ISaleItemCommandRepository, SaleItemCommandRepository>();
+            services.AddScoped<IOrderCommandRepository, OrderCommandRepository>();
+            services.AddScoped<IOrderItemCommandRepository, OrderItemCommandRepository>();
             services.AddScoped<IExpenseCommandRepository, ExpenseCommandRepository>();
             services.AddScoped<IExpenseCategoryCommandRepository, ExpenseCategoryCommandRepository>();
             services.AddScoped<IStockMovementCommandRepository, StockMovementCommandRepository>();
@@ -87,8 +87,8 @@ namespace Infrastructure
             services.AddScoped<ISupplierQueryRepository, SupplierQueryRepository>();
             services.AddScoped<IPurchaseQueryRepository, PurchaseQueryRepository>();
             services.AddScoped<IPurchaseItemQueryRepository, PurchaseItemQueryRepository>();
-            services.AddScoped<ISaleQueryRepository, SaleQueryRepository>();
-            services.AddScoped<ISaleItemQueryRepository, SaleItemQueryRepository>();
+            services.AddScoped<IOrderQueryRepository, OrderQueryRepository>();
+            services.AddScoped<IOrderItemQueryRepository, OrderItemQueryRepository>();
             services.AddScoped<IExpenseQueryRepository, ExpenseQueryRepository>();
             services.AddScoped<IExpenseCategoryQueryRepository, ExpenseCategoryQueryRepository>();
             services.AddScoped<IStockMovementQueryRepository, StockMovementQueryRepository>();

@@ -9,10 +9,6 @@ namespace Domain.Entities.Products
 {
     public partial class StockMovement : IEntity<Guid>
     {
-        public Guid GetKey() => Id;
-
-        public void SetKey(Guid key) => Id = key;
-
         public Guid Id { get; set; }
 
         public Guid ProductId { get; set; }
@@ -30,5 +26,30 @@ namespace Domain.Entities.Products
         public virtual Product Product { get; set; } = null!;
         public virtual Warehouse Warehouse { get; set; } = null!;
         public virtual Brand Brand { get; set; } = null!;
+
+        private StockMovement() { }
+
+        public StockMovement(Guid productId, Guid batchId, Guid warehouseId, Guid brandId, int quantity, StockMovementType movementType, string? referenceType = null, Guid? referenceId = null)
+        {
+            if (quantity <= 0)
+                throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
+            ProductId = productId;
+            BatchId = batchId;
+            WarehouseId = warehouseId;
+            BrandId = brandId;
+            Quantity = quantity;
+            MovementType = movementType;
+            ReferenceType = referenceType;
+            ReferenceId = referenceId;
+            CreatedAt = DateTime.UtcNow;
+        }
+
+        public bool IsInbound => MovementType == StockMovementType.PurchaseIn;
+        public bool IsOutbound => MovementType == StockMovementType.Order || MovementType == StockMovementType.OrderReturn;
+
+        public Guid GetKey() => Id;
+
+        public void SetKey(Guid key) => Id = key;
     }
 }

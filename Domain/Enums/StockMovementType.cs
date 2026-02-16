@@ -7,9 +7,9 @@ namespace Domain.Enums
     public enum StockMovementType
     {
         PurchaseIn,
-        Sale,
+        Order,
         Transfer,
-        SaleReturn,
+        OrderReturn,
         Adjustment
     }
 }

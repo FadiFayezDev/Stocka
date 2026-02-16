@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Domain.Entities.Core
+namespace Domain.ValueObjects
 {
     public class BrandMembership
     {

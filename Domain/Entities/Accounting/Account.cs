@@ -3,17 +3,11 @@ using Domain.Entities.Core;
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities.Accounting;
 
 public partial class Account : IEntity<Guid>
 {
-    public Guid GetKey() => Id;
-
-    public void SetKey(Guid key) => Id = key;
-
-
     public Guid Id { get; set; }
 
     public Guid BrandId { get; set; }
@@ -22,7 +16,45 @@ public partial class Account : IEntity<Guid>
 
     public AccountType Type { get; set; }
 
+    private readonly List<JournalEntryLine> _journalEntryLines = new();
     public virtual Brand Brand { get; set; } = null!;
+    public virtual ICollection<JournalEntryLine> JournalEntryLines => _journalEntryLines.AsReadOnly();
 
-    public virtual ICollection<JournalEntryLine> JournalEntryLines { get; set; } = new List<JournalEntryLine>();
+    private Account() { }
+
+    public Account(Guid brandId, string name, AccountType type)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Account name cannot be empty.", nameof(name));
+
+        BrandId = brandId;
+        Name = name.Trim();
+        Type = type;
+    }
+
+    public void UpdateName(string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+            throw new ArgumentException("Account name cannot be empty.", nameof(newName));
+
+        Name = newName.Trim();
+    }
+
+    public void AddJournalEntryLine(JournalEntryLine line)
+    {
+        if (line == null)
+            throw new ArgumentNullException(nameof(line));
+
+        if (line.AccountId != Id)
+            throw new ArgumentException("Journal entry line does not belong to this account.");
+
+        if (_journalEntryLines.Any(l => l.Id == line.Id))
+            throw new InvalidOperationException("Journal entry line already added.");
+
+        _journalEntryLines.Add(line);
+    }
+
+    public Guid GetKey() => Id;
+
+    public void SetKey(Guid key) => Id = key;
 }

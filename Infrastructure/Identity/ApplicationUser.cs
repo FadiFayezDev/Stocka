@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Domain.ValueObjects;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 
@@ -10,6 +11,6 @@ namespace Infrastructure.Identity
         public string LastName { get; set; } = string.Empty;
 
         public virtual ICollection<UserPhoneNumber> PhoneNumbers { get; set; } = new List<UserPhoneNumber>();
-        public virtual ICollection<BrandUser> BrandUsers { get; set; } = new List<BrandUser>();
+        public virtual ICollection<BrandMembership> BrandMemberships { get; set; } = new List<BrandMembership>();
     }
 }

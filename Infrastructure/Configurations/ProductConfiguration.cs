@@ -1,9 +1,6 @@
 using Domain.Entities.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Configurations
 {
@@ -14,18 +11,47 @@ namespace Infrastructure.Configurations
             builder.HasKey(e => e.Id).HasName("PK_Products");
 
             builder.Property(e => e.Id).ValueGeneratedNever();
-            builder.Property(e => e.Barcode).HasMaxLength(100);
-            builder.Property(e => e.Name).HasMaxLength(200);
+            builder.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(200);
+            builder.Property(e => e.Barcode)
+                .HasMaxLength(100);
 
             builder.HasOne(d => d.Brand).WithMany(p => p.Products)
                 .HasForeignKey(d => d.BrandId)
-                .OnDelete(DeleteBehavior.ClientSetNull) // Product belongs to Brand. If Brand deleted? Usually cascade, but user asked for "Restrict" or consistent. Usually Brand deletion is huge. Let's keep ClientSetNull or Restrict. Actually, Product is master data. Restrict is safer.
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Products_Brands_BrandId");
 
             builder.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict) // Category deletion shouldn't delete products silently
+                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Products_ProductCategories_CategoryId");
+
+            // Configure Batches collection
+            builder.HasMany(d => d.Batches)
+                .WithOne(d => d.Product)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure PurchaseItems collection
+            builder.HasMany(d => d.PurchaseItems)
+                .WithOne(d => d.Product)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure OrderItems collection
+            builder.HasMany(d => d.OrderItems)
+                .WithOne(d => d.Product)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure StockMovements collection
+            builder.HasMany(d => d.StockMovements)
+                .WithOne(d => d.Product)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Navigation(d => d.Batches).AutoInclude();
         }
     }
 }

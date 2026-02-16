@@ -34,7 +34,6 @@ namespace Authentication.Application.Commands.Auth
 
             var userTokenDto = new UserTokenDetailsDto (
                 userId,
-                brandIds,
                 userName,
                 roles
             );
@@ -44,6 +43,7 @@ namespace Authentication.Application.Commands.Auth
             return new AuthResponseDTO()
             {
                 UserId = userId,
+                BrandIds = brandIds,
                 Name = userName,
                 Token = token
             };

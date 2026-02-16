@@ -67,7 +67,7 @@ namespace Infrastructure.Serviecs
         public async Task<UserDetailsDto> GetUserDetailsAsync(Guid userId)
         {
             var user = await _userManager.Users
-                .Include(u => u.BrandUsers)
+                .Include(u => u.BrandMemberships)
                 .FirstOrDefaultAsync(x => x.Id == userId);
 
             if (user == null) throw new NotFoundException("USER_NOT_FOUND");
@@ -78,7 +78,7 @@ namespace Infrastructure.Serviecs
         public async Task<UserDetailsDto> GetUserDetailsByUserNameAsync(string userName)
         {
             var user = await _userManager.Users
-                .Include(u => u.BrandUsers)
+                .Include(u => u.BrandMemberships)
                 .FirstOrDefaultAsync(x => x.UserName == userName);
 
             if (user == null) throw new NotFoundException("USER_NOT_FOUND");
@@ -125,7 +125,7 @@ namespace Infrastructure.Serviecs
 
         public async Task<List<UserDetailsDto>> GetAllUsersDetailsAsync()
         {
-            var users = await _userManager.Users.Include(u => u.BrandUsers).ToListAsync();
+            var users = await _userManager.Users.Include(u => u.BrandMemberships).ToListAsync();
             var userDetailsList = new List<UserDetailsDto>();
 
             foreach (var user in users)
@@ -248,7 +248,7 @@ namespace Infrastructure.Serviecs
 
         private async Task<UserDetailsDto> MapToUserDetailsDto(ApplicationUser user)
         {
-            var brandIds = user.BrandUsers?.Select(bu => bu.BrandId).ToList() ?? new List<Guid>();
+            var brandIds = user.BrandMemberships?.Select(bu => bu.BrandId).ToList() ?? new List<Guid>();
             var roles = await _userManager.GetRolesAsync(user);
 
             return new UserDetailsDto(

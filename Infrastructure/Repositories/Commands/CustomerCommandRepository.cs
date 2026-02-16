@@ -1,7 +1,7 @@
 using Domain.Contracts;
 using Domain.Entities.Accounting;
 using Domain.Entities.Core;
-using Domain.Entities.Sales;
+using Domain.Entities.Orders;
 using Infrastructure.Contexts;
 using Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;

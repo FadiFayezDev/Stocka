@@ -4,12 +4,11 @@ using Authentication.Application.Commands.User.Update;
 using Authentication.Application.DTOs;
 using Authentication.Application.Queries.User;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace Authentication.Api.Controllers
+namespace API.Controllers
 {
     [Authorize(Roles = "Admin")]
     [Route("[controller]")]
@@ -33,12 +32,12 @@ namespace Authentication.Api.Controllers
             return Ok(await _mediator.Send(command));
         }
 
-        [HttpGet("GetAll")]
-        [ProducesDefaultResponseType(typeof(List<UserResponseDTO>))]
-        public async Task<IActionResult> GetAllUserAsync()
-        {
-            return Ok(await _mediator.Send(new Application.Queries.User.GetUserQuery()));
-        }
+        //[HttpGet("GetAll")]
+        //[ProducesDefaultResponseType(typeof(List<UserResponseDTO>))]
+        //public async Task<IActionResult> GetAllUserAsync()
+        //{
+        //    return Ok(await _mediator.Send(new Application.Queries.User.GetUserQuery()));
+        //}
 
         [HttpDelete("Delete/{userId}")]
         [ProducesDefaultResponseType(typeof(int))]

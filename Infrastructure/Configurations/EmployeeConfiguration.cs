@@ -20,17 +20,21 @@ namespace Infrastructure.Configurations
             builder.Property(e => e.Salary)
                 .HasColumnType("decimal(18,2)");
 
-            // ✅ Optional One-to-One with Identity
+            builder.Property(e => e.HireDate)
+                .HasDefaultValueSql("NOW()");  // ✅ تغيير من GETUTCDATE() إلى NOW()
+
+            builder.Property(e => e.IsActive)
+                .HasDefaultValue(true);
+
+            // Optional One-to-One with ApplicationUser
             builder.HasOne<ApplicationUser>()
-                .WithOne() // 👑 no navigation back (cleaner)
+                .WithOne()
                 .HasForeignKey<Employee>(e => e.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // ✅ Unique UserId لو موجود
             builder.HasIndex(e => e.UserId)
                 .IsUnique()
-                .HasFilter("[UserId] IS NOT NULL"); // مهم جدًا
-
+                .HasFilter("\"UserId\" IS NOT NULL");  // ✅ تغيير من [UserId] إلى "UserId" (PostgreSQL syntax)
         }
     }
 }

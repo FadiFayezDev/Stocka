@@ -1,26 +1,26 @@
 using Application.Bases;
-using Application.Dtos.Sales;
+using Application.Dtos.Orders;
 using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
-namespace Application.Features.Queries.SaleItem.GetAll
+namespace Application.Features.Queries.OrderItem.GetAll
 {
-    public class GetAllSaleItemsQuery : IRequest<Response<IEnumerable<SaleItemDto>>>
+    public class GetAllOrderItemsQuery : IRequest<Response<IEnumerable<OrderItemDto>>>
     {
     }
 
-    public class GetAllSaleItemsQueryHandler : BaseHandler<ISaleItemCommandRepository>, IRequestHandler<GetAllSaleItemsQuery, Response<IEnumerable<SaleItemDto>>>
+    public class GetAllOrderItemsQueryHandler : BaseHandler<IOrderItemCommandRepository>, IRequestHandler<GetAllOrderItemsQuery, Response<IEnumerable<OrderItemDto>>>
     {
-        public GetAllSaleItemsQueryHandler(ISaleItemCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public GetAllOrderItemsQueryHandler(IOrderItemCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
         {
         }
 
-        public async Task<Response<IEnumerable<SaleItemDto>>> Handle(GetAllSaleItemsQuery request, CancellationToken cancellationToken)
+        public async Task<Response<IEnumerable<OrderItemDto>>> Handle(GetAllOrderItemsQuery request, CancellationToken cancellationToken)
         {
             var items = await _repo.GetAllTableAsync();
-            var dtos = _mapper.Map<IEnumerable<SaleItemDto>>(items);
-            return new Response<IEnumerable<SaleItemDto>>(dtos, "Success");
+            var dtos = _mapper.Map<IEnumerable<OrderItemDto>>(items);
+            return new Response<IEnumerable<OrderItemDto>>(dtos, "Success");
         }
     }
 }

@@ -3,7 +3,7 @@ using Domain.Entities.Core;
 using Domain.Entities.Expenses;
 using Domain.Entities.Products;
 using Domain.Entities.Purchasing;
-using Domain.Entities.Sales;
+using Domain.Entities.Orders;
 using Infrastructure.Identity;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
@@ -48,9 +48,9 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public virtual DbSet<PurchaseItem> PurchaseItems { get; set; }
 
-    public virtual DbSet<Sale> Sales { get; set; }
+    public virtual DbSet<Order> Orders { get; set; }
 
-    public virtual DbSet<SaleItem> SaleItems { get; set; }
+    public virtual DbSet<OrderItem> OrderItems { get; set; }
 
     public virtual DbSet<StockMovement> StockMovements { get; set; }
 

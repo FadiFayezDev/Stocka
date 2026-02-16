@@ -3,7 +3,8 @@ using Domain.Entities.Accounting;
 using Domain.Entities.Expenses;
 using Domain.Entities.Products;
 using Domain.Entities.Purchasing;
-using Domain.Entities.Sales;
+using Domain.Entities.Orders;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -31,7 +32,7 @@ namespace Domain.Entities.Core
         public virtual ICollection<Product> Products { get; set; } = new List<Product>();
         public virtual ICollection<Supplier> Suppliers { get; set; } = new List<Supplier>();
         public virtual ICollection<Purchase> Purchases { get; set; } = new List<Purchase>();
-        public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
         public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
         public virtual ICollection<ExpenseCategory> ExpenseCategories { get; set; } = new List<ExpenseCategory>();
         public virtual ICollection<JournalEntry> JournalEntries { get; set; } = new List<JournalEntry>();

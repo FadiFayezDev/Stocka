@@ -1,15 +1,15 @@
 using Application.Bases;
-using Application.Dtos.Sales;
+using Application.Dtos.Orders;
 using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
-namespace Application.Features.Commands.SaleItem.Update
+namespace Application.Features.Commands.OrderItem.Update
 {
-    public class UpdateSaleItemCommand : IRequest<Response<SaleItemDto>>
+    public class UpdateOrderItemCommand : IRequest<Response<OrderItemDto>>
     {
         public Guid Id { get; set; }
-        public Guid SaleId { get; set; }
+        public Guid OrderId { get; set; }
         public Guid ProductId { get; set; }
         public Guid BatchId { get; set; }
         public int Quantity { get; set; }
@@ -17,23 +17,23 @@ namespace Application.Features.Commands.SaleItem.Update
         public decimal CostPrice { get; set; }
     }
 
-    public class UpdateSaleItemCommandHandler : BaseHandler<ISaleItemCommandRepository>, IRequestHandler<UpdateSaleItemCommand, Response<SaleItemDto>>
+    public class UpdateOrderItemCommandHandler : BaseHandler<IOrderItemCommandRepository>, IRequestHandler<UpdateOrderItemCommand, Response<OrderItemDto>>
     {
-        public UpdateSaleItemCommandHandler(ISaleItemCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public UpdateOrderItemCommandHandler(IOrderItemCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
         {
         }
 
-        public async Task<Response<SaleItemDto>> Handle(UpdateSaleItemCommand request, CancellationToken cancellationToken)
+        public async Task<Response<OrderItemDto>> Handle(UpdateOrderItemCommand request, CancellationToken cancellationToken)
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<SaleItemDto>("Not found");
+                return new Response<OrderItemDto>("Not found");
 
             _mapper.Map(request, existing);
 
             await _repo.UpdateAsync(existing);
 
-            return new Response<SaleItemDto>();
+            return new Response<OrderItemDto>();
         }
     }
 }

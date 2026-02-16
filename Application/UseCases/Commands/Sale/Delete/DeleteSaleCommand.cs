@@ -1,23 +1,23 @@
 using Application.Bases;
-using Application.Dtos.Sales;
+using Application.Dtos.Orders;
 using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
-namespace Application.Features.Commands.Sale.Delete
+namespace Application.Features.Commands.Order.Delete
 {
-    public class DeleteSaleCommand : IRequest<Response<bool>>
+    public class DeleteOrderCommand : IRequest<Response<bool>>
     {
         public Guid Id { get; set; }
     }
 
-    public class DeleteSaleCommandHandler : BaseHandler<ISaleCommandRepository>, IRequestHandler<DeleteSaleCommand, Response<bool>>
+    public class DeleteOrderCommandHandler : BaseHandler<IOrderCommandRepository>, IRequestHandler<DeleteOrderCommand, Response<bool>>
     {
-        public DeleteSaleCommandHandler(ISaleCommandRepository Repository) : base(null, Repository)
+        public DeleteOrderCommandHandler(IOrderCommandRepository Repository) : base(null, Repository)
         {
         }
 
-        public async Task<Response<bool>> Handle(DeleteSaleCommand request, CancellationToken cancellationToken)
+        public async Task<Response<bool>> Handle(DeleteOrderCommand request, CancellationToken cancellationToken)
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
