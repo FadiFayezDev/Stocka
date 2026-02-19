@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Authentication.Application.Commands.Role.Update
+namespace Application.UseCases.Commands.Role.Update
 {
     public class UpdateRoleCommand : IRequest<int>
     {

@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Accounting;
 using Application.QueryRepositories;
 using Domain.Contracts;
@@ -11,25 +12,24 @@ namespace Application.UseCases.Commands.Account.Delete
         public Guid Id { get; set; }
     }
 
-    public class DeleteAccountCommandHandler : IRequestHandler<DeleteAccountCommand, Response<bool>>
+    public class DeleteAccountCommandHandler : BaseHandler<IAccountCommandRepository, IAccountQueryRepository>, IRequestHandler<DeleteAccountCommand, Response<bool>>
     {
-        private readonly IAccountCommandRepository _commands;
-        private readonly IAccountQueryRepository _queries;
-
-        public DeleteAccountCommandHandler(IAccountCommandRepository commands, IAccountQueryRepository queries)
+        public DeleteAccountCommandHandler(IAccountCommandRepository command, IAccountQueryRepository query, IUnitOfWork work)
+            : base(null, command, query, work)
         {
-            _commands = commands;
-            _queries = queries;
         }
 
         public async Task<Response<bool>> Handle(DeleteAccountCommand request, CancellationToken cancellationToken)
         {
-            var existing = await _queries.GetByIdAsync(request.Id);
+            var existing = await _command.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<bool>("Not found");
+                return new Response<bool>(false, "Account not found");
 
-            //await _commands.DeleteAsync(existing);
-            return new Response<bool>(true, "Deleted Successfully");
+            return await ExecuteDeleteAsync(
+                existing,
+                async (acc) => await _command.DeleteAsync(acc),
+                cancellationToken
+            );
         }
     }
 }

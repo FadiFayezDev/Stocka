@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -15,7 +16,8 @@ namespace Application.Features.Commands.Warehouse.Create
 
     public class CreateWarehouseCommandHandler : BaseHandler<IWarehouseCommandRepository>, IRequestHandler<CreateWarehouseCommand, Response<WarehouseDto>>
     {
-        public CreateWarehouseCommandHandler(IWarehouseCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreateWarehouseCommandHandler(IWarehouseCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -23,9 +25,10 @@ namespace Application.Features.Commands.Warehouse.Create
         {
             var entity = _mapper.Map<Domain.Entities.Products.Warehouse>(request);
 
-            await _repo.CreateAsync(entity);
-
-            return new Response<WarehouseDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Products.Warehouse, WarehouseDto>(
+                entity,
+                async (w) => await _repo.CreateAsync(w),
+                cancellationToken);
         }
     }
 }

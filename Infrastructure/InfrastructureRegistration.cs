@@ -30,7 +30,8 @@ namespace Infrastructure
             #region Entity Framework Core registration
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseNpgsql(connectionString);
+                options.UseNpgsql(connectionString)
+                .UseSnakeCaseNamingConvention();
             });
             #endregion
 

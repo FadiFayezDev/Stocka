@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Orders;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -19,7 +20,8 @@ namespace Application.Features.Commands.Order.Update
 
     public class UpdateOrderCommandHandler : BaseHandler<IOrderCommandRepository>, IRequestHandler<UpdateOrderCommand, Response<OrderDto>>
     {
-        public UpdateOrderCommandHandler(IOrderCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public UpdateOrderCommandHandler(IOrderCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -27,12 +29,14 @@ namespace Application.Features.Commands.Order.Update
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<OrderDto>("Not found");
+                return new Response<OrderDto>("Order not found");
 
             _mapper.Map(request, existing);
 
-           await _repo.UpdateAsync(existing);
-            return new Response<OrderDto>();
+            return await ExecuteUpdateAsync<Domain.Entities.Orders.Order, OrderDto>(
+                existing,
+                async (o) => await _repo.UpdateAsync(o),
+                cancellationToken);
         }
     }
 }

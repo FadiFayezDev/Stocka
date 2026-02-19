@@ -1,9 +1,6 @@
 ﻿using Domain.Entities.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Configurations
 {
@@ -13,13 +10,13 @@ namespace Infrastructure.Configurations
         {
             builder.HasKey(e => e.Id).HasName("PK_Brands");
 
-            builder.HasIndex(e => e.Slug, "UQ_Brands_Slug").IsUnique();
+            builder.HasIndex(e => e.Slug, "ix_brands_slug").IsUnique();
 
             builder.HasMany(b => b.Memberships)
                 .WithOne()
                 .HasForeignKey(m => m.BrandId)
                 .OnDelete(DeleteBehavior.Cascade);
-        
+
             builder.Metadata?
                 .FindNavigation(nameof(Brand.Memberships))?
                 .SetPropertyAccessMode(PropertyAccessMode.Field);

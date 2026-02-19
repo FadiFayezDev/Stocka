@@ -1,6 +1,6 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Core;
-using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -13,7 +13,8 @@ namespace Application.Features.Commands.Brand.Delete
 
     public class DeleteBrandCommandHandler : BaseHandler<IBrandCommandRepository>, IRequestHandler<DeleteBrandCommand, Response<bool>>
     {
-        public DeleteBrandCommandHandler(IBrandCommandRepository brandRepository) : base(null, brandRepository)
+        public DeleteBrandCommandHandler(IBrandCommandRepository brandRepository, IUnitOfWork unitOfWork) 
+            : base(null, brandRepository, unitOfWork)
         {
         }
 
@@ -21,11 +22,12 @@ namespace Application.Features.Commands.Brand.Delete
         {
             var existingBrand = await _repo.GetByIdAsync(request.Id);
             if (existingBrand == null)
-                return new Response<bool>("Brand not found");
+                return new Response<bool>(false, "Brand not found");
 
-            await _repo.DeleteAsync(existingBrand);
-
-            return new Response<bool>();
+            return await ExecuteDeleteAsync(
+                existingBrand,
+                async (b) => await _repo.DeleteAsync(b),
+                cancellationToken);
         }
     }
 }

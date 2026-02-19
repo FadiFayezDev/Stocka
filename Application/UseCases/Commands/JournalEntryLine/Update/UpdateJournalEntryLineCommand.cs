@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Accounting;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -17,7 +18,8 @@ namespace Application.Features.Commands.JournalEntryLine.Update
 
     public class UpdateJournalEntryLineCommandHandler : BaseHandler<IJournalEntryLineCommandRepository>, IRequestHandler<UpdateJournalEntryLineCommand, Response<JournalEntryLineDto>>
     {
-        public UpdateJournalEntryLineCommandHandler(IJournalEntryLineCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public UpdateJournalEntryLineCommandHandler(IJournalEntryLineCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -25,12 +27,14 @@ namespace Application.Features.Commands.JournalEntryLine.Update
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<JournalEntryLineDto>("Not found");
+                return new Response<JournalEntryLineDto>("Journal entry line not found");
 
             _mapper.Map(request, existing);
 
-            await _repo.UpdateAsync(existing);
-            return new Response<JournalEntryLineDto>();
+            return await ExecuteUpdateAsync<Domain.Entities.Accounting.JournalEntryLine, JournalEntryLineDto>(
+                existing,
+                async (jel) => await _repo.UpdateAsync(jel),
+                cancellationToken);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Customer> builder)
         {
-            builder.ToTable("Customers");
+            builder.ToTable("customers");
 
             builder.HasKey(c => c.Id);
 
@@ -24,7 +24,7 @@ namespace Infrastructure.Configurations
 
             builder.HasIndex(c => c.UserId)
                 .IsUnique()
-                .HasFilter("\"UserId\" IS NOT NULL");  // ✅ تغيير من [UserId] إلى "UserId" (PostgreSQL syntax)
+                .HasFilter("\"user_id\" IS NOT NULL");
 
             // Configure Orders collection
             builder.HasMany(d => d.Orders)

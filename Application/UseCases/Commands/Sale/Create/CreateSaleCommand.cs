@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Orders;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -18,7 +19,8 @@ namespace Application.Features.Commands.Order.Create
 
     public class CreateOrderCommandHandler : BaseHandler<IOrderCommandRepository>, IRequestHandler<CreateOrderCommand, Response<OrderDto>>
     {
-        public CreateOrderCommandHandler(IOrderCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreateOrderCommandHandler(IOrderCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -26,8 +28,10 @@ namespace Application.Features.Commands.Order.Create
         {
             var entity = _mapper.Map<Domain.Entities.Orders.Order>(request);
 
-            await _repo.CreateAsync(entity);
-            return new Response<OrderDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Orders.Order, OrderDto>(
+                entity,
+                async (o) => await _repo.CreateAsync(o),
+                cancellationToken);
         }
     }
 }

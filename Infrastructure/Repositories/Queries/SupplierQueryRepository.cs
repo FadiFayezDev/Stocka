@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<SupplierDto?> GetByIdAsync(Guid id)
         {
-            var query = "SELECT Id, BrandId, Name, Email, Phone FROM Suppliers WHERE Id = @Id";
+            var query = $"SELECT id, brand_id AS BrandId, name AS Name, email AS Email, phone AS Phone, address AS Address FROM {TableSuppliers} WHERE id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<SupplierDto>(query, parameters);
             return result;
@@ -25,14 +25,14 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<SupplierDto>> GetAllTableAsync()
         {
-            var query = "SELECT Id, BrandId, Name, Email, Phone FROM Suppliers";
+            var query = $"SELECT id, brand_id AS BrandId, name AS Name, email AS Email, phone AS Phone, address AS Address FROM {TableSuppliers}";
             var result = await _connection.QueryAsync<SupplierDto>(query);
             return result;
         }
 
         public async Task<IEnumerable<SupplierDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = "SELECT Id, BrandId, Name, Email, Phone FROM Suppliers WHERE BrandId = @BrandId";
+            var query = $"SELECT id, brand_id AS BrandId, name AS Name, email AS Email, phone AS Phone, address AS Address FROM {TableSuppliers} WHERE brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<SupplierDto>(query, parameters);
             return result;

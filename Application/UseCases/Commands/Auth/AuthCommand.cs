@@ -1,10 +1,12 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Dtos.Auth;
-using Authentication.Application.DTOs;
+using Application.Dtos.Core;
+using Application.DTOs;
+using Application.QueryRepositories;
 using MediatR;
 
-namespace Authentication.Application.Commands.Auth
+namespace Application.UseCases.Commands.Auth
 {
     public class AuthCommand : IRequest<AuthResponseDTO>
     {
@@ -15,12 +17,14 @@ namespace Authentication.Application.Commands.Auth
     public class AuthCommandHandler : IRequestHandler<AuthCommand, AuthResponseDTO>
     {
         private readonly ITokenGenerator _tokenGenerator;
+        private readonly IBrandQueryRepository _brandQuery;
         private readonly IIdentityService _identityService;
 
-        public AuthCommandHandler(IIdentityService identityService, ITokenGenerator tokenGenerator)
+        public AuthCommandHandler(IIdentityService identityService, ITokenGenerator tokenGenerator, IBrandQueryRepository brandQuery)
         {
             _identityService = identityService;
             _tokenGenerator = tokenGenerator;
+            this._brandQuery = brandQuery;
         }
 
         public async Task<AuthResponseDTO> Handle(AuthCommand request, CancellationToken cancellationToken)
@@ -32,8 +36,19 @@ namespace Authentication.Application.Commands.Auth
 
             var (userId, brandIds, firstName, lastName, userName, email, roles) = await _identityService.GetUserDetailsAsync(await _identityService.GetUserIdAsync(request.UserName));
 
-            var userTokenDto = new UserTokenDetailsDto (
+            var brands = new List<BrandDto>();
+
+            foreach (var brandId in brandIds)
+            {
+                var brand = await _brandQuery.GetByIdAsync(brandId);
+                if (brand is null)
+                    throw new NotFoundException($"Brand with id {brandId} not found");
+                brands.Add(brand);
+            }
+
+            var userTokenDto = new UserTokenDetailsDto(
                 userId,
+                brandIds,
                 userName,
                 roles
             );
@@ -43,7 +58,7 @@ namespace Authentication.Application.Commands.Auth
             return new AuthResponseDTO()
             {
                 UserId = userId,
-                BrandIds = brandIds,
+                Brands = brands,
                 Name = userName,
                 Token = token
             };

@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -20,7 +21,8 @@ namespace Application.Features.Commands.StockMovement.Update
 
     public class UpdateStockMovementCommandHandler : BaseHandler<IStockMovementCommandRepository>, IRequestHandler<UpdateStockMovementCommand, Response<StockMovementDto>>
     {
-        public UpdateStockMovementCommandHandler(IStockMovementCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public UpdateStockMovementCommandHandler(IStockMovementCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -28,13 +30,14 @@ namespace Application.Features.Commands.StockMovement.Update
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<StockMovementDto>("Not found");
+                return new Response<StockMovementDto>("Stock movement not found");
 
             _mapper.Map(request, existing);
 
-            await _repo.UpdateAsync(existing);
-
-            return new Response<StockMovementDto>();
+            return await ExecuteUpdateAsync<Domain.Entities.Products.StockMovement, StockMovementDto>(
+                existing,
+                async (sm) => await _repo.UpdateAsync(sm),
+                cancellationToken);
         }
     }
 }

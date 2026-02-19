@@ -2,7 +2,7 @@
 using MediatR;
 
 
-namespace Authentication.Application.Commands.Role.Create
+namespace Application.UseCases.Commands.Role.Create
 {
     public class RoleCreateCommand : IRequest<int>
     {

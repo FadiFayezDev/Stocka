@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Core;
 using AutoMapper;
 using Domain.Contracts;
@@ -16,33 +17,26 @@ namespace Application.UseCases.Commands.Employee.Create
         public bool IsActive { get; set; }
     }
 
-    public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeCommand, Response<EmployeeDto>>
+    public class CreateEmployeeCommandHandler : BaseHandler<IEmployeeCommandRepository>, IRequestHandler<CreateEmployeeCommand, Response<EmployeeDto>>
     {
-        private readonly IEmployeeCommandRepository _repository;
-        private readonly IMapper _mapper;
-
-        public CreateEmployeeCommandHandler(IEmployeeCommandRepository repository, IMapper mapper)
+        public CreateEmployeeCommandHandler(IEmployeeCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
-            _repository = repository;
-            _mapper = mapper;
         }
 
         public async Task<Response<EmployeeDto>> Handle(CreateEmployeeCommand request, CancellationToken cancellationToken)
         {
-            //var employee = new Domain.Entities.Core.Employee
-            //{
-            //    UserId = request.ApplicationUserId,
-            //    BrandId = request.BrandId,
-            //    JobTitle = request.JobTitle,
-            //    Salary = request.Salary,
-            //    HireDate = request.HireDate,
-            //    IsActive = request.IsActive
-            //};
+            var employee = new Domain.Entities.Core.Employee(
+                request.ApplicationUserId,
+                request.BrandId,
+                request.JobTitle,
+                request.Salary,
+                request.HireDate);
 
-            //var created = await _repository.AddAsync(employee);
-            //var employeeDto = _mapper.Map<EmployeeDto>(created);
-            //return new Response<EmployeeDto>(employeeDto, "Created Successfully"); 
-            throw new NotImplementedException();
+            return await ExecuteCreateAsync<Domain.Entities.Core.Employee, EmployeeDto>(
+                employee,
+                async (emp) => await _repo.CreateAsync(emp),
+                cancellationToken);
         }
     }
 }

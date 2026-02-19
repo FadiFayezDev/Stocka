@@ -1,5 +1,4 @@
 ﻿using Application;
-using CleanArchitecture.Api.Middleware;
 using Infrastructure;
 using Infrastructure.Contexts;
 using Infrastructure.Identity;
@@ -9,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using CleanArchitecture.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -122,7 +122,7 @@ app.UseCors(cors =>
         .AllowAnyHeader()
         .AllowAnyMethod());
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseMiddleware<GlobalExceptionMiddleware>();
 }

@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Core;
 using AutoMapper;
 using Domain.Contracts;
@@ -17,35 +18,32 @@ namespace Application.UseCases.Commands.Employee.Update
         public bool IsActive { get; set; }
     }
 
-    public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeCommand, Response<EmployeeDto>>
+    public class UpdateEmployeeCommandHandler : BaseHandler<IEmployeeCommandRepository>, IRequestHandler<UpdateEmployeeCommand, Response<EmployeeDto>>
     {
-        private readonly IEmployeeCommandRepository _repository;
-        private readonly IMapper _mapper;
-
-        public UpdateEmployeeCommandHandler(IEmployeeCommandRepository repository, IMapper mapper)
+        public UpdateEmployeeCommandHandler(IEmployeeCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
-            _repository = repository;
-            _mapper = mapper;
         }
 
         public async Task<Response<EmployeeDto>> Handle(UpdateEmployeeCommand request, CancellationToken cancellationToken)
         {
-            //var existingEmployee = await _repository.GetByIdAsync(request.Id);
-            //if (existingEmployee == null)
-            //    return new Response<EmployeeDto>("Employee not found");
+            var existingEmployee = await _repo.GetByIdAsync(request.Id);
+            if (existingEmployee == null)
+                return new Response<EmployeeDto>("Employee not found");
 
-            //existingEmployee.UserId = request.ApplicationUserId;
-            //existingEmployee.BrandId = request.BrandId;
-            //existingEmployee.JobTitle = request.JobTitle;
-            //existingEmployee.Salary = request.Salary;
-            //existingEmployee.HireDate = request.HireDate;
-            //existingEmployee.IsActive = request.IsActive;
+            existingEmployee.UpdateJobTitle(request.JobTitle);
+            if (request.Salary.HasValue)
+                existingEmployee.UpdateSalary(request.Salary.Value);
 
-            //var updated = await _repository.UpdateAsync(existingEmployee);
-            //var employeeDto = _mapper.Map<EmployeeDto>(updated);
-            //return new Response<EmployeeDto>(employeeDto, "Updated Successfully");
+            if (request.IsActive && !existingEmployee.IsActive)
+                existingEmployee.Activate();
+            else if (!request.IsActive && existingEmployee.IsActive)
+                existingEmployee.Deactivate();
 
-            throw new NotImplementedException();
+            return await ExecuteUpdateAsync<Domain.Entities.Core.Employee, EmployeeDto>(
+                existingEmployee,
+                async (emp) => await _repo.UpdateAsync(emp),
+                cancellationToken);
         }
     }
 }

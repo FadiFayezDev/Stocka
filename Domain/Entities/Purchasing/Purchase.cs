@@ -28,6 +28,8 @@ namespace Domain.Entities.Purchasing
 
         public Purchase(Guid brandId, Guid supplierId, DateTime? purchaseDate = null)
         {
+            Id = Guid.NewGuid();
+
             BrandId = brandId;
             SupplierId = supplierId;
             PurchaseDate = purchaseDate ?? DateTime.UtcNow;

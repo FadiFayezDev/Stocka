@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<PurchaseItemDto?> GetByIdAsync(Guid id)
         {
-            var query = "SELECT Id, PurchaseId, ProductId, Quantity, UnitCost FROM PurchaseItems WHERE Id = @Id";
+            var query = $"SELECT id, purchase_id AS PurchaseId, product_id AS ProductId, quantity AS Quantity, unit_cost AS UnitCost FROM {TablePurchaseItems} WHERE id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<PurchaseItemDto>(query, parameters);
             return result;
@@ -25,17 +25,17 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<PurchaseItemDto>> GetAllTableAsync()
         {
-            var query = "SELECT Id, PurchaseId, ProductId, Quantity, UnitCost FROM PurchaseItems";
+            var query = $"SELECT id, purchase_id AS PurchaseId, product_id AS ProductId, quantity AS Quantity, unit_cost AS UnitCost FROM {TablePurchaseItems}";
             var result = await _connection.QueryAsync<PurchaseItemDto>(query);
             return result;
         }
 
         public async Task<IEnumerable<PurchaseItemDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = @"SELECT pi.Id, pi.PurchaseId, pi.ProductId, pi.Quantity, pi.UnitCost 
-                         FROM PurchaseItems pi
-                         INNER JOIN Purchases p ON pi.PurchaseId = p.Id
-                         WHERE p.BrandId = @BrandId";
+            var query = $@"SELECT pi.id, pi.purchase_id AS PurchaseId, pi.product_id AS ProductId, pi.quantity AS Quantity, pi.unit_cost AS UnitCost 
+                         FROM {TablePurchaseItems} pi
+                         INNER JOIN {TablePurchases} p ON pi.purchase_id = p.id
+                         WHERE p.brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<PurchaseItemDto>(query, parameters);
             return result;

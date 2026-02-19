@@ -14,6 +14,7 @@ namespace Application.Features.Queries.ProductCategory.GetAll
     {
         public GetAllProductCategoriesQueryHandler(IProductCategoryCommandRepository productCategoryRepository, IMapper mapper) : base(mapper, productCategoryRepository)
         {
+            
         }
 
         public async Task<Response<IEnumerable<ProductCategoryDto>>> Handle(GetAllProductCategoriesQuery request, CancellationToken cancellationToken)

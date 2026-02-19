@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -19,7 +20,8 @@ namespace Application.Features.Commands.StockMovement.Create
 
     public class CreateStockMovementCommandHandler : BaseHandler<IStockMovementCommandRepository>, IRequestHandler<CreateStockMovementCommand, Response<StockMovementDto>>
     {
-        public CreateStockMovementCommandHandler(IStockMovementCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreateStockMovementCommandHandler(IStockMovementCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -28,9 +30,10 @@ namespace Application.Features.Commands.StockMovement.Create
             var entity = _mapper.Map<Domain.Entities.Products.StockMovement>(request);
             entity.CreatedAt = DateTime.UtcNow;
 
-            await _repo.CreateAsync(entity);
-
-            return new Response<StockMovementDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Products.StockMovement, StockMovementDto>(
+                entity,
+                async (sm) => await _repo.CreateAsync(sm),
+                cancellationToken);
         }
     }
 }

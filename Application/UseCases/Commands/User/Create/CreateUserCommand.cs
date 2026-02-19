@@ -1,17 +1,8 @@
 ﻿using Application.Common.Interfaces;
-using Application.Dtos.Auth;
-using Authentication.Application.DTOs;
-using Domain.Entities;
-using Domain.Enums;
-using Domain.Repositories.Commands;
+using Application.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Authentication.Application.Commands.User.Create
+namespace Application.UseCases.Commands.User.Create
 {
     public class CreateUserCommand : IRequest<AuthResponseDTO>
     {

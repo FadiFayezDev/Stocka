@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Core;
 using Application.QueryRepositories;
 using Domain.Contracts;
@@ -11,25 +12,23 @@ namespace Application.UseCases.Commands.Customer.Delete
         public Guid Id { get; set; }
     }
 
-    public class DeleteCustomerCommandHandler : IRequestHandler<DeleteCustomerCommand, Response<bool>>
+    public class DeleteCustomerCommandHandler : BaseHandler<ICustomerCommandRepository, ICustomerQueryRepository>, IRequestHandler<DeleteCustomerCommand, Response<bool>>
     {
-        private readonly ICustomerCommandRepository _customerCommand;
-        private readonly ICustomerQueryRepository _customerQuery;
-
-        public DeleteCustomerCommandHandler(ICustomerCommandRepository customerCommand, ICustomerQueryRepository customerQuery)
+        public DeleteCustomerCommandHandler(ICustomerCommandRepository customerCommand, ICustomerQueryRepository customerQuery, IUnitOfWork unitOfWork)
+            : base(null, customerCommand, customerQuery, unitOfWork)
         {
-            _customerCommand = customerCommand;
-            _customerQuery = customerQuery;
         }
 
         public async Task<Response<bool>> Handle(DeleteCustomerCommand request, CancellationToken cancellationToken)
         {
-            var existingCustomer = await _customerQuery.GetByIdAsync(request.Id);
+            var existingCustomer = await _command.GetByIdAsync(request.Id);
             if (existingCustomer == null)
-                return new Response<bool>("Customer not found");
+                return new Response<bool>(false, "Customer not found");
 
-            //await _customerCommand.DeleteAsync(existingCustomer);
-            return new Response<bool>(true, "Deleted Successfully");
+            return await ExecuteDeleteAsync(
+                existingCustomer,
+                async (cust) => await _command.DeleteAsync(cust),
+                cancellationToken);
         }
     }
 }

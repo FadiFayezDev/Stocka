@@ -22,6 +22,8 @@ public partial class ProductCategory : IEntity<Guid>
 
     public ProductCategory(Guid brandId, string name)
     {
+        Id = Guid.NewGuid();
+
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Category name cannot be empty.", nameof(name));
 

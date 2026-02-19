@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Expenses;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -15,7 +16,8 @@ namespace Application.Features.Commands.ExpenseCategory.Update
 
     public class UpdateExpenseCategoryCommandHandler : BaseHandler<IExpenseCategoryCommandRepository>, IRequestHandler<UpdateExpenseCategoryCommand, Response<ExpenseCategoryDto>>
     {
-        public UpdateExpenseCategoryCommandHandler(IExpenseCategoryCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public UpdateExpenseCategoryCommandHandler(IExpenseCategoryCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -23,13 +25,14 @@ namespace Application.Features.Commands.ExpenseCategory.Update
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<ExpenseCategoryDto>("Not found");
+                return new Response<ExpenseCategoryDto>("Expense category not found");
 
             _mapper.Map(request, existing);
 
-             await _repo.UpdateAsync(existing);
-
-            return new Response<ExpenseCategoryDto>();
+            return await ExecuteUpdateAsync<Domain.Entities.Expenses.ExpenseCategory, ExpenseCategoryDto>(
+                existing,
+                async (ec) => await _repo.UpdateAsync(ec),
+                cancellationToken);
         }
     }
 }

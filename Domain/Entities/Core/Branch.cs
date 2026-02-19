@@ -23,6 +23,8 @@ public partial class Branch : IEntity<Guid>
 
     public Branch(Guid brandId, string name)
     {
+        Id = Guid.NewGuid();
+
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Branch name cannot be empty.", nameof(name));
         

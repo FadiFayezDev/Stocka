@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<BrandDto?> GetByIdAsync(Guid id)
         {
-            var query = "SELECT Id, Name, Slug, CreatedAt FROM Brands WHERE Id = @Id";
+            var query = $"SELECT id, name AS Name, slug AS Slug, created_at AS CreatedAt FROM {TableBrands} WHERE id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<BrandDto>(query, parameters);
             return result;
@@ -25,14 +25,14 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<BrandDto>> GetAllTableAsync()
         {
-            var query = "SELECT Id, Name, Slug, CreatedAt FROM Brands";
+            var query = $"SELECT id, name AS Name, slug AS Slug, created_at AS CreatedAt FROM {TableBrands}";
             var result = await _connection.QueryAsync<BrandDto>(query);
             return result;
         }
 
         public async Task<IEnumerable<BrandDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = "SELECT Id, Name, Slug, CreatedAt FROM Brands WHERE Id = @BrandId";
+            var query = $"SELECT id, name AS Name, slug AS Slug, created_at AS CreatedAt FROM {TableBrands} WHERE id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<BrandDto>(query, parameters);
             return result;

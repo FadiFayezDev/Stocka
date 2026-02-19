@@ -8,7 +8,7 @@ namespace Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<StockMovement> builder)
         {
-            builder.ToTable("StockMovements");
+            builder.ToTable("stock_movements");
 
             builder.HasKey(e => e.Id).HasName("PK_StockMovements");
 

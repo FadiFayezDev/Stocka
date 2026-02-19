@@ -26,6 +26,8 @@ public partial class JournalEntry : IEntity<Guid>
 
     public JournalEntry(Guid brandId, DateTime? entryDate = null, string? description = null)
     {
+        Id = Guid.NewGuid();
+
         BrandId = brandId;
         EntryDate = entryDate ?? DateTime.UtcNow;
         Description = description?.Trim();

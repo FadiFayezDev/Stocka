@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Core;
 using Application.QueryRepositories;
 using AutoMapper;
@@ -14,17 +15,11 @@ namespace Application.UseCases.Commands.Customer.Create
         public int LoyaltyPoints { get; set; }
     }
 
-    public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, Response<CustomerDto>>
+    public class CreateCustomerCommandHandler : BaseHandler<ICustomerCommandRepository, ICustomerQueryRepository>, IRequestHandler<CreateCustomerCommand, Response<CustomerDto>>
     {
-        private readonly ICustomerCommandRepository _customerCommand;
-        private readonly ICustomerQueryRepository _customerQuery;
-        private readonly IMapper _mapper;
-
-        public CreateCustomerCommandHandler(ICustomerCommandRepository customerCommand, ICustomerQueryRepository customerQuery, IMapper mapper)
+        public CreateCustomerCommandHandler(ICustomerCommandRepository customerCommand, ICustomerQueryRepository customerQuery, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, customerCommand, customerQuery, unitOfWork)
         {
-            _customerCommand = customerCommand;
-            _customerQuery = customerQuery;
-            _mapper = mapper;
         }
 
         public async Task<Response<CustomerDto>> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
@@ -36,9 +31,10 @@ namespace Application.UseCases.Commands.Customer.Create
                 LoyaltyPoints = request.LoyaltyPoints
             };
 
-            var created = await _customerCommand.CreateAsync(customer);
-            var customerDto = _mapper.Map<CustomerDto>(created);
-            return new Response<CustomerDto>(customerDto, "Created Successfully");
+            return await ExecuteCreateAsync<Domain.Entities.Core.Customer, CustomerDto>(
+                customer,
+                async (cust) => await _command.CreateAsync(cust),
+                cancellationToken);
         }
     }
 }

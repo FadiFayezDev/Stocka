@@ -1,5 +1,7 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Accounting;
+using Application.QueryRepositories;
 using AutoMapper;
 using Domain.Contracts;
 using MediatR;
@@ -13,27 +15,21 @@ namespace Application.UseCases.Commands.Account.Create
         public string Type { get; set; } = null!;
     }
 
-    public class CreateAccountCommandHandler : IRequestHandler<CreateAccountCommand, Response<AccountDto>>
+    public class CreateAccountCommandHandler : BaseHandler<IAccountCommandRepository, IAccountQueryRepository>, IRequestHandler<CreateAccountCommand, Response<AccountDto>>
     {
-        private readonly IAccountCommandRepository _repository;
-        private readonly IMapper _mapper;
-
-        public CreateAccountCommandHandler(IAccountCommandRepository repository, IMapper mapper)
+        public CreateAccountCommandHandler(IMapper mapper, IAccountCommandRepository command, IAccountQueryRepository query, IUnitOfWork work) 
+            : base(mapper, command, query, work)
         {
-            _repository = repository;
-            _mapper = mapper;
         }
 
         public async Task<Response<AccountDto>> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
         {
             var entity = _mapper.Map<Domain.Entities.Accounting.Account>(request);
             
-            var success = await _repository.CreateAsync(entity);
-            if (!success)
-                return new Response<AccountDto>(false, "Failed to create account");
-
-            var dto = _mapper.Map<AccountDto>(entity);
-            return new Response<AccountDto>(dto, "Created Successfully");
+            return await ExecuteCreateAsync<Domain.Entities.Accounting.Account, AccountDto>(
+                entity,
+                async (acc) => await _command.CreateAsync(acc),
+                cancellationToken);
         }
     }
 }

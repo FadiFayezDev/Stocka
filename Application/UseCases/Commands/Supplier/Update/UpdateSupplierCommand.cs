@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Purchasing;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -18,7 +19,8 @@ namespace Application.Features.Commands.Supplier.Update
 
     public class UpdateSupplierCommandHandler : BaseHandler<ISupplierCommandRepository>, IRequestHandler<UpdateSupplierCommand, Response<SupplierDto>>
     {
-        public UpdateSupplierCommandHandler(ISupplierCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public UpdateSupplierCommandHandler(ISupplierCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -26,12 +28,14 @@ namespace Application.Features.Commands.Supplier.Update
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<SupplierDto>("Not found");
+                return new Response<SupplierDto>("Supplier not found");
 
             _mapper.Map(request, existing);
 
-            await _repo.UpdateAsync(existing);
-            return new Response<SupplierDto>();
+            return await ExecuteUpdateAsync<Domain.Entities.Purchasing.Supplier, SupplierDto>(
+                existing,
+                async (s) => await _repo.UpdateAsync(s),
+                cancellationToken);
         }
     }
 }

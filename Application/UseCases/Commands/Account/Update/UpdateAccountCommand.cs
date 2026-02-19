@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Accounting;
 using Application.QueryRepositories;
 using AutoMapper;
@@ -15,33 +16,25 @@ namespace Application.UseCases.Commands.Account.Update
         public string Type { get; set; } = null!;
     }
 
-    public class UpdateAccountCommandHandler : IRequestHandler<UpdateAccountCommand, Response<AccountDto>>
+    public class UpdateAccountCommandHandler : BaseHandler<IAccountCommandRepository, IAccountQueryRepository>, IRequestHandler<UpdateAccountCommand, Response<AccountDto>>
     {
-        private readonly IAccountCommandRepository _repository;
-        private readonly IAccountQueryRepository _queries;
-        private readonly IMapper _mapper;
-
-        public UpdateAccountCommandHandler(IAccountCommandRepository repository, IAccountQueryRepository queries, IMapper mapper)
+        public UpdateAccountCommandHandler(IMapper mapper, IAccountCommandRepository command, IAccountQueryRepository query, IUnitOfWork work)
+            : base(mapper, command, query, work)
         {
-            _repository = repository;
-            _queries = queries;
-            _mapper = mapper;
         }
 
         public async Task<Response<AccountDto>> Handle(UpdateAccountCommand request, CancellationToken cancellationToken)
         {
-            var existing = await _queries.GetByIdAsync(request.Id);
+            var existing = await _command.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<AccountDto>("Not found");
+                return new Response<AccountDto>("Account not found");
 
             _mapper.Map(request, existing);
-            //var success = await _repository.UpdateAsync(existing);
 
-            //if (!success)
-            //    return new Response<AccountDto>(false, "Failed to update account");
-
-            var dto = _mapper.Map<AccountDto>(existing);
-            return new Response<AccountDto>(dto, "Updated Successfully");
+            return await ExecuteUpdateAsync<Domain.Entities.Accounting.Account, AccountDto>(
+                existing,
+                async (acc) => await _command.UpdateAsync(acc),
+                cancellationToken);
         }
     }
 }

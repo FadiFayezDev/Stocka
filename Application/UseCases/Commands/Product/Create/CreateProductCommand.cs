@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -16,7 +17,8 @@ namespace Application.Features.Commands.Product.Create
 
     public class CreateProductCommandHandler : BaseHandler<IProductCommandRepository>, IRequestHandler<CreateProductCommand, Response<ProductDto>>
     {
-        public CreateProductCommandHandler(IProductCommandRepository productRepository, IMapper mapper) : base(mapper, productRepository)
+        public CreateProductCommandHandler(IProductCommandRepository productRepository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, productRepository, unitOfWork)
         {
         }
 
@@ -24,9 +26,10 @@ namespace Application.Features.Commands.Product.Create
         {
             var product = _mapper.Map<Domain.Entities.Products.Product>(request);
 
-            await _repo.CreateAsync(product);
-
-            return new Response<ProductDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Products.Product, ProductDto>(
+                product,
+                async (p) => await _repo.CreateAsync(p),
+                cancellationToken);
         }
     }
 }

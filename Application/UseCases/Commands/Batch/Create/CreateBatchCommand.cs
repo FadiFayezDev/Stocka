@@ -1,4 +1,5 @@
 ﻿using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
 using MediatR;
 using AutoMapper;
@@ -18,7 +19,8 @@ namespace Application.Features.Commands.Batch.Create
 
     public class CreateBatchCommandHandler : BaseHandler<IBatchCommandRepository>, IRequestHandler<CreateBatchCommand, Response<BatchDto>>
     {
-        public CreateBatchCommandHandler(IBatchCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreateBatchCommandHandler(IBatchCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -27,9 +29,10 @@ namespace Application.Features.Commands.Batch.Create
             var entity = _mapper.Map<Domain.Entities.Products.Batch>(request);
             entity.CreatedAt = DateTime.UtcNow;
 
-            await _repo.CreateAsync(entity);
-
-            return new Response<BatchDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Products.Batch, BatchDto>(
+                entity,
+                async (b) => await _repo.CreateAsync(b),
+                cancellationToken);
         }
     }
 }

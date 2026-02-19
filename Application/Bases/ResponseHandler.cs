@@ -6,7 +6,6 @@ namespace Application.Bases
 {
     public class ResponseHandler
     {
-
         public ResponseHandler()
         {
 

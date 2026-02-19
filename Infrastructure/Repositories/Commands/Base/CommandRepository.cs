@@ -30,7 +30,6 @@ namespace Infrastructure.Repositories.Base
 
         public virtual async Task<bool> CreateAsync(T entity)
         {
-            entity.SetKey(Guid.NewGuid());
             var createdEntity = _context.Set<T>().Add(entity);
             return true;
         }

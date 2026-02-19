@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<BatchDto?> GetByIdAsync(Guid id)
         {
-            var query = "SELECT Id, ProductId, ExpiryDate, ManufactureDate FROM Batches WHERE Id = @Id";
+            var query = $"SELECT id, product_id AS ProductId, expiry_date AS ExpiryDate, manufacture_date AS ManufactureDate FROM {TableBatches} WHERE id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<BatchDto>(query, parameters);
             return result;
@@ -25,17 +25,17 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<BatchDto>> GetAllTableAsync()
         {
-            var query = "SELECT Id, ProductId, ExpiryDate, ManufactureDate FROM Batches";
+            var query = $"SELECT id, product_id AS ProductId, expiry_date AS ExpiryDate, manufacture_date AS ManufactureDate FROM {TableBatches}";
             var result = await _connection.QueryAsync<BatchDto>(query);
             return result;
         }
 
         public async Task<IEnumerable<BatchDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = @"SELECT b.Id, b.ProductId, b.ExpiryDate, b.ManufactureDate 
-                         FROM Batches b
-                         INNER JOIN Products p ON b.ProductId = p.Id
-                         WHERE p.BrandId = @BrandId";
+            var query = $@"SELECT b.id, b.product_id AS ProductId, b.expiry_date AS ExpiryDate, b.manufacture_date AS ManufactureDate 
+                         FROM {TableBatches} b
+                         INNER JOIN {TableProducts} p ON b.product_id = p.id
+                         WHERE p.brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<BatchDto>(query, parameters);
             return result;

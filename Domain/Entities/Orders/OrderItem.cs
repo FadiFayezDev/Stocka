@@ -37,6 +37,8 @@ namespace Domain.Entities.Orders
 
         public OrderItem(Guid orderId, Guid productId, Guid batchId, Guid brandId, int quantity, decimal unitPrice, decimal costPrice)
         {
+            Id = Guid.NewGuid();
+
             if (quantity <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
 

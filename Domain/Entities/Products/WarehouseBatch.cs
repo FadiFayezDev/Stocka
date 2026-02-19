@@ -24,6 +24,8 @@ public partial class WarehouseBatch : IEntity<Guid>
 
     public WarehouseBatch(Guid warehouseId, Guid batchId, Guid brandId, int quantity)
     {
+        Id = Guid.NewGuid();
+
         if (quantity <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
 

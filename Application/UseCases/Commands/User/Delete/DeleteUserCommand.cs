@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Authentication.Application.Commands.User.Delete
+namespace Application.UseCases.Commands.User.Delete
 {
     public class DeleteUserCommand : IRequest<int>
     {

@@ -31,6 +31,8 @@ namespace Domain.Entities.Products
 
         public Warehouse(Guid branchId, Guid brandId, string name, WarehouseType type)
         {
+            Id = Guid.NewGuid();
+
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Warehouse name cannot be empty.", nameof(name));
 

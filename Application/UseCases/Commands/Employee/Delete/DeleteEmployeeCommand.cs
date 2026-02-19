@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Core;
 using Domain.Contracts;
 using MediatR;
@@ -10,24 +11,23 @@ namespace Application.UseCases.Commands.Employee.Delete
         public Guid Id { get; set; }
     }
 
-    public class DeleteEmployeeCommandHandler : IRequestHandler<DeleteEmployeeCommand, Response<bool>>
+    public class DeleteEmployeeCommandHandler : BaseHandler<IEmployeeCommandRepository>, IRequestHandler<DeleteEmployeeCommand, Response<bool>>
     {
-        private readonly IEmployeeCommandRepository _repository;
-
-        public DeleteEmployeeCommandHandler(IEmployeeCommandRepository repository)
+        public DeleteEmployeeCommandHandler(IEmployeeCommandRepository repository, IUnitOfWork unitOfWork)
+            : base(null, repository, unitOfWork)
         {
-            _repository = repository;
         }
 
         public async Task<Response<bool>> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
         {
-            //var existingEmployee = await _repository.GetByIdAsync(request.Id);
-            //if (existingEmployee == null)
-            //    return new Response<bool>("Employee not found");
+            var existingEmployee = await _repo.GetByIdAsync(request.Id);
+            if (existingEmployee == null)
+                return new Response<bool>(false, "Employee not found");
 
-            //await _repository.DeleteAsync(existingEmployee);
-            //return new Response<bool>(true, "Deleted Successfully");
-            throw new NotImplementedException();
+            return await ExecuteDeleteAsync(
+                existingEmployee,
+                async (emp) => await _repo.DeleteAsync(emp),
+                cancellationToken);
         }
     }
 }

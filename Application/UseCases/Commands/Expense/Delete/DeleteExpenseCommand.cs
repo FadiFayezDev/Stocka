@@ -1,6 +1,6 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Expenses;
-using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -13,7 +13,8 @@ namespace Application.Features.Commands.Expense.Delete
 
     public class DeleteExpenseCommandHandler : BaseHandler<IExpenseCommandRepository>, IRequestHandler<DeleteExpenseCommand, Response<bool>>
     {
-        public DeleteExpenseCommandHandler(IExpenseCommandRepository Repository) : base(null, Repository)
+        public DeleteExpenseCommandHandler(IExpenseCommandRepository repository, IUnitOfWork unitOfWork)
+            : base(null, repository, unitOfWork)
         {
         }
 
@@ -21,11 +22,12 @@ namespace Application.Features.Commands.Expense.Delete
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<bool>("Not found");
+                return new Response<bool>(false, "Expense not found");
 
-            await _repo.DeleteAsync(existing);
-
-            return new Response<bool>();
+            return await ExecuteDeleteAsync(
+                existing,
+                async (e) => await _repo.DeleteAsync(e),
+                cancellationToken);
         }
     }
 }

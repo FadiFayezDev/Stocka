@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -15,7 +16,8 @@ namespace Application.Features.Commands.ProductCategory.Update
 
     public class UpdateProductCategoryCommandHandler : BaseHandler<IProductCategoryCommandRepository>, IRequestHandler<UpdateProductCategoryCommand, Response<ProductCategoryDto>>
     {
-        public UpdateProductCategoryCommandHandler(IProductCategoryCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public UpdateProductCategoryCommandHandler(IProductCategoryCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -23,13 +25,14 @@ namespace Application.Features.Commands.ProductCategory.Update
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<ProductCategoryDto>("Not found");
+                return new Response<ProductCategoryDto>("Product category not found");
 
             _mapper.Map(request, existing);
 
-             await _repo.UpdateAsync(existing);
-
-            return new Response<ProductCategoryDto>();
+            return await ExecuteUpdateAsync<Domain.Entities.Products.ProductCategory, ProductCategoryDto>(
+                existing,
+                async (pc) => await _repo.UpdateAsync(pc),
+                cancellationToken);
         }
     }
 }

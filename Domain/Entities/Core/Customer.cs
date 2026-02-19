@@ -22,6 +22,8 @@ namespace Domain.Entities.Core
 
         public Customer(Guid? userId, Guid? brandId, int initialLoyaltyPoints = 0)
         {
+            Id = Guid.NewGuid();
+
             if (initialLoyaltyPoints < 0)
                 throw new ArgumentException("Loyalty points cannot be negative.", nameof(initialLoyaltyPoints));
 

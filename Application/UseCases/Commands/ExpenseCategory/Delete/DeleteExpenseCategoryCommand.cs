@@ -1,6 +1,6 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Expenses;
-using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -14,7 +14,8 @@ namespace Application.Features.Commands.ExpenseCategory.Delete
 
     public class DeleteExpenseCategoryCommandHandler : BaseHandler<IExpenseCategoryCommandRepository>, IRequestHandler<DeleteExpenseCategoryCommand, Response<bool>>
     {
-        public DeleteExpenseCategoryCommandHandler(IExpenseCategoryCommandRepository Repository) : base(null, Repository)
+        public DeleteExpenseCategoryCommandHandler(IExpenseCategoryCommandRepository repository, IUnitOfWork unitOfWork)
+            : base(null, repository, unitOfWork)
         {
         }
 
@@ -22,11 +23,12 @@ namespace Application.Features.Commands.ExpenseCategory.Delete
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<bool>("Not found");
+                return new Response<bool>(false, "Expense category not found");
 
-            await _repo.DeleteAsync(existing);
-
-            return new Response<bool>();
+            return await ExecuteDeleteAsync(
+                existing,
+                async (ec) => await _repo.DeleteAsync(ec),
+                cancellationToken);
         }
     }
 }

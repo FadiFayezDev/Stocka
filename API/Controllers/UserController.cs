@@ -1,8 +1,10 @@
-﻿using Authentication.Application.Commands.User.Create;
-using Authentication.Application.Commands.User.Delete;
-using Authentication.Application.Commands.User.Update;
-using Authentication.Application.DTOs;
+﻿using Application.DTOs;
+using Application.Queries.User;
+using Application.UseCases.Commands.User.Create;
+using Application.UseCases.Commands.User.Delete;
+using Application.UseCases.Commands.User.Update;
 using Authentication.Application.Queries.User;
+using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize(Roles = "Admin")]
     [Route("[controller]")]
     [ApiController]
 

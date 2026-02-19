@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<WarehouseDto?> GetByIdAsync(Guid id)
         {
-            var query = "SELECT Id, BranchId, Name, Type FROM Warehouses WHERE Id = @Id";
+            var query = $"SELECT id, branch_id AS BranchId, name AS Name, type AS Type FROM Warehouses WHERE id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<WarehouseDto>(query, parameters);
             return result;
@@ -25,17 +25,17 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<WarehouseDto>> GetAllTableAsync()
         {
-            var query = "SELECT Id, BranchId, Name, Type FROM Warehouses";
+            var query = $"SELECT id, branch_id AS BranchId, name AS Name, type AS Type FROM Warehouses";
             var result = await _connection.QueryAsync<WarehouseDto>(query);
             return result;
         }
 
         public async Task<IEnumerable<WarehouseDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = @"SELECT w.Id, w.BranchId, w.Name, w.Type 
+            var query = $@"SELECT w.id, w.branch_id AS BranchId, w.name AS Name, w.type AS Type 
                          FROM Warehouses w
-                         INNER JOIN Branches b ON w.BranchId = b.Id
-                         WHERE b.BrandId = @BrandId";
+                         INNER JOIN {TableBranches} b ON w.branch_id = b.id
+                         WHERE b.brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<WarehouseDto>(query, parameters);
             return result;

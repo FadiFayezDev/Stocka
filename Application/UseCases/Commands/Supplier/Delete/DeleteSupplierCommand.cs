@@ -1,6 +1,6 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Purchasing;
-using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -13,7 +13,8 @@ namespace Application.Features.Commands.Supplier.Delete
 
     public class DeleteSupplierCommandHandler : BaseHandler<ISupplierCommandRepository>, IRequestHandler<DeleteSupplierCommand, Response<bool>>
     {
-        public DeleteSupplierCommandHandler(ISupplierCommandRepository Repository) : base(null, Repository)
+        public DeleteSupplierCommandHandler(ISupplierCommandRepository repository, IUnitOfWork unitOfWork)
+            : base(null, repository, unitOfWork)
         {
         }
 
@@ -21,11 +22,12 @@ namespace Application.Features.Commands.Supplier.Delete
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<bool>("Not found");
+                return new Response<bool>(false, "Supplier not found");
 
-            await _repo.DeleteAsync(existing);
-
-            return new Response<bool>();
+            return await ExecuteDeleteAsync(
+                existing,
+                async (s) => await _repo.DeleteAsync(s),
+                cancellationToken);
         }
     }
 }

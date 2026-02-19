@@ -8,7 +8,7 @@ namespace Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Supplier> builder)
         {
-            builder.ToTable("Suppliers");
+            builder.ToTable("suppliers");
 
             builder.HasKey(e => e.Id).HasName("PK_Suppliers");
 

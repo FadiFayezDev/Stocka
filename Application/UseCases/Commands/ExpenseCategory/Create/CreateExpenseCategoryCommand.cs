@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Expenses;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -14,7 +15,8 @@ namespace Application.Features.Commands.ExpenseCategory.Create
 
     public class CreateExpenseCategoryCommandHandler : BaseHandler<IExpenseCategoryCommandRepository>, IRequestHandler<CreateExpenseCategoryCommand, Response<ExpenseCategoryDto>>
     {
-        public CreateExpenseCategoryCommandHandler(IExpenseCategoryCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreateExpenseCategoryCommandHandler(IExpenseCategoryCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -22,9 +24,10 @@ namespace Application.Features.Commands.ExpenseCategory.Create
         {
             var entity = _mapper.Map<Domain.Entities.Expenses.ExpenseCategory>(request);
 
-            await _repo.CreateAsync(entity);
-
-            return new Response<ExpenseCategoryDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Expenses.ExpenseCategory, ExpenseCategoryDto>(
+                entity,
+                async (ec) => await _repo.CreateAsync(ec),
+                cancellationToken);
         }
     }
 }

@@ -36,6 +36,8 @@ namespace Domain.Entities.Products
 
         public Product(Guid brandId, Guid categoryId, string name, string? barcode = null)
         {
+            Id = Guid.NewGuid();
+
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Product name cannot be empty.", nameof(name));
 

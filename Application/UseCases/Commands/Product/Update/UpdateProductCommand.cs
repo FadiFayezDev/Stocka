@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -9,7 +10,6 @@ namespace Application.Features.Commands.Product.Update
     public class UpdateProductCommand : IRequest<Response<ProductDto>>
     {
         public Guid Id { get; set; }
-        public Guid BrandId { get; set; }
         public Guid CategoryId { get; set; }
         public string Name { get; set; } = null!;
         public string? Barcode { get; set; }
@@ -17,7 +17,8 @@ namespace Application.Features.Commands.Product.Update
 
     public class UpdateProductCommandHandler : BaseHandler<IProductCommandRepository>, IRequestHandler<UpdateProductCommand, Response<ProductDto>>
     {
-        public UpdateProductCommandHandler(IProductCommandRepository productRepository, IMapper mapper) : base(mapper, productRepository)
+        public UpdateProductCommandHandler(IProductCommandRepository productRepository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, productRepository, unitOfWork)
         {
         }
 
@@ -29,9 +30,10 @@ namespace Application.Features.Commands.Product.Update
 
             _mapper.Map(request, existingProduct);
 
-             await _repo.UpdateAsync(existingProduct);
-
-            return new Response<ProductDto>();
+            return await ExecuteUpdateAsync<Domain.Entities.Products.Product, ProductDto>(
+                existingProduct,
+                async (p) => await _repo.UpdateAsync(p),
+                cancellationToken);
         }
     }
 }

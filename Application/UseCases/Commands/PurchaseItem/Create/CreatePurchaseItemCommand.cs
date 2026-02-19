@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Purchasing;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -16,7 +17,8 @@ namespace Application.Features.Commands.PurchaseItem.Create
 
     public class CreatePurchaseItemCommandHandler : BaseHandler<IPurchaseItemCommandRepository>, IRequestHandler<CreatePurchaseItemCommand, Response<PurchaseItemDto>>
     {
-        public CreatePurchaseItemCommandHandler(IPurchaseItemCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreatePurchaseItemCommandHandler(IPurchaseItemCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -24,8 +26,10 @@ namespace Application.Features.Commands.PurchaseItem.Create
         {
             var entity = _mapper.Map<Domain.Entities.Purchasing.PurchaseItem>(request);
 
-            await _repo.CreateAsync(entity);
-            return new Response<PurchaseItemDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Purchasing.PurchaseItem, PurchaseItemDto>(
+                entity,
+                async (pi) => await _repo.CreateAsync(pi),
+                cancellationToken);
         }
     }
 }

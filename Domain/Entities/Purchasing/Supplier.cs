@@ -26,6 +26,8 @@ namespace Domain.Entities.Purchasing
 
         public Supplier(Guid brandId, string name, string? phone = null, string? email = null, string? address = null)
         {
+            Id = Guid.NewGuid();
+
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Supplier name cannot be empty.", nameof(name));
 

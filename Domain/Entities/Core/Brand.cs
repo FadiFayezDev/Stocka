@@ -22,11 +22,23 @@ namespace Domain.Entities.Core
         public string Slug { get; private set; } = null!;
         public DateTime CreatedAt { get; private set; }
 
+        public Brand(string name, string slug)
+        {
+            Id = Guid.NewGuid();
+            Name = name;
+            Slug = slug;
+            CreatedAt = DateTime.UtcNow;
+        }
+
         private readonly List<BrandMembership> _memberships = new();
         public IReadOnlyCollection<BrandMembership> Memberships => _memberships;
 
+        private readonly List<Branch> _branches = new();
+        public IReadOnlyCollection<Branch> Branches => _branches.AsReadOnly();
+
+
+
         // Navigation Properties
-        public virtual ICollection<Branch> Branches { get; set; } = new List<Branch>();
         public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
         public virtual ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
         public virtual ICollection<Product> Products { get; set; } = new List<Product>();
@@ -54,6 +66,29 @@ namespace Domain.Entities.Core
                 throw new ArgumentException("User not a member");
 
             _memberships.Remove(membership);
+        }
+
+        public void AddBranch(Branch branch)
+        {
+            if (branch == null)
+                throw new ArgumentNullException(nameof(branch));
+
+            if (branch.BrandId != Id)
+                throw new ArgumentException("Branch does not belong to this brand.");
+
+            if (_branches.Any(b => b.Id == branch.Id))
+                throw new InvalidOperationException("Branch already exists in this brand.");
+
+            _branches.Add(branch);
+        }
+
+        public void RemoveBranch(Guid branchId)
+        {
+            var branch = _branches.FirstOrDefault(b => b.Id == branchId);
+            if (branch == null)
+                throw new ArgumentException("Branch not found in this brand.");
+
+            _branches.Remove(branch);
         }
 
         public Guid GetKey() => Id;

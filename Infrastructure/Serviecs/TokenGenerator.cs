@@ -5,6 +5,7 @@ using Infrastructure.Helpers;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -24,7 +25,7 @@ namespace Infrastructure.Serviecs
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
             var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var (userId, userName, roles) = userDetails;
+            var (userId, brandIds, userName, roles) = userDetails;
 
             var claims = new List<Claim>()
             {
@@ -34,6 +35,7 @@ namespace Infrastructure.Serviecs
                 new Claim("UserId", userId.ToString())
             };
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+            claims.AddRange(brandIds.Select(brandId => new Claim("brandId", brandId.ToString())));
 
 
             var token = new JwtSecurityToken(

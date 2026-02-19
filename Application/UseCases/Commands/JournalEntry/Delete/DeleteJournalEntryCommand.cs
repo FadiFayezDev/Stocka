@@ -1,6 +1,6 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Accounting;
-using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -13,7 +13,8 @@ namespace Application.Features.Commands.JournalEntry.Delete
 
     public class DeleteJournalEntryCommandHandler : BaseHandler<IJournalEntryCommandRepository>, IRequestHandler<DeleteJournalEntryCommand, Response<bool>>
     {
-        public DeleteJournalEntryCommandHandler(IJournalEntryCommandRepository Repository) : base(null, Repository)
+        public DeleteJournalEntryCommandHandler(IJournalEntryCommandRepository repository, IUnitOfWork unitOfWork)
+            : base(null, repository, unitOfWork)
         {
         }
 
@@ -21,10 +22,12 @@ namespace Application.Features.Commands.JournalEntry.Delete
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<bool>("Not found");
+                return new Response<bool>(false, "Journal entry not found");
 
-            await _repo.DeleteAsync(existing);
-            return new Response<bool>();
+            return await ExecuteDeleteAsync(
+                existing,
+                async (je) => await _repo.DeleteAsync(je),
+                cancellationToken);
         }
     }
 }

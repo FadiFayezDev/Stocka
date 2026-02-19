@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces;
-using Authentication.Application.DTOs;
+using Application.DTOs;
 using MediatR;
 using System;
 using System.Collections.Generic;

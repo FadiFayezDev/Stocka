@@ -38,6 +38,8 @@ namespace Domain.Entities.Orders
 
         public Order(Guid brandId, Guid employeeId, Guid? customerId = null, DateTime? orderDate = null)
         {
+            Id = Guid.NewGuid();
+
             BrandId = brandId;
             EmployeeId = employeeId;
             CustomerId = customerId;

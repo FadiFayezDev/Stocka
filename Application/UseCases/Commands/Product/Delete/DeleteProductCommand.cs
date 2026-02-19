@@ -1,6 +1,6 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
-using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -13,7 +13,8 @@ namespace Application.Features.Commands.Product.Delete
 
     public class DeleteProductCommandHandler : BaseHandler<IProductCommandRepository>, IRequestHandler<DeleteProductCommand, Response<bool>>
     {
-        public DeleteProductCommandHandler(IProductCommandRepository productRepository) : base(null, productRepository)
+        public DeleteProductCommandHandler(IProductCommandRepository productRepository, IUnitOfWork unitOfWork)
+            : base(null, productRepository, unitOfWork)
         {
         }
 
@@ -21,11 +22,12 @@ namespace Application.Features.Commands.Product.Delete
         {
             var existingProduct = await _repo.GetByIdAsync(request.Id);
             if (existingProduct == null)
-                return new Response<bool>("Product not found");
+                return new Response<bool>(false, "Product not found");
 
-            await _repo.DeleteAsync(existingProduct);
-
-            return new Response<bool>();
+            return await ExecuteDeleteAsync(
+                existingProduct,
+                async (p) => await _repo.DeleteAsync(p),
+                cancellationToken);
         }
     }
 }

@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Core;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -12,27 +13,21 @@ namespace Application.UseCases.Commands.Brand.Create
         public string Slug { get; set; } = null!;
     }
 
-    public class CreateBrandCommandHandler : IRequestHandler<CreateBrandCommand, Response<BrandDto>>
+    public class CreateBrandCommandHandler : BaseHandler<IBrandCommandRepository>, IRequestHandler<CreateBrandCommand, Response<BrandDto>>
     {
-        private readonly IBrandCommandRepository _repository;
-        private readonly IMapper _mapper;
-
-        public CreateBrandCommandHandler(IBrandCommandRepository repository, IMapper mapper)
+        public CreateBrandCommandHandler(IBrandCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork) 
+            : base(mapper, repository, unitOfWork)
         {
-            _repository = repository;
-            _mapper = mapper;
         }
 
         public async Task<Response<BrandDto>> Handle(CreateBrandCommand request, CancellationToken cancellationToken)
         {
             var brand = _mapper.Map<Domain.Entities.Core.Brand>(request);
-            var success = await _repository.CreateAsync(brand);
             
-            if (!success)
-                return new Response<BrandDto>(false, "Failed to create brand");
-
-            var dto = _mapper.Map<BrandDto>(brand);
-            return new Response<BrandDto>(dto, "Created Successfully");
+            return await ExecuteCreateAsync<Domain.Entities.Core.Brand, BrandDto>(
+                brand,
+                async (b) => await _repo.CreateAsync(b),
+                cancellationToken);
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Authentication.Application.Commands.Role.Delete
+namespace Application.UseCases.Commands.Role.Delete
 {
     public class DeleteRoleCommand : IRequest<int>
     {

@@ -27,6 +27,8 @@ public partial class Expense : IEntity<Guid>
 
     public Expense(Guid brandId, Guid categoryId, decimal amount, DateTime? expenseDate = null, string? notes = null)
     {
+        Id = Guid.NewGuid();
+
         if (amount <= 0)
             throw new ArgumentException("Expense amount must be greater than zero.", nameof(amount));
 

@@ -27,6 +27,8 @@ namespace Application.Common.Interfaces
         Task<bool> DeleteRoleAsync(Guid roleId);
         Task<List<RoleDto>> GetRolesAsync();
         Task<RoleDto> GetRoleByIdAsync(Guid id);
+        Task<RoleDto> GetRoleByNameAsync(string name);
+        Task<bool> RoleIsExistAsync(string roleName);
         Task<bool> UpdateRole(RoleDto roleDto);
         #endregion
 

@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<ExpenseDto?> GetByIdAsync(Guid id)
         {
-            var query = "SELECT Id, BrandId, CategoryId, Amount, ExpenseDate, Notes FROM Expenses WHERE Id = @Id";
+            var query = $"SELECT id, brand_id AS BrandId, category_id AS CategoryId, amount AS Amount, expense_date AS ExpenseDate, notes AS Notes FROM {TableExpenses} WHERE id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<ExpenseDto>(query, parameters);
             return result;
@@ -25,14 +25,14 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<ExpenseDto>> GetAllTableAsync()
         {
-            var query = "SELECT Id, BrandId, CategoryId, Amount, ExpenseDate, Notes FROM Expenses";
+            var query = $"SELECT id, brand_id AS BrandId, category_id AS CategoryId, amount AS Amount, expense_date AS ExpenseDate, notes AS Notes FROM {TableExpenses}";
             var result = await _connection.QueryAsync<ExpenseDto>(query);
             return result;
         }
 
         public async Task<IEnumerable<ExpenseDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = "SELECT Id, BrandId, CategoryId, Amount, ExpenseDate, Notes FROM Expenses WHERE BrandId = @BrandId";
+            var query = $"SELECT id, brand_id AS BrandId, category_id AS CategoryId, amount AS Amount, expense_date AS ExpenseDate, notes AS Notes FROM {TableExpenses} WHERE brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<ExpenseDto>(query, parameters);
             return result;

@@ -24,6 +24,8 @@ public partial class Account : IEntity<Guid>
 
     public Account(Guid brandId, string name, AccountType type)
     {
+        Id = Guid.NewGuid();
+
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Account name cannot be empty.", nameof(name));
 

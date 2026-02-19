@@ -1,6 +1,6 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Purchasing;
-using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -13,7 +13,8 @@ namespace Application.Features.Commands.PurchaseItem.Delete
 
     public class DeletePurchaseItemCommandHandler : BaseHandler<IPurchaseItemCommandRepository>, IRequestHandler<DeletePurchaseItemCommand, Response<bool>>
     {
-        public DeletePurchaseItemCommandHandler(IPurchaseItemCommandRepository Repository) : base(null, Repository)
+        public DeletePurchaseItemCommandHandler(IPurchaseItemCommandRepository repository, IUnitOfWork unitOfWork)
+            : base(null, repository, unitOfWork)
         {
         }
 
@@ -21,11 +22,12 @@ namespace Application.Features.Commands.PurchaseItem.Delete
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<bool>("Not found");
+                return new Response<bool>(false, "Purchase item not found");
 
-            await _repo.DeleteAsync(existing);
-
-            return new Response<bool>();
+            return await ExecuteDeleteAsync(
+                existing,
+                async (pi) => await _repo.DeleteAsync(pi),
+                cancellationToken);
         }
     }
 }

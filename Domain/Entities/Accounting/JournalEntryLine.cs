@@ -29,6 +29,8 @@ public partial class JournalEntryLine : IEntity<Guid>
 
     public JournalEntryLine(Guid journalEntryId, Guid accountId, Guid brandId, decimal debit, decimal credit)
     {
+        Id = Guid.NewGuid();
+
         if (debit < 0 || credit < 0)
             throw new ArgumentException("Debit and Credit must be non-negative.");
 

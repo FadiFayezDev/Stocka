@@ -13,7 +13,7 @@ namespace Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<BrandMembership> builder)
         {
-            builder.ToTable("BrandMemberships");
+            builder.ToTable("brand_memberships");
 
             builder.HasKey(m => new { m.BrandId, m.UserId });
 
@@ -27,7 +27,7 @@ namespace Infrastructure.Configurations
                    .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne<ApplicationUser>()
-                .WithMany()
+                .WithMany(u => u.BrandMemberships)
                 .HasForeignKey(m => m.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

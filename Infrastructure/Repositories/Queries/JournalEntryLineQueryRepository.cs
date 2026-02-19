@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<JournalEntryLineDto?> GetByIdAsync(Guid id)
         {
-            var query = "SELECT Id, JournalEntryId, AccountId, DebitAmount, CreditAmount FROM JournalEntryLines WHERE Id = @Id";
+            var query = $"SELECT id, journal_entry_id AS JournalEntryId, account_id AS AccountId, debit AS DebitAmount, credit AS CreditAmount FROM {TableJournalEntryLines} WHERE id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<JournalEntryLineDto>(query, parameters);
             return result;
@@ -25,17 +25,17 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<JournalEntryLineDto>> GetAllTableAsync()
         {
-            var query = "SELECT Id, JournalEntryId, AccountId, DebitAmount, CreditAmount FROM JournalEntryLines";
+            var query = $"SELECT id, journal_entry_id AS JournalEntryId, account_id AS AccountId, debit AS DebitAmount, credit AS CreditAmount FROM {TableJournalEntryLines}";
             var result = await _connection.QueryAsync<JournalEntryLineDto>(query);
             return result;
         }
 
         public async Task<IEnumerable<JournalEntryLineDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = @"SELECT jel.Id, jel.JournalEntryId, jel.AccountId, jel.DebitAmount, jel.CreditAmount 
-                         FROM JournalEntryLines jel
-                         INNER JOIN JournalEntries je ON jel.JournalEntryId = je.Id
-                         WHERE je.BrandId = @BrandId";
+            var query = $@"SELECT jel.id, jel.journal_entry_id AS JournalEntryId, jel.account_id AS AccountId, jel.debit AS DebitAmount, jel.credit AS CreditAmount 
+                         FROM {TableJournalEntryLines} jel
+                         INNER JOIN {TableJournalEntries} je ON jel.journal_entry_id = je.id
+                         WHERE je.brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<JournalEntryLineDto>(query, parameters);
             return result;

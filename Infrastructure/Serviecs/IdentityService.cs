@@ -188,6 +188,19 @@ namespace Infrastructure.Serviecs
             return new RoleDto(role.Id, role.Name);
         }
 
+        public async Task<RoleDto> GetRoleByNameAsync(string name)
+        {
+            var role = await _roleManager.FindByNameAsync(name);
+            if (role == null) throw new NotFoundException("ROLE_NOT_FOUND");
+            return new RoleDto(role.Id, role.Name ?? name);
+        }
+
+        public async Task<bool> RoleIsExistAsync(string name)
+        {
+            var role = await _roleManager.FindByNameAsync(name);
+            return role != null;
+        }
+
         public async Task<bool> UpdateRole(RoleDto roleDto)
         {
             var role = await _roleManager.FindByIdAsync(roleDto.Id.ToString());
@@ -245,7 +258,6 @@ namespace Infrastructure.Serviecs
         #endregion
 
         #region Private Helpers
-
         private async Task<UserDetailsDto> MapToUserDetailsDto(ApplicationUser user)
         {
             var brandIds = user.BrandMemberships?.Select(bu => bu.BrandId).ToList() ?? new List<Guid>();
@@ -261,7 +273,6 @@ namespace Infrastructure.Serviecs
                 roles
             );
         }
-
         #endregion
     }
 }

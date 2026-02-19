@@ -18,12 +18,12 @@ namespace Infrastructure.Repositories.Queries
         public async Task<UserSummaryDto?> GetByIdAsync(Guid id)
         {
             var query = @"SELECT 
-                         u.Id, 
-                         u.FirstName, 
-                         u.LastName, 
-                         u.UserName, 
-                         u.Email 
-                         FROM AspNetUsers u WHERE u.Id = @Id";
+                         u.id, 
+                         u.first_name AS FirstName, 
+                         u.last_name AS LastName, 
+                         u.user_name AS UserName, 
+                         u.email AS Email 
+                         FROM AspNetUsers u WHERE u.id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<UserSummaryDto>(query, parameters);
             return result;
@@ -32,11 +32,11 @@ namespace Infrastructure.Repositories.Queries
         public async Task<IEnumerable<UserSummaryDto>> GetAllTableAsync()
         {
             var query = @"SELECT 
-                         u.Id, 
-                         u.FirstName, 
-                         u.LastName, 
-                         u.UserName, 
-                         u.Email 
+                         u.id, 
+                         u.first_name AS FirstName, 
+                         u.last_name AS LastName, 
+                         u.user_name AS UserName, 
+                         u.email AS Email 
                          FROM AspNetUsers u";
             var result = await _connection.QueryAsync<UserSummaryDto>(query);
             return result;
@@ -44,15 +44,15 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<UserSummaryDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = @"SELECT DISTINCT 
-                         u.Id, 
-                         u.FirstName, 
-                         u.LastName, 
-                         u.UserName, 
-                         u.Email 
+            var query = $@"SELECT DISTINCT 
+                         u.id, 
+                         u.first_name AS FirstName, 
+                         u.last_name AS LastName, 
+                         u.user_name AS UserName, 
+                         u.email AS Email 
                          FROM AspNetUsers u
-                         INNER JOIN BrandUsers bu ON u.Id = bu.UserId
-                         WHERE bu.BrandId = @BrandId";
+                         INNER JOIN {TableBrandMemberships} bu ON u.id = bu.user_id
+                         WHERE bu.brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<UserSummaryDto>(query, parameters);
             return result;

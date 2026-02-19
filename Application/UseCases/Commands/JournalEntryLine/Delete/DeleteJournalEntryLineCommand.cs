@@ -1,6 +1,6 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Accounting;
-using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -13,7 +13,8 @@ namespace Application.Features.Commands.JournalEntryLine.Delete
 
     public class DeleteJournalEntryLineCommandHandler : BaseHandler<IJournalEntryLineCommandRepository>, IRequestHandler<DeleteJournalEntryLineCommand, Response<bool>>
     {
-        public DeleteJournalEntryLineCommandHandler(IJournalEntryLineCommandRepository Repository) : base(null, Repository)
+        public DeleteJournalEntryLineCommandHandler(IJournalEntryLineCommandRepository repository, IUnitOfWork unitOfWork)
+            : base(null, repository, unitOfWork)
         {
         }
 
@@ -21,11 +22,12 @@ namespace Application.Features.Commands.JournalEntryLine.Delete
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<bool>("Not found");
+                return new Response<bool>(false, "Journal entry line not found");
 
-            await _repo.DeleteAsync(existing);
-
-            return new Response<bool>();
+            return await ExecuteDeleteAsync(
+                existing,
+                async (jel) => await _repo.DeleteAsync(jel),
+                cancellationToken);
         }
     }
 }

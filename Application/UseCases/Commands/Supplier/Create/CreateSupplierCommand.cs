@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Purchasing;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -17,7 +18,8 @@ namespace Application.Features.Commands.Supplier.Create
 
     public class CreateSupplierCommandHandler : BaseHandler<ISupplierCommandRepository>, IRequestHandler<CreateSupplierCommand, Response<SupplierDto>>
     {
-        public CreateSupplierCommandHandler(ISupplierCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreateSupplierCommandHandler(ISupplierCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -25,9 +27,10 @@ namespace Application.Features.Commands.Supplier.Create
         {
             var entity = _mapper.Map<Domain.Entities.Purchasing.Supplier>(request);
 
-            await _repo.CreateAsync(entity);
-
-            return new Response<SupplierDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Purchasing.Supplier, SupplierDto>(
+                entity,
+                async (s) => await _repo.CreateAsync(s),
+                cancellationToken);
         }
     }
 }

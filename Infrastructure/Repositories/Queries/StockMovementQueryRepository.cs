@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<StockMovementDto?> GetByIdAsync(Guid id)
         {
-            var query = "SELECT Id, ProductId, WarehouseId, BatchId, MovementType, ReferenceType, Quantity, MovementDate FROM StockMovements WHERE Id = @Id";
+            var query = $"SELECT id, product_id AS ProductId, warehouse_id AS WarehouseId, batch_id AS BatchId, movement_type AS MovementType, reference_type AS ReferenceType, quantity AS Quantity, created_at AS MovementDate FROM {TableStockMovements} WHERE id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<StockMovementDto>(query, parameters);
             return result;
@@ -25,17 +25,17 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<StockMovementDto>> GetAllTableAsync()
         {
-            var query = "SELECT Id, ProductId, WarehouseId, BatchId, MovementType, ReferenceType, Quantity, MovementDate FROM StockMovements";
+            var query = $"SELECT id, product_id AS ProductId, warehouse_id AS WarehouseId, batch_id AS BatchId, movement_type AS MovementType, reference_type AS ReferenceType, quantity AS Quantity, created_at AS MovementDate FROM {TableStockMovements}";
             var result = await _connection.QueryAsync<StockMovementDto>(query);
             return result;
         }
 
         public async Task<IEnumerable<StockMovementDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = @"SELECT sm.Id, sm.ProductId, sm.WarehouseId, sm.BatchId, sm.MovementType, sm.ReferenceType, sm.Quantity, sm.MovementDate 
-                         FROM StockMovements sm
-                         INNER JOIN Products p ON sm.ProductId = p.Id
-                         WHERE p.BrandId = @BrandId";
+            var query = $@"SELECT sm.id, sm.product_id AS ProductId, sm.warehouse_id AS WarehouseId, sm.batch_id AS BatchId, sm.movement_type AS MovementType, sm.reference_type AS ReferenceType, sm.quantity AS Quantity, sm.created_at AS MovementDate 
+                         FROM {TableStockMovements} sm
+                         INNER JOIN {TableProducts} p ON sm.product_id = p.id
+                         WHERE p.brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<StockMovementDto>(query, parameters);
             return result;

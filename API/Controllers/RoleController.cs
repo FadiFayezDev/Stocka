@@ -1,10 +1,9 @@
-﻿using Authentication.Application.Commands.Role.Create;
-using Authentication.Application.Commands.Role.Delete;
-using Authentication.Application.Commands.Role.Update;
-using Authentication.Application.DTOs;
+﻿using Application.DTOs;
+using Application.UseCases.Commands.Role.Create;
+using Application.UseCases.Commands.Role.Delete;
+using Application.UseCases.Commands.Role.Update;
 using Authentication.Application.Queries.Role;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

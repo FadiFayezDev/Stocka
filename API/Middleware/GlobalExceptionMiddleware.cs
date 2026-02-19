@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Infrastructure.Exceptions;
 
 namespace CleanArchitecture.Api.Middleware
 {
@@ -28,6 +29,33 @@ namespace CleanArchitecture.Api.Middleware
             catch (PersistenceOperationException ex)
             {
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    error = "INFRASTRUCTURE_ERROR",
+                    details = ex.Message
+                });
+            }
+            catch (IdentityOperationException  ex)
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    error = "INFRASTRUCTURE_ERROR",
+                    details = ex.Message
+                });
+            }
+            catch (NotFoundException ex)
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    error = "INFRASTRUCTURE_ERROR",
+                    details = ex.Message
+                });
+            }
+            catch (BadRequestException ex)
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
                 await context.Response.WriteAsJsonAsync(new
                 {
                     error = "INFRASTRUCTURE_ERROR",

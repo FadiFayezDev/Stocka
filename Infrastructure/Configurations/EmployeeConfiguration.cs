@@ -9,7 +9,7 @@ namespace Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Employee> builder)
         {
-            builder.ToTable("Employees");
+            builder.ToTable("employees");
 
             builder.HasKey(e => e.Id);
 
@@ -21,7 +21,7 @@ namespace Infrastructure.Configurations
                 .HasColumnType("decimal(18,2)");
 
             builder.Property(e => e.HireDate)
-                .HasDefaultValueSql("NOW()");  // ✅ تغيير من GETUTCDATE() إلى NOW()
+                .HasDefaultValueSql("NOW()");
 
             builder.Property(e => e.IsActive)
                 .HasDefaultValue(true);
@@ -34,7 +34,7 @@ namespace Infrastructure.Configurations
 
             builder.HasIndex(e => e.UserId)
                 .IsUnique()
-                .HasFilter("\"UserId\" IS NOT NULL");  // ✅ تغيير من [UserId] إلى "UserId" (PostgreSQL syntax)
+                .HasFilter("\"user_id\" IS NOT NULL");
         }
     }
 }

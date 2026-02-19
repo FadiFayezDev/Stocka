@@ -22,6 +22,8 @@ public partial class ExpenseCategory : IEntity<Guid>
 
     public ExpenseCategory(Guid brandId, string name)
     {
+        Id = Guid.NewGuid();
+
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Expense category name cannot be empty.", nameof(name));
 

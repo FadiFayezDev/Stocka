@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Core;
 using AutoMapper;
 using MediatR;
@@ -15,7 +16,8 @@ namespace Application.Features.Commands.Branch.Update
 
     public class UpdateBranchCommandHandler : BaseHandler<IBranchCommandRepository>, IRequestHandler<UpdateBranchCommand, Response<BranchDto>>
     {
-        public UpdateBranchCommandHandler(IBranchCommandRepository branchRepository, IMapper mapper) : base(mapper, branchRepository)
+        public UpdateBranchCommandHandler(IBranchCommandRepository branchRepository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, branchRepository, unitOfWork)
         {
         }
 
@@ -27,9 +29,10 @@ namespace Application.Features.Commands.Branch.Update
 
             _mapper.Map(request, existingBranch);
 
-            await _repo.UpdateAsync(existingBranch);
-
-            return new Response<BranchDto>();
+            return await ExecuteUpdateAsync<Domain.Entities.Core.Branch, BranchDto>(
+                existingBranch,
+                async (b) => await _repo.UpdateAsync(b),
+                cancellationToken);
         }
     }
 }

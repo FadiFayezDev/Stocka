@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<EmployeeDto?> GetByIdAsync(Guid id)
         {
-            var query = "SELECT Id, UserId, BrandId, JobTitle, Salary, HireDate, IsActive FROM Employees WHERE Id = @Id";
+            var query = $"SELECT id, user_id AS UserId, brand_id AS BrandId, job_title AS JobTitle, salary AS Salary, hire_date AS HireDate, is_active AS IsActive FROM {TableEmployees} WHERE id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<EmployeeDto>(query, parameters);
             return result;
@@ -25,14 +25,14 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<EmployeeDto>> GetAllTableAsync()
         {
-            var query = "SELECT Id, UserId, BrandId, JobTitle, Salary, HireDate, IsActive FROM Employees";
+            var query = $"SELECT id, user_id AS UserId, brand_id AS BrandId, job_title AS JobTitle, salary AS Salary, hire_date AS HireDate, is_active AS IsActive FROM {TableEmployees}";
             var result = await _connection.QueryAsync<EmployeeDto>(query);
             return result;
         }
 
         public async Task<IEnumerable<EmployeeDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = "SELECT Id, UserId, BrandId, JobTitle, Salary, HireDate, IsActive FROM Employees WHERE BrandId = @BrandId";
+            var query = $"SELECT id, user_id AS UserId, brand_id AS BrandId, job_title AS JobTitle, salary AS Salary, hire_date AS HireDate, is_active AS IsActive FROM {TableEmployees} WHERE brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<EmployeeDto>(query, parameters);
             return result;

@@ -1,0 +1,83 @@
+# ????? ????? Configuration Files ?? Snake_Case
+
+## ?? ??????? ????????:
+
+### 1. **????? ??????? (ToTable) ?? ?????? snake_case**
+
+| Configuration | ?????? | ?????? | ?????? |
+|---|---|---|---|
+| BrandMembershipConfiguration | `"BrandMemberships"` | `"brand_memberships"` | ? |
+| CustomerConfiguration | `"Customers"` | `"customers"` | ? |
+| EmployeeConfiguration | `"Employees"` | `"employees"` | ? |
+| StockMovementConfiguration | `"StockMovements"` | `"stock_movements"` | ? |
+| OrdertemConfiguration (OrderItemConfiguration) | `"OrderItems"` | `"order_items"` | ? |
+| WarehouseConfiguration | `"Warehouses"` | `"warehouses"` | ? |
+| SupplierConfiguration | `"Suppliers"` | `"suppliers"` | ? |
+
+### 2. **????? Index ??????? (Unique)**
+
+| File | ????? | ?????? | ?????? |
+|---|---|---|---|
+| BrandConfiguration | Unique Index name | `"UQ_Brands_Slug"` | `"ix_brands_slug"` |
+| WarehouseBatchConfiguration | Unique Index name | `"UQ_WarehouseBatches_WarehouseId_BatchId"` | `"ix_warehouse_batches_warehouse_id_batch_id"` |
+
+### 3. **Filter ?? Indexes ?????? PascalCase**
+
+?? ???? ??? Configurations:
+```csharp
+.HasFilter("\"UserId\" IS NOT NULL")  // ? ??? ?? ???? "user_id"
+```
+
+### 4. **????? ????? ??? ?????:**
+
+- ProductCategoryConfiguration
+- ExpenseCategoryConfiguration
+- ExpenseConfiguration
+- JournalEntryConfiguration
+- JournalEntryLineConfiguration
+- AccountConfiguration
+- WarehouseBatchConfiguration
+- UserPhoneNumberConfiguration
+- PurchaseConfiguration
+- PurchaseItemConfiguration
+- SupplierConfiguration
+- WarehouseConfiguration
+- BatchConfiguration
+- BranchConfiguration
+- OrdertemConfiguration (OrderItemConfiguration)
+
+---
+
+## ? ????:
+
+1. ????? ???? `.ToTable("PascalCase")` ?? ??????? ??? snake_case
+2. ????? ???? `HasName()` ? `HasDatabaseName()` ????? snake_case
+3. ????? ???? `HasFilter()` ???????? ????? ??????? ????? snake_case
+4. ?????? ?? ??? ????? ????? ??? Indexes
+
+---
+
+## ?? ??????? ???? ????? ?????:
+
+- [x] BrandMembershipConfiguration.cs
+- [x] CustomerConfiguration.cs
+- [x] EmployeeConfiguration.cs
+- [x] StockMovementConfiguration.cs
+- [x] OrdertemConfiguration.cs (OrderItemConfiguration)
+- [x] WarehouseConfiguration.cs
+- [x] SupplierConfiguration.cs
+- [ ] ProductCategoryConfiguration.cs
+- [ ] ExpenseCategoryConfiguration.cs
+- [ ] ExpenseConfiguration.cs
+- [ ] JournalEntryConfiguration.cs
+- [ ] JournalEntryLineConfiguration.cs
+- [ ] AccountConfiguration.cs
+- [ ] WarehouseBatchConfiguration.cs
+- [ ] UserPhoneNumberConfiguration.cs
+- [ ] PurchaseConfiguration.cs
+- [ ] PurchaseItemConfiguration.cs
+- [ ] BrandConfiguration.cs
+- [ ] BranchConfiguration.cs
+- [ ] ProductConfiguration.cs
+- [ ] BatchConfiguration.cs
+- [ ] OrderConfiguration.cs

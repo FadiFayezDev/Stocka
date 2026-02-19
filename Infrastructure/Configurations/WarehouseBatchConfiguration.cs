@@ -15,7 +15,7 @@ namespace Infrastructure.Configurations
                 .IsRequired();
 
             // Unique constraint on WarehouseId + BatchId
-            builder.HasIndex(e => new { e.WarehouseId, e.BatchId }, "UQ_WarehouseBatches_WarehouseId_BatchId")
+            builder.HasIndex(e => new { e.WarehouseId, e.BatchId }, "ix_warehouse_batches_warehouse_id_batch_id")
                 .IsUnique();
 
             builder.HasOne(d => d.Batch).WithMany(p => p.WarehouseBatches)

@@ -1,7 +1,8 @@
-﻿using Authentication.Application.Commands.Auth;
-using Authentication.Application.DTOs;
+﻿using Application.UseCases.Commands.Auth;
+using Application.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Application.DTOs;
 
 namespace API.Controllers
 {

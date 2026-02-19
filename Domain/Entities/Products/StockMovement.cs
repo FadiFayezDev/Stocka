@@ -31,6 +31,8 @@ namespace Domain.Entities.Products
 
         public StockMovement(Guid productId, Guid batchId, Guid warehouseId, Guid brandId, int quantity, StockMovementType movementType, string? referenceType = null, Guid? referenceId = null)
         {
+            Id = Guid.NewGuid();
+
             if (quantity <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
 

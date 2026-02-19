@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -16,7 +17,8 @@ namespace Application.Features.Commands.Warehouse.Update
 
     public class UpdateWarehouseCommandHandler : BaseHandler<IWarehouseCommandRepository>, IRequestHandler<UpdateWarehouseCommand, Response<WarehouseDto>>
     {
-        public UpdateWarehouseCommandHandler(IWarehouseCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public UpdateWarehouseCommandHandler(IWarehouseCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -24,13 +26,14 @@ namespace Application.Features.Commands.Warehouse.Update
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<WarehouseDto>("Not found");
+                return new Response<WarehouseDto>("Warehouse not found");
 
             _mapper.Map(request, existing);
 
-             await _repo.UpdateAsync(existing);
-
-            return new Response<WarehouseDto>();
+            return await ExecuteUpdateAsync<Domain.Entities.Products.Warehouse, WarehouseDto>(
+                existing,
+                async (w) => await _repo.UpdateAsync(w),
+                cancellationToken);
         }
     }
 }

@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -15,7 +16,8 @@ namespace Application.Features.Commands.WarehouseBatch.Create
 
     public class CreateWarehouseBatchCommandHandler : BaseHandler<IWarehouseBatchCommandRepository>, IRequestHandler<CreateWarehouseBatchCommand, Response<WarehouseBatchDto>>
     {
-        public CreateWarehouseBatchCommandHandler(IWarehouseBatchCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreateWarehouseBatchCommandHandler(IWarehouseBatchCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -23,9 +25,10 @@ namespace Application.Features.Commands.WarehouseBatch.Create
         {
             var entity = _mapper.Map<Domain.Entities.Products.WarehouseBatch>(request);
 
-            await _repo.CreateAsync(entity);
-
-            return new Response<WarehouseBatchDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Products.WarehouseBatch, WarehouseBatchDto>(
+                entity,
+                async (wb) => await _repo.CreateAsync(wb),
+                cancellationToken);
         }
     }
 }

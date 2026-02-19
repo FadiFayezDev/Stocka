@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Accounting;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -15,7 +16,8 @@ namespace Application.Features.Commands.JournalEntry.Create
 
     public class CreateJournalEntryCommandHandler : BaseHandler<IJournalEntryCommandRepository>, IRequestHandler<CreateJournalEntryCommand, Response<JournalEntryDto>>
     {
-        public CreateJournalEntryCommandHandler(IJournalEntryCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreateJournalEntryCommandHandler(IJournalEntryCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -23,8 +25,10 @@ namespace Application.Features.Commands.JournalEntry.Create
         {
             var entity = _mapper.Map<Domain.Entities.Accounting.JournalEntry>(request);
 
-            await _repo.CreateAsync(entity);
-            return new Response<JournalEntryDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Accounting.JournalEntry, JournalEntryDto>(
+                entity,
+                async (je) => await _repo.CreateAsync(je),
+                cancellationToken);
         }
     }
 }

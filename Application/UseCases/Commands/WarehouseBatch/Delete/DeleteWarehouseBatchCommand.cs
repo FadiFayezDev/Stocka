@@ -1,6 +1,6 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
-using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -13,7 +13,8 @@ namespace Application.Features.Commands.WarehouseBatch.Delete
 
     public class DeleteWarehouseBatchCommandHandler : BaseHandler<IWarehouseBatchCommandRepository>, IRequestHandler<DeleteWarehouseBatchCommand, Response<bool>>
     {
-        public DeleteWarehouseBatchCommandHandler(IWarehouseBatchCommandRepository Repository) : base(null, Repository)
+        public DeleteWarehouseBatchCommandHandler(IWarehouseBatchCommandRepository repository, IUnitOfWork unitOfWork)
+            : base(null, repository, unitOfWork)
         {
         }
 
@@ -21,12 +22,12 @@ namespace Application.Features.Commands.WarehouseBatch.Delete
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<bool>("Not found");
+                return new Response<bool>(false, "Warehouse batch not found");
 
-            await _repo.DeleteAsync(existing);
-
-
-            return new Response<bool>();
+            return await ExecuteDeleteAsync(
+                existing,
+                async (wb) => await _repo.DeleteAsync(wb),
+                cancellationToken);
         }
     }
 }

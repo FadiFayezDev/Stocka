@@ -20,6 +20,8 @@ namespace Domain.Entities.Core
 
         public Employee(Guid? userId, Guid brandId, string jobTitle, decimal? salary, DateTime? hireDate = null)
         {
+            Id = Guid.NewGuid();
+
             if (string.IsNullOrWhiteSpace(jobTitle))
                 throw new ArgumentException("Job title cannot be empty.", nameof(jobTitle));
 

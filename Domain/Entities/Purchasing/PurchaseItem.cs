@@ -32,6 +32,8 @@ namespace Domain.Entities.Purchasing
 
         public PurchaseItem(Guid purchaseId, Guid productId, int quantity, decimal unitCost)
         {
+            Id = Guid.NewGuid();
+
             if (quantity <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
 

@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Purchasing;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -17,7 +18,8 @@ namespace Application.Features.Commands.Purchase.Update
 
     public class UpdatePurchaseCommandHandler : BaseHandler<IPurchaseCommandRepository>, IRequestHandler<UpdatePurchaseCommand, Response<PurchaseDto>>
     {
-        public UpdatePurchaseCommandHandler(IPurchaseCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public UpdatePurchaseCommandHandler(IPurchaseCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -25,12 +27,14 @@ namespace Application.Features.Commands.Purchase.Update
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<PurchaseDto>("Not found");
+                return new Response<PurchaseDto>("Purchase not found");
 
             _mapper.Map(request, existing);
 
-             await _repo.UpdateAsync(existing);
-            return new Response<PurchaseDto>();
+            return await ExecuteUpdateAsync<Domain.Entities.Purchasing.Purchase, PurchaseDto>(
+                existing,
+                async (p) => await _repo.UpdateAsync(p),
+                cancellationToken);
         }
     }
 }

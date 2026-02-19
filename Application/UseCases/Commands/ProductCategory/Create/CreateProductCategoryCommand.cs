@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Products;
 using AutoMapper;
 using Domain.Repositories.Commands;
@@ -14,7 +15,8 @@ namespace Application.Features.Commands.ProductCategory.Create
 
     public class CreateProductCategoryCommandHandler : BaseHandler<IProductCategoryCommandRepository>, IRequestHandler<CreateProductCategoryCommand, Response<ProductCategoryDto>>
     {
-        public CreateProductCategoryCommandHandler(IProductCategoryCommandRepository Repository, IMapper mapper) : base(mapper, Repository)
+        public CreateProductCategoryCommandHandler(IProductCategoryCommandRepository repository, IMapper mapper, IUnitOfWork unitOfWork)
+            : base(mapper, repository, unitOfWork)
         {
         }
 
@@ -22,9 +24,10 @@ namespace Application.Features.Commands.ProductCategory.Create
         {
             var entity = _mapper.Map<Domain.Entities.Products.ProductCategory>(request);
 
-            await _repo.CreateAsync(entity);
-
-            return new Response<ProductCategoryDto>();
+            return await ExecuteCreateAsync<Domain.Entities.Products.ProductCategory, ProductCategoryDto>(
+                entity,
+                async (pc) => await _repo.CreateAsync(pc),
+                cancellationToken);
         }
     }
 }

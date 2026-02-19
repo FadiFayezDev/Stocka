@@ -1,6 +1,6 @@
 using Application.Bases;
+using Application.Common.Interfaces;
 using Application.Dtos.Orders;
-using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -13,7 +13,8 @@ namespace Application.Features.Commands.OrderItem.Delete
 
     public class DeleteOrderItemCommandHandler : BaseHandler<IOrderItemCommandRepository>, IRequestHandler<DeleteOrderItemCommand, Response<bool>>
     {
-        public DeleteOrderItemCommandHandler(IOrderItemCommandRepository Repository) : base(null, Repository)
+        public DeleteOrderItemCommandHandler(IOrderItemCommandRepository repository, IUnitOfWork unitOfWork)
+            : base(null, repository, unitOfWork)
         {
         }
 
@@ -21,11 +22,12 @@ namespace Application.Features.Commands.OrderItem.Delete
         {
             var existing = await _repo.GetByIdAsync(request.Id);
             if (existing == null)
-                return new Response<bool>("Not found");
+                return new Response<bool>(false, "Order item not found");
 
-            await _repo.DeleteAsync(existing);
-
-            return new Response<bool>();
+            return await ExecuteDeleteAsync(
+                existing,
+                async (oi) => await _repo.DeleteAsync(oi),
+                cancellationToken);
         }
     }
 }

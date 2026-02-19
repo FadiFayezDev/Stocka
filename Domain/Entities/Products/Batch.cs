@@ -37,6 +37,8 @@ namespace Domain.Entities.Products
 
         public Batch(Guid productId, Guid purchaseItemId, Guid brandId, int initialQuantity, decimal unitCost)
         {
+            Id = Guid.NewGuid();
+
             if (initialQuantity <= 0)
                 throw new ArgumentException("Initial quantity must be greater than zero.", nameof(initialQuantity));
 
