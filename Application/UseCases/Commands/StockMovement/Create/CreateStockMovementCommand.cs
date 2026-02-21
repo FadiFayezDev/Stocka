@@ -28,7 +28,6 @@ namespace Application.Features.Commands.StockMovement.Create
         public async Task<Response<StockMovementDto>> Handle(CreateStockMovementCommand request, CancellationToken cancellationToken)
         {
             var entity = _mapper.Map<Domain.Entities.Products.StockMovement>(request);
-            entity.CreatedAt = DateTime.UtcNow;
 
             return await ExecuteCreateAsync<Domain.Entities.Products.StockMovement, StockMovementDto>(
                 entity,

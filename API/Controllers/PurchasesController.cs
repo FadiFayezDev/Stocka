@@ -7,6 +7,7 @@ using Application.Features.Commands.Purchase.Update;
 using Application.Features.Queries.Purchase.GetAll;
 using Application.Features.Queries.Purchase.GetById;
 using Application.Queries.Purchase.GetByBrandId;
+using Application.UseCases;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -112,6 +113,13 @@ namespace API.Controllers
             var result = await _mediator.Send(new DeletePurchaseCommand { Id = id }, cancellationToken);
             if (!result.Succeeded)
                 return NotFound(result);
+            return Ok(result);
+        }
+
+        [HttpPost("receive")]
+        public async Task<IActionResult> ReceivePurchasedProducts(ReceiveAndStockPurchasedProductsCommand command)
+        {
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
     }

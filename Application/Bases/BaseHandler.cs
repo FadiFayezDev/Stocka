@@ -5,19 +5,26 @@ namespace Application.Bases
 {
     public abstract class BaseHandler<T> : ResponseHandler where T : class
     {
-        protected T _repo;  // Alias for compatibility
-        protected readonly IMapper? _mapper;
-        protected readonly IUnitOfWork? _work;
+        protected T _repo;
+        protected readonly IMapper _mapper;
+        protected readonly IUnitOfWork _work;
 
-        public BaseHandler(IMapper? mapper, T repo, IUnitOfWork? work = null)
+        public BaseHandler(IMapper mapper, T repo, IUnitOfWork work)
         {
             _repo = repo;
             _mapper = mapper;
             _work = work;
         }
 
-        public BaseHandler(IMapper? mapper, T services) : this(mapper, services, null)
+        public BaseHandler(IMapper mapper, T repo)
         {
+            _repo = repo;
+            _mapper = mapper;
+        }
+
+        public BaseHandler(T repo)
+        {
+            _repo = repo;
         }
 
         /// <summary>

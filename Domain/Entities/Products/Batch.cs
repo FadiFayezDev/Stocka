@@ -31,7 +31,7 @@ namespace Domain.Entities.Products
 
         public virtual ICollection<OrderItem> OrderItems => _OrderItems.AsReadOnly();
         public virtual ICollection<StockMovement> StockMovements => _stockMovements.AsReadOnly();
-        public virtual ICollection<WarehouseBatch> WarehouseBatches => _warehouseBatches.AsReadOnly();
+        public virtual IReadOnlyCollection<WarehouseBatch> WarehouseBatches => _warehouseBatches.AsReadOnly();
 
         private Batch() { }
 
@@ -71,6 +71,11 @@ namespace Domain.Entities.Products
                 throw new ArgumentException("Quantity to add must be greater than zero.", nameof(quantityToAdd));
 
             RemainingQuantity += quantityToAdd;
+        }
+
+        public void DistributeToWarehouse(Guid warehouseId, int quantity)
+        {
+            _warehouseBatches.Add(new WarehouseBatch(warehouseId, Id, BrandId, quantity));
         }
 
         public bool IsExhausted => RemainingQuantity == 0;

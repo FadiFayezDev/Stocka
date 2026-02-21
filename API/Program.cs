@@ -111,18 +111,18 @@ var app = builder.Build();
 
 // ================== Middleware ==================
 
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 app.UseCors(cors =>
     cors.WithOrigins("http://localhost:3000")
         .AllowAnyHeader()
         .AllowAnyMethod());
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
     app.UseMiddleware<GlobalExceptionMiddleware>();
 }

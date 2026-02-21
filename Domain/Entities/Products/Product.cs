@@ -19,6 +19,7 @@ namespace Domain.Entities.Products
         public string Name { get; set; } = null!;
 
         public string? Barcode { get; set; }
+        public string? ImagePath { get; set; }
 
         private readonly List<Batch> _batches = new();
         private readonly List<PurchaseItem> _purchaseItems = new();

@@ -10,6 +10,7 @@ namespace Application.Features.Commands.Warehouse.Create
     public class CreateWarehouseCommand : IRequest<Response<WarehouseDto>>
     {
         public Guid BranchId { get; set; }
+        public Guid BrandId { get; set; }
         public string Name { get; set; } = null!;
         public string Type { get; set; } = null!;
     }

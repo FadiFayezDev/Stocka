@@ -70,8 +70,10 @@ namespace Domain.Entities.Purchasing
             if (batch.PurchaseItemId != Id)
                 throw new ArgumentException("Batch does not belong to this purchase item.");
 
-            if (_batches.Any(b => b.Id == batch.Id))
-                throw new InvalidOperationException("Batch already added.");
+            var totalBatchesQuantity = _batches.Sum(b => b.InitialQuantity);
+
+            if (totalBatchesQuantity + batch.InitialQuantity > Quantity)
+                throw new InvalidOperationException("Batch quantity exceeds purchase item quantity.");
 
             _batches.Add(batch);
         }

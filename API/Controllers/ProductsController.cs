@@ -1,5 +1,7 @@
 using API.Controllers.Base;
+using API.Models;
 using Application.Bases;
+using Application.Dtos;
 using Application.Dtos.Products;
 using Application.Features.Commands.Product.Create;
 using Application.Features.Commands.Product.Delete;
@@ -7,8 +9,10 @@ using Application.Features.Commands.Product.Update;
 using Application.Features.Queries.Product.GetAll;
 using Application.Features.Queries.Product.GetById;
 using Application.Queries.Product.GetByBrandId;
+using Application.Queries.Product.GetProductsWithWarehousesQuntity;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace API.Controllers
 {
@@ -45,6 +49,16 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [ProducesResponseType(typeof(Response<IEnumerable<ProductsWithWarehouseQuntityDto>>), StatusCodes.Status200OK)]
+        [HttpGet("with-quantities/{brandId:guid}")]
+        public async Task<IActionResult> GetProductsWithQuantities(Guid brandId, CancellationToken cancellationToken = default)
+        {
+            var result = await _mediator.Send(new GetProductsWithQuantitiesQuery(brandId), cancellationToken);
+            if (!result.Succeeded)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
         /// <summary>
         /// Get product by ID
         /// </summary>
@@ -67,10 +81,24 @@ namespace API.Controllers
         [ProducesResponseType(typeof(Response<ProductDto>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateProductCommand command, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Create([FromForm] CreateProductRequest request, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            var command = new CreateProductCommand
+            {
+                BrandId = request.BrandId,
+                CategoryId = request.CategoryId,
+                Name = request.Name,
+                Barcode = request.Barcode,
+            };
+
+            if (request.Image != null)
+            {
+                command.Image = request.Image.OpenReadStream();
+                command.ImageExtension = Path.GetExtension(request.Image.FileName);
+            }
 
             var result = await _mediator.Send(command, cancellationToken);
             if (!result.Succeeded)
