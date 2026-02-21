@@ -16,7 +16,7 @@ namespace Infrastructure.Contexts
             var dbPath = Path.Combine(Directory.GetCurrentDirectory(), "armoryx_migrations.db");
             var sqlite = $"Data Source={dbPath}";
             var postgreSql = "Host=ep-bold-forest-a9ugoads-pooler.gwc.azure.neon.tech; Database=neondb; Username=neondb_owner; Password=npg_HPQDd9gf3rAc; SSL Mode=VerifyFull; Channel Binding=Require;";
-            var sqlServer = "Server=localhost,1433;Database=Stocka;User Id=sa;Password=Fz-5117288;TrustServerCertificate=True;Encrypt=True;";
+            var sqlServer = "Data Source=black-terminal.database.windows.net;Initial Catalog=stocka;User ID=fadyfayez.net@gmail.com;Connect Timeout=60;Encrypt=True;Trust Server Certificate=False;Authentication=ActiveDirectoryInteractive;Application Intent=ReadWrite;Multi Subnet Failover=False;Command Timeout=30";
 
             optionsBuilder.UseNpgsql(postgreSql)
                 .UseSnakeCaseNamingConvention();
