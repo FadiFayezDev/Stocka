@@ -18,8 +18,10 @@ namespace Domain.Entities.Products
 
         public string Name { get; set; } = null!;
 
+        public decimal SellingPrice { get; private set; }
         public string? Barcode { get; set; }
         public string? ImagePath { get; set; }
+        public bool IsActive { get; set; }
 
         private readonly List<Batch> _batches = new();
         private readonly List<PurchaseItem> _purchaseItems = new();
@@ -35,17 +37,29 @@ namespace Domain.Entities.Products
 
         private Product() { }
 
-        public Product(Guid brandId, Guid categoryId, string name, string? barcode = null)
+        public Product(Guid brandId, Guid categoryId, string name, decimal sellingPrice, string? barcode = null)
         {
             Id = Guid.NewGuid();
 
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Product name cannot be empty.", nameof(name));
 
+            if (sellingPrice < 0)
+                throw new ArgumentOutOfRangeException(nameof(sellingPrice), "Selling price cannot be negative.");
+
             BrandId = brandId;
             CategoryId = categoryId;
             Name = name.Trim();
             Barcode = barcode?.Trim();
+            SellingPrice = sellingPrice;
+            IsActive = true;
+        }
+
+        public void UpdateSellingPrice(decimal newPrice)
+        {
+            if (newPrice < 0)
+                throw new ArgumentOutOfRangeException(nameof(newPrice), "Selling price cannot be negative.");
+            SellingPrice = newPrice;
         }
 
         public void UpdateName(string newName)

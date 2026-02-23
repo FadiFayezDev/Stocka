@@ -10,12 +10,15 @@ using Application.Features.Queries.Product.GetAll;
 using Application.Features.Queries.Product.GetById;
 using Application.Queries.Product.GetByBrandId;
 using Application.Queries.Product.GetProductsWithWarehousesQuntity;
+using Application.UseCases.Commands.Product.PartialUpdate;
+using Azure.Core;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace API.Controllers
 {
+    [Authorize(Roles = "BrandOwner")]
     [ApiController]
     [Route("[controller]")]
     public class ProductsController : BaseController
@@ -91,6 +94,7 @@ namespace API.Controllers
                 BrandId = request.BrandId,
                 CategoryId = request.CategoryId,
                 Name = request.Name,
+                SellingPrice = request.SellingPrice,
                 Barcode = request.Barcode,
             };
 
@@ -114,13 +118,64 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductCommand command, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Update(Guid id, [FromForm] UpdateProductRequest request, CancellationToken cancellationToken = default)
         {
-            if (id != command.Id)
+            if (id != request.Id)
                 return BadRequest("ID mismatch");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            var command = new UpdateProductCommand
+            {
+                Id = id,
+                CategoryId = request.CategoryId,
+                Name = request.Name,
+                SellingPrice = request.SellingPrice,
+                Barcode = request.Barcode,
+            };
+
+            if (request.Image != null)
+            {
+                command.Image = request.Image.OpenReadStream();
+                command.ImageExtension = Path.GetExtension(request.Image.FileName);
+            }
+
+            var result = await _mediator.Send(command, cancellationToken);
+            if (!result.Succeeded)
+                return NotFound(result);
+            return Ok(result);
+        }
+
+        [HttpPatch("{id:guid}")]
+        [ProducesResponseType(typeof(Response<ProductDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PartialUpdate(Guid id, [FromForm] PartialUpdateProductRequest request, CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if(id != request.Id)
+                return BadRequest("ID mismatch");
+
+            var command = new PartialUpdateProductCommand
+            {
+                Id = id,
+                CategoryId = request.CategoryId,
+                Name = request.Name,
+                SellingPrice = request.SellingPrice,
+                Barcode = request.Barcode,
+                IsActive = request.IsActive
+                
+            };
+
+            if (request.Image != null)
+            {
+                command.Image = request.Image.OpenReadStream();
+                command.ImageExtension = Path.GetExtension(request.Image.FileName);
+            }
 
             var result = await _mediator.Send(command, cancellationToken);
             if (!result.Succeeded)
@@ -137,7 +192,7 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
         {
-            var result = await _mediator.Send(new DeleteProductCommand { Id = id }, cancellationToken);
+            var result = await _mediator.Send(new DeleteProductCommand(id), cancellationToken);
             if (!result.Succeeded)
                 return NotFound(result);
             return Ok(result);

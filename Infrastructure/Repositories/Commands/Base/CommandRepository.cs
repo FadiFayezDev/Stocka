@@ -44,7 +44,7 @@ namespace Infrastructure.Repositories.Base
         {
             if(entity.GetKey() is Guid id)
             {
-                var existingEntity = await _context.Set<T>().FindAsync(id);
+                var existingEntity = await GetByIdAsync(id);
                 if (existingEntity == null)
                     return false;
                 _context.Entry(existingEntity).CurrentValues.SetValues(entity);

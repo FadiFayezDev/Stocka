@@ -32,7 +32,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<ProductCategoryDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = $"SELECT id, brand_id AS BrandId, name AS Name FROM {TableProductCategories} WHERE brand_id = @BrandId";
+            var query = $"SELECT id, brand_id AS BrandId, name AS Name, is_active AS IsActive FROM {TableProductCategories} WHERE brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<ProductCategoryDto>(query, parameters);
             return result;

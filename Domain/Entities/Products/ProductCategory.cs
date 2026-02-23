@@ -14,6 +14,8 @@ public partial class ProductCategory : IEntity<Guid>
 
     public string Name { get; set; } = null!;
 
+    public bool IsActive { get; set; }
+
     private readonly List<Product> _products = new();
     public virtual Brand Brand { get; set; } = null!;
     public virtual ICollection<Product> Products => _products.AsReadOnly();
@@ -29,7 +31,10 @@ public partial class ProductCategory : IEntity<Guid>
 
         BrandId = brandId;
         Name = name.Trim();
+        IsActive = true;
     }
+
+    public void UpdateActive(bool value) => IsActive = value;
 
     public void UpdateName(string newName)
     {

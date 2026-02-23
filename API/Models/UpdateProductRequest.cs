@@ -1,8 +1,11 @@
-﻿namespace API.Models
+﻿using Application.Dtos.Products;
+using MediatR;
+
+namespace API.Models
 {
-    public class CreateProductRequest
+    public class UpdateProductRequest
     {
-        public Guid BrandId { get; set; }
+        public Guid Id { get; set; }
         public Guid CategoryId { get; set; }
         public string Name { get; set; } = null!;
         public decimal SellingPrice { get; set; }

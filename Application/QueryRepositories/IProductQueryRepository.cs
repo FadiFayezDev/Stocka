@@ -1,10 +1,4 @@
-using Application.Dtos;
 using Application.Dtos.Products;
-using Domain.Entities.Products;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.QueryRepositories
 {
@@ -13,6 +7,7 @@ namespace Application.QueryRepositories
         Task<ProductDto?> GetByIdAsync(Guid id);
         Task<IEnumerable<ProductDto>> GetAllTableAsync();
         Task<IEnumerable<ProductDto>> GetAllByBrandIdAsync(Guid brandId);
-        Task<IEnumerable<ProductsWithWarehouseQuntityDto>> GetProductsWithQuantities(Guid brandId);
+        Task<ProductDto?> GetProductsWithQuantityAsync(Guid productId);
+        Task<IEnumerable<ProductDto>> GetProductsWithQuantities(Guid brandId);
     }
 }

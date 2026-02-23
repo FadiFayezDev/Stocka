@@ -1,6 +1,7 @@
 using Application.Bases;
 using Application.Common.Interfaces;
 using Application.Dtos.Products;
+using Application.QueryRepositories;
 using AutoMapper;
 using Domain.Repositories.Commands;
 using MediatR;
@@ -12,19 +13,19 @@ namespace Application.Features.Commands.Product.Create
         public Guid BrandId { get; set; }
         public Guid CategoryId { get; set; }
         public string Name { get; set; } = null!;
+        public decimal SellingPrice { get; set; }
         public string? Barcode { get; set; }
         public Stream? Image { get; set; }
         public string? ImageExtension { get; set; }
     }
 
-    public class CreateProductCommandHandler : BaseHandler<IProductCommandRepository>, IRequestHandler<CreateProductCommand, Response<ProductDto>>
+    public class CreateProductCommandHandler : BaseHandler<IProductCommandRepository, IProductQueryRepository>, IRequestHandler<CreateProductCommand, Response<ProductDto>>
     {
-        private readonly IImageStorageService _storageService;
+        private readonly IStorageService _storageService;
 
-        public CreateProductCommandHandler(IProductCommandRepository productRepository, IMapper mapper, IUnitOfWork unitOfWork, IImageStorageService storageService)
-            : base(mapper, productRepository, unitOfWork)
+        public CreateProductCommandHandler(IMapper mapper, IProductCommandRepository command, IProductQueryRepository query, IUnitOfWork work, IStorageService storageService) : base(mapper, command, query, work)
         {
-            this._storageService = storageService;
+            _storageService = storageService;
         }
 
         public async Task<Response<ProductDto>> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -38,10 +39,14 @@ namespace Application.Features.Commands.Product.Create
                 product.ImagePath = imagePath;
             }
 
-            return await ExecuteCreateAsync<Domain.Entities.Products.Product, ProductDto>(
+            await ExecuteCreateAsync<Domain.Entities.Products.Product, ProductDto>(
                 product,
-                async (p) => await _repo.CreateAsync(p),
+                async (p) => await _command.CreateAsync(p),
                 cancellationToken);
+
+            var productDto = await _query.GetProductsWithQuantityAsync(product.Id);
+
+            return Success(productDto);
         }
     }
 }

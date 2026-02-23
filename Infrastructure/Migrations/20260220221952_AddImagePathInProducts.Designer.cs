@@ -508,7 +508,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("category_id");
 
-                    b.Property<string>("ImagePath")
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("text")
                         .HasColumnName("image_path");
 

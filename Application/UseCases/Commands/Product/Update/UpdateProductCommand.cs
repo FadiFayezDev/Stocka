@@ -1,7 +1,10 @@
 using Application.Bases;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Dtos.Products;
+using Application.QueryRepositories;
 using AutoMapper;
+using Domain.Entities.Products;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -11,29 +14,49 @@ namespace Application.Features.Commands.Product.Update
     {
         public Guid Id { get; set; }
         public Guid CategoryId { get; set; }
-        public string Name { get; set; } = null!;
+        public string Name { get; set; } = null!; 
+        public decimal SellingPrice { get; set; }
         public string? Barcode { get; set; }
+        public Stream? Image { get; set; }
+        public string? ImageExtension { get; set; }
+        public bool? IsActive { get; set; }
     }
 
-    public class UpdateProductCommandHandler : BaseHandler<IProductCommandRepository>, IRequestHandler<UpdateProductCommand, Response<ProductDto>>
+    public class UpdateProductCommandHandler : BaseHandler<IProductCommandRepository, IProductQueryRepository>, IRequestHandler<UpdateProductCommand, Response<ProductDto>>
     {
-        public UpdateProductCommandHandler(IProductCommandRepository productRepository, IMapper mapper, IUnitOfWork unitOfWork)
-            : base(mapper, productRepository, unitOfWork)
+        private readonly IStorageService _storageService;
+
+        public UpdateProductCommandHandler(IMapper mapper, IProductCommandRepository command, IProductQueryRepository query, IUnitOfWork work) : base(mapper, command, query, work)
         {
         }
 
         public async Task<Response<ProductDto>> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
         {
-            var existingProduct = await _repo.GetByIdAsync(request.Id);
+            var existingProduct = await _command.GetByIdAsync(request.Id);
             if (existingProduct == null)
-                return new Response<ProductDto>("Product not found");
+                throw new BusinessException("product in not found");
 
-            _mapper.Map(request, existingProduct);
+            var brandId = existingProduct.BrandId;
 
-            return await ExecuteUpdateAsync<Domain.Entities.Products.Product, ProductDto>(
+            _mapper!.Map(request, existingProduct);
+
+            if (request.Image != null && request.ImageExtension != null)
+            {
+                var imagePath = await _storageService.SaveAsync(
+                request.Image, brandId, existingProduct.BrandId, request.ImageExtension);
+                existingProduct.ImagePath = imagePath;
+            }
+
+             await ExecuteUpdateAsync<Domain.Entities.Products.Product, ProductDto>(
                 existingProduct,
-                async (p) => await _repo.UpdateAsync(p),
+                async (p) => await _command.UpdateAsync(p),
                 cancellationToken);
+
+            var dto = await _query.GetProductsWithQuantityAsync(existingProduct.Id);
+
+            //dto.ImageUrl += _storageService.GetToken();
+
+            return Success(dto);
         }
     }
 }

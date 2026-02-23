@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using AutoMapper;
 
 namespace Application.Bases
@@ -41,9 +42,7 @@ namespace Application.Bases
             {
                 await _work!.BeginTransactionAsync();
 
-                var success = await createAction(entity);
-                if (!success)
-                    return new Response<TDto>("Failed to create resource");
+                await createAction(entity);
 
                 var result = await _work.SaveChangesAsync(cancellationToken);
                 if (result <= 0)
@@ -77,11 +76,11 @@ namespace Application.Bases
 
                 var success = await updateAction(entity);
                 if (!success)
-                    return new Response<TDto>("Failed to update resource");
+                    throw new BusinessException("Failed to update resource");
 
                 var result = await _work.SaveChangesAsync(cancellationToken);
-                if (result <= 0)
-                    return new Response<TDto>("Failed to persist changes");
+                if (result < 0)
+                    throw new BusinessException("Failed to persist changes");
 
                 await _work.CommitTransactionAsync();
 
@@ -203,7 +202,7 @@ namespace Application.Bases
                     return new Response<TDto>("Failed to update resource");
 
                 var result = await _work.SaveChangesAsync(cancellationToken);
-                if (result <= 0)
+                if (result < 0)
                     return new Response<TDto>("Failed to persist changes");
 
                 await _work.CommitTransactionAsync();

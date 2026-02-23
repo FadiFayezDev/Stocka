@@ -7,6 +7,7 @@ using Application.Features.Commands.ProductCategory.Update;
 using Application.Features.Queries.ProductCategory.GetAll;
 using Application.Features.Queries.ProductCategory.GetById;
 using Application.Queries.ProductCategory.GetByBrandId;
+using Application.UseCases.Commands.ProductCategory.PartialUpdate;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -103,6 +104,28 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductCategoryCommand command, CancellationToken cancellationToken = default)
+        {
+            if (id != command.Id)
+                return BadRequest("ID mismatch");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _mediator.Send(command, cancellationToken);
+            if (!result.Succeeded)
+                return NotFound(result);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Update an existing product category
+        /// </summary>
+        [HttpPatch("{id:guid}")]
+        [ProducesResponseType(typeof(Response<ProductCategoryDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PartialUpdate(Guid id, [FromForm] PartialUpdateProductCategoryCommand command, CancellationToken cancellationToken = default)
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");

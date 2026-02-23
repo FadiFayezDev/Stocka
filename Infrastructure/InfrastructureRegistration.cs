@@ -50,7 +50,7 @@ namespace Infrastructure
             services.AddScoped<IMediaStorage, MediaStorage>();
             services.AddScoped<ITokenGenerator, TokenGenerator>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IImageStorageService, ImageStorageService>();
+            services.AddScoped<IStorageService, StorageService>();
             #endregion
 
             #region Command Repositories

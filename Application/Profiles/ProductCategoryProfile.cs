@@ -13,6 +13,7 @@ namespace Application.Profiles
         {
             // Entity ? DTOs
             CreateMap<ProductCategory, ProductCategoryDto>().ReverseMap();
+            CreateMap<ProductCategoryDto, ProductCategory>().ReverseMap();
             CreateMap<ProductCategory, ProductCategoryIncludedBrandDto>().ReverseMap();
 
             // Command ? Entity
