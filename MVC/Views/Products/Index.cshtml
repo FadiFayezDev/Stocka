@@ -1,0 +1,116 @@
+﻿@using Application.Dtos.Products
+@model IEnumerable<ProductDto>
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Products</h2>
+
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i>
+            Add Product
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body py-5 text-center">
+                <h5>No Products Found</h5>
+                <p class="text-muted mb-4">
+                    Start by adding your first product.
+                </p>
+
+                <a asp-action="Create" class="btn btn-primary">
+                    Create Product
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+
+            @foreach (var product in Model)
+            {
+                <div class="col-lg-4 col-md-6">
+
+                    <div class="card h-100 border-0 shadow-sm">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+
+                                <h5 class="card-title fw-bold mb-0">
+                                    @product.Name
+                                </h5>
+
+                                @if (product.IsActive)
+                                {
+                                    <span class="badge bg-success">
+                                        Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        Inactive
+                                    </span>
+                                }
+
+                            </div>
+
+                            <hr />
+
+                            <div class="mb-2">
+                                <small class="text-muted">Price</small>
+                                <div class="fw-semibold fs-5 text-primary">
+                                    @product.SellingPrice.ToString("N2") ج.م
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <small class="text-muted">Quantity</small>
+                                <div class="fw-semibold">
+                                    @product.TotalQuantity
+                                </div>
+                            </div>
+
+                            <div>
+                                <small class="text-muted">Barcode</small>
+                                <div class="font-monospace">
+                                    @(string.IsNullOrWhiteSpace(product.Barcode)
+                                        ? "-"
+                                        : product.Barcode)
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer border-0 bg-white">
+
+                            <div class="d-flex gap-2">
+
+                                <a href="#"
+                                       class="btn btn-outline-primary flex-fill">
+                                    Edit
+                                </a>
+
+                                <a href="#"
+                                       class="btn btn-outline-secondary flex-fill">
+                                    Details
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>

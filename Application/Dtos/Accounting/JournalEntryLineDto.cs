@@ -1,0 +1,13 @@
+using System;
+
+namespace Application.Dtos.Accounting
+{
+    public class JournalEntryLineDto
+    {
+        public Guid Id { get; set; }
+        public Guid JournalEntryId { get; set; }
+        public Guid AccountId { get; set; }
+        public decimal Debit { get; set; }
+        public decimal Credit { get; set; }
+    }
+}

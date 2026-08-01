@@ -1,0 +1,32 @@
+﻿using Application.Common.Interfaces;
+using MediatR;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Application.UseCases.Commands.User.Update
+{
+    public class UpdateUserRolesCommand : IRequest<bool>
+    {
+        public string userName { get; set; }
+        public IList<string> Roles { get; set; }
+    }
+
+    public class UpdateUserRolesCommandHandler : IRequestHandler<UpdateUserRolesCommand, bool>
+    {
+        private readonly IIdentityService _identityService;
+
+        public UpdateUserRolesCommandHandler(IIdentityService identityService)
+        {
+            _identityService = identityService;
+        }
+
+        public async Task<bool> Handle(UpdateUserRolesCommand request, CancellationToken cancellationToken)
+        {
+            var result = await _identityService.UpdateUsersRole(request.userName, request.Roles);
+            return result;
+        }
+    }
+}

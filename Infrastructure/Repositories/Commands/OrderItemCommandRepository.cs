@@ -1,0 +1,22 @@
+using Domain.Entities.Accounting;
+using Domain.Entities.Orders;
+using Domain.Primitives;
+using Domain.Repositories.Commands;
+using Infrastructure.Contexts;
+using Infrastructure.Repositories.Base;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Infrastructure.Repositories.Commands
+{
+    public class OrderItemCommandRepository : CommandRepository<OrderItem, OrderItemId>, IOrderItemCommandRepository
+    {
+        private readonly AppDbContext _context;
+        public OrderItemCommandRepository(AppDbContext context) : base(context) 
+        {
+            _context = context;
+        }
+    }
+}
