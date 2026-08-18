@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Expenses;
+﻿using Domain.Entities.Core;
+using Domain.Entities.Expenses;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -31,17 +32,17 @@ namespace Infrastructure.Configurations
             builder.Property(e => e.Notes)
                 .HasMaxLength(500);
 
-            builder.HasOne(d => d.Brand).WithMany(p => p.Expenses)
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Expenses_Brands_BrandId");
 
-            builder.HasOne(d => d.Branch).WithMany()
+            builder.HasOne<Branch>().WithMany()
                 .HasForeignKey(d => d.BranchId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Expenses_Branches_BranchId");
 
-            builder.HasOne(d => d.Category).WithMany(p => p.Expenses)
+            builder.HasOne<ExpenseCategory>().WithMany()
                 .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Expenses_ExpenseCategories_CategoryId");

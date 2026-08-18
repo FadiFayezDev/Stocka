@@ -1,6 +1,6 @@
 using Application.Dtos.Orders;
 using Application.QueryRepositories;
-using Application.UseCases.Commands.Sale.Create;
+using Application.UseCases.SaleCases;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,7 +35,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateSaleCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromBody] RecordSaleCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);

@@ -1,0 +1,816 @@
+/* ============================================================================
+   Stocka — Application shell
+   ============================================================================
+   Design tokens, app frame (sidebar + top bar + content), and responsive
+   behavior. Written with logical CSS properties (inline-start / inline-end /
+   margin-inline / inset-block …) so the whole shell mirrors correctly in
+   RTL without duplicating rules. Physical left/right is used only where a
+   CSS property has no logical equivalent (e.g. translateX for off-canvas).
+
+   Sections
+   1.  Design tokens
+   2.  Base & focus
+   3.  App frame
+   4.  Top bar
+   5.  Sidebar — expanded mode
+   6.  Sidebar — collapsed rail + flyout (desktop)
+   7.  Sidebar — off-canvas (mobile)
+   8.  Dropdowns & shared controls
+   9.  Skip link & utilities
+   10. Reduced motion
+   ========================================================================== */
+
+/* 1. Design tokens --------------------------------------------------------- */
+
+:root {
+  /* Palette */
+  --app-bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-muted: #f7f9fb;
+  --surface-hover: #eff3f7;
+  --border: #e4e9f0;
+  --border-strong: #d3dae4;
+  --text-1: #1b2534;
+  --text-2: #5a6a7d;
+  --text-3: #8a99ac;
+
+  /* Brand accent (emerald — stock, inventory) */
+  --accent: #0e9f6e;
+  --accent-strong: #0b7f57;
+  --accent-soft: #e3f4ee;
+  --accent-ink: #0b7f57;
+  --focus-ring: rgba(14, 159, 110, 0.55);
+
+  /* Sidebar — deep ink navy */
+  --sidebar-bg: #101826;
+  --sidebar-bg-2: #182238;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --sidebar-text: #9aa7bd;
+  --sidebar-text-hover: #eaf0fa;
+  --sidebar-accent: #3dd69a;
+  --sidebar-accent-soft: rgba(61, 214, 154, 0.12);
+
+  /* Layout metrics */
+  --sidebar-width: 264px;
+  --sidebar-rail: 76px;
+  --topbar-height: 64px;
+
+  /* Shape & elevation */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-1: 0 1px 2px rgba(16, 24, 38, 0.05);
+  --shadow-2: 0 12px 32px -12px rgba(16, 24, 38, 0.22);
+  --shadow-3: 0 24px 48px -16px rgba(10, 15, 25, 0.35);
+
+  /* Typography */
+  --font-sans: "Inter", "Cairo", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-arabic: "Cairo", "Inter", "Segoe UI", system-ui, sans-serif;
+
+  /* Motion */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur-med: 200ms;
+  --dur-slow: 260ms;
+}
+
+html[lang="ar"] body {
+  font-family: var(--font-arabic);
+}
+
+/* 2. Base & focus ---------------------------------------------------------- */
+
+body {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-1);
+  background: var(--app-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.app-content:focus,
+.app-sidebar:focus,
+.main-content:focus {
+  outline: none;
+}
+
+/* 3. App frame -------------------------------------------------------------- */
+
+.app {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.app-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.app-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  scroll-behavior: smooth;
+}
+
+@media (min-width: 768px) {
+  .app-content {
+    padding: 24px 28px 32px;
+  }
+}
+
+.app-overlay {
+  display: none;
+}
+
+/* 4. Top bar ---------------------------------------------------------------- */
+
+.app-topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--topbar-height);
+  padding-inline: 14px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  z-index: 20;
+}
+
+.topbar-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 38px;
+  height: 38px;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.topbar-btn:hover,
+.topbar-btn:focus-visible {
+  background: var(--surface-hover);
+  color: var(--text-1);
+}
+
+.topbar-btn--text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.topbar-badge {
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline-end: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding-inline: 4px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  border-radius: 999px;
+}
+
+.topbar-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.topbar-title__eyebrow {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-3);
+}
+
+.topbar-title__label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 575.98px) {
+  .topbar-title__eyebrow {
+    display: none;
+  }
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+
+/* 5. Sidebar — expanded mode ------------------------------------------------ */
+
+.app-sidebar {
+  flex: 0 0 auto;
+  width: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  z-index: 1030;
+  transition: width var(--dur-slow) var(--ease);
+}
+
+.sidebar-brand {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: var(--topbar-height);
+  padding-inline: 18px;
+  border-bottom: 1px solid var(--sidebar-border);
+  transition: padding var(--dur-slow) var(--ease);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: #fff;
+  text-decoration: none;
+}
+
+.brand:hover,
+.brand:focus-visible {
+  color: #fff;
+  text-decoration: none;
+}
+
+.brand__mark {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.brand__name {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.sidebar-nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 10px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.nav-tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 12px 6px;
+}
+
+.nav-section:first-child {
+  padding-top: 4px;
+}
+
+.nav-section__label {
+  font-size: 0.6563rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--sidebar-text);
+  opacity: 0.72;
+  white-space: nowrap;
+}
+
+.nav-section::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--sidebar-border);
+}
+
+.nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  text-align: start;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--sidebar-text-hover);
+}
+
+.nav-link__icon {
+  flex: 0 0 auto;
+  width: 20px;
+  font-size: 1.0625rem;
+  text-align: center;
+}
+
+.nav-link__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: start;
+}
+
+.nav-link__chevron {
+  flex: 0 0 auto;
+  font-size: 0.6875rem;
+  color: var(--sidebar-text);
+  opacity: 0.8;
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+/* Active state — accent-tinted pill with an accent bar on the inline-start */
+.nav-link.is-active {
+  background: var(--sidebar-accent-soft);
+  color: #e9f6f1;
+}
+
+.nav-link.is-active::before {
+  content: "";
+  position: absolute;
+  inset-block: 8px;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--sidebar-accent);
+}
+
+.nav-link--sub.is-active::before {
+  display: none;
+}
+
+/* Collapsible groups */
+.nav-tree__group.is-open > .nav-link .nav-link__chevron {
+  transform: rotate(180deg);
+}
+
+.nav-sub {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-med) var(--ease);
+}
+
+.nav-tree__group.is-open > .nav-sub {
+  grid-template-rows: 1fr;
+}
+
+.nav-sub__inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nav-sub__header {
+  display: none;
+}
+
+.nav-link--sub {
+  margin-block-start: 1px;
+  padding: 7px 12px 7px 40px;
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.nav-link--sub.is-active {
+  color: var(--sidebar-accent);
+  font-weight: 600;
+  background: transparent;
+}
+
+.nav-link--sub:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--sidebar-text-hover);
+}
+
+/* Sidebar footer — version mark */
+.sidebar-foot {
+  flex: 0 0 auto;
+  padding: 12px 18px;
+  border-top: 1px solid var(--sidebar-border);
+  font-size: 0.6875rem;
+  color: var(--sidebar-text);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 6. Sidebar — collapsed rail + flyout (desktop) ---------------------------- */
+
+.nav-flyout {
+  position: fixed;
+  z-index: 1060;
+  width: 236px;
+  padding: 6px;
+  visibility: hidden;
+  opacity: 0;
+  background: var(--sidebar-bg-2);
+  border: 1px solid var(--sidebar-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-3);
+  transition: opacity var(--dur-fast) var(--ease), visibility var(--dur-fast) var(--ease);
+}
+
+.nav-flyout.is-open {
+  visibility: visible;
+  opacity: 1;
+}
+
+.nav-flyout__header {
+  padding: 8px 12px 6px;
+  font-size: 0.6563rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--sidebar-text);
+  opacity: 0.75;
+}
+
+.nav-flyout .nav-link--sub {
+  margin-block-start: 1px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--sidebar-text-hover);
+}
+
+.nav-flyout .nav-link--sub:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.nav-flyout .nav-link--sub.is-active {
+  color: var(--sidebar-accent);
+  background: var(--sidebar-accent-soft);
+}
+
+@media (min-width: 992px) {
+  .app-sidebar.is-collapsed {
+    width: var(--sidebar-rail);
+  }
+
+  .app-sidebar.is-collapsed .sidebar-brand {
+    padding-inline: 0;
+    justify-content: center;
+  }
+
+  .app-sidebar.is-collapsed .brand__name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .app-sidebar.is-collapsed .sidebar-nav {
+    padding-inline: 10px;
+  }
+
+  /* Center icons; keep labels in the a11y tree via the clip technique */
+  .app-sidebar.is-collapsed .nav-link {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .app-sidebar.is-collapsed .nav-link__label,
+  .app-sidebar.is-collapsed .nav-link__chevron {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .app-sidebar.is-collapsed .nav-link__icon {
+    width: auto;
+  }
+
+  .app-sidebar.is-collapsed .nav-section {
+    padding-inline: 4px;
+  }
+
+  .app-sidebar.is-collapsed .nav-section__label {
+    display: none;
+  }
+
+  .app-sidebar.is-collapsed .nav-section::after {
+    margin-inline: 4px;
+  }
+
+  .app-sidebar.is-collapsed .nav-link.is-active::before {
+    inset-block: 10px;
+  }
+
+  /* Inline sub-menus never appear on the rail — the flyout replaces them */
+  .app-sidebar.is-collapsed .nav-sub {
+    display: none;
+  }
+}
+
+/* 7. Sidebar — off-canvas (mobile / tablet portrait) ------------------------ */
+
+@media (max-width: 991.98px) {
+  .app-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1025;
+    background: rgba(8, 12, 20, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--dur-med) var(--ease), visibility var(--dur-med) var(--ease);
+  }
+
+  .app.is-open .app-overlay {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .app-sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: min(var(--sidebar-width), 84vw);
+    transform: translateX(-102%);
+    transition: transform var(--dur-slow) var(--ease);
+    box-shadow: var(--shadow-3);
+  }
+
+  .app.is-open .app-sidebar {
+    transform: translateX(0);
+  }
+}
+
+/* translateX has no logical equivalent — mirror explicitly for RTL */
+[dir="rtl"] .app-sidebar {
+  transform: translateX(102%);
+}
+
+[dir="rtl"] .app.is-open .app-sidebar {
+  transform: translateX(0);
+}
+
+/* 8. Dropdowns & shared controls -------------------------------------------- */
+
+.dropdown-menu {
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+}
+
+.dropdown-header {
+  padding: 8px 12px 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-1);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: var(--surface-hover);
+  color: var(--text-1);
+}
+
+.dropdown-item .bi {
+  color: var(--text-2);
+  font-size: 0.9375rem;
+}
+
+.dropdown-divider {
+  margin: 6px 0;
+  border-color: var(--border);
+}
+
+/* User menu */
+.user-menu {
+  position: relative;
+}
+
+.user-menu__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding-inline: 8px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.user-menu__btn:hover,
+.user-menu__btn:focus-visible {
+  background: var(--surface-hover);
+}
+
+.user-menu__avatar {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.user-menu__meta {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.user-menu__name {
+  max-width: 150px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-menu__caret {
+  font-size: 0.7rem;
+  color: var(--text-3);
+}
+
+.user-menu__menu {
+  inset-block-start: calc(100% + 10px);
+  inset-inline-end: 0;
+  inset-inline-start: auto;
+  min-width: 232px;
+}
+
+/* Brand-aligned primary button (used across views) */
+.btn-primary {
+  --bs-btn-bg: var(--accent);
+  --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-bg: var(--accent-strong);
+  --bs-btn-hover-border-color: var(--accent-strong);
+  --bs-btn-active-bg: var(--accent-strong);
+  --bs-btn-active-border-color: var(--accent-strong);
+  --bs-btn-disabled-bg: var(--accent);
+  --bs-btn-disabled-border-color: var(--accent);
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.card {
+  --bs-card-border-radius: var(--radius-md);
+}
+
+/* Directional icons that must mirror in RTL */
+[dir="rtl"] .bi-box-arrow-right,
+[dir="rtl"] .bi-box-arrow-left,
+[dir="rtl"] .bi-arrow-right,
+[dir="rtl"] .bi-arrow-left {
+  transform: scaleX(-1);
+}
+
+/* 9. Skip link -------------------------------------------------------------- */
+
+.skip-link {
+  position: fixed;
+  inset-block-start: 12px;
+  inset-inline-start: 16px;
+  z-index: 2000;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-2);
+  color: var(--text-1);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-220%);
+  transition: transform var(--dur-med) var(--ease);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  color: var(--text-1);
+}
+
+/* 10. Reduced motion --------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

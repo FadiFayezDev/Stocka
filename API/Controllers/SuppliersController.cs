@@ -1,7 +1,5 @@
 using Application.QueryRepositories;
-using Application.Features.Commands.Supplier.Create;
-using Application.Features.Commands.Supplier.Update;
-using Application.Features.Commands.Supplier.Delete;
+using Application.UseCases.SupplierCases;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,14 +34,14 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateSupplierCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromBody] RegisterSupplierCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSupplierCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSupplierProfileCommand command, CancellationToken cancellationToken)
         {
             command.Id = id;
             var result = await _mediator.Send(command, cancellationToken);
@@ -53,7 +51,7 @@ namespace API.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new DeleteSupplierCommand { Id = id }, cancellationToken);
+            var result = await _mediator.Send(new RemoveSupplierCommand { Id = id }, cancellationToken);
             return Ok(result);
         }
     }

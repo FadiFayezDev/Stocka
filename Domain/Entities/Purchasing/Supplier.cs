@@ -17,11 +17,6 @@ namespace Domain.Entities.Purchasing
         public string? Email { get; private set; }
         public string? Address { get; private set; }
 
-        private readonly List<Purchase> _purchases = new();
-
-        public virtual Brand Brand { get; private set; } = null!;
-        public virtual ICollection<Purchase> Purchases => _purchases.AsReadOnly();
-
         private Supplier() { }
 
         [SetsRequiredMembers]
@@ -56,20 +51,6 @@ namespace Domain.Entities.Purchasing
             Phone = phone?.Trim();
             Email = email?.Trim();
             Address = address?.Trim();
-        }
-
-        public void AddPurchase(Purchase purchase)
-        {
-            if (purchase == null)
-                throw new ArgumentNullException(nameof(purchase));
-
-            if (purchase.SupplierId != Id)
-                throw new ArgumentException("Purchase does not belong to this supplier.");
-
-            if (_purchases.Any(p => p.Id == purchase.Id))
-                throw new InvalidOperationException("Purchase already added.");
-
-            _purchases.Add(purchase);
         }
 
         private static void ValidateEmail(string? email)

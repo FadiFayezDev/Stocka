@@ -58,7 +58,6 @@ namespace Infrastructure
             #region Command Repositories
             services.AddScoped<IAccountCommandRepository, AccountCommandRepository>();
             services.AddScoped<IJournalEntryCommandRepository, JournalEntryCommandRepository>();
-            services.AddScoped<IJournalEntryLineCommandRepository, JournalEntryLineCommandRepository>();
             services.AddScoped<IBranchCommandRepository, BranchCommandRepository>();
             services.AddScoped<IBrandCommandRepository, BrandCommandRepository>();
             services.AddScoped<IBatchCommandRepository, BatchCommandRepository>();
@@ -67,13 +66,10 @@ namespace Infrastructure
             services.AddScoped<IWarehouseCommandRepository, WarehouseCommandRepository>();
             services.AddScoped<ISupplierCommandRepository, SupplierCommandRepository>();
             services.AddScoped<IPurchaseCommandRepository, PurchaseCommandRepository>();
-            services.AddScoped<IPurchaseItemCommandRepository, PurchaseItemCommandRepository>();
             services.AddScoped<IOrderCommandRepository, OrderCommandRepository>();
-            services.AddScoped<IOrderItemCommandRepository, OrderItemCommandRepository>();
             services.AddScoped<IExpenseCommandRepository, ExpenseCommandRepository>();
             services.AddScoped<IExpenseCategoryCommandRepository, ExpenseCategoryCommandRepository>();
             services.AddScoped<IStockMovementCommandRepository, StockMovementCommandRepository>();
-            services.AddScoped<IWarehouseBatchCommandRepository, WarehouseBatchCommandRepository>();
             services.AddScoped<ICustomerCommandRepository, CustomerCommandRepository>();
             services.AddScoped<IEmployeeCommandRepository, EmployeeCommandRepository>();
             #endregion

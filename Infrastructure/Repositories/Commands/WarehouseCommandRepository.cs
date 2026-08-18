@@ -18,5 +18,12 @@ namespace Infrastructure.Repositories.Commands
         {
             _context = context;
         }
+
+        public override async Task<Warehouse?> GetByIdAsync(Guid id)
+        {
+            return await _context.Set<Warehouse>()
+                .Include(w => w.WarehouseBatches)
+                .FirstOrDefaultAsync(w => w.Id == new WarehouseId(id));
+        }
     }
 }

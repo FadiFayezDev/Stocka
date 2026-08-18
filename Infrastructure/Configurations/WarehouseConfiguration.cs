@@ -1,3 +1,4 @@
+using Domain.Entities.Core;
 using Domain.Entities.Products;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
@@ -29,15 +30,9 @@ namespace Infrastructure.Configurations
 
 
 
-            builder.HasOne(d => d.Brand).WithMany()
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            // Configure StockMovements collection
-            builder.HasMany(d => d.StockMovements)
-                .WithOne(d => d.Warehouse)
-                .HasForeignKey(d => d.WarehouseId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             // Configure WarehouseBatches collection
             builder.HasMany(d => d.WarehouseBatches)

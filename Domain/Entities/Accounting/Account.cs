@@ -16,10 +16,6 @@ public partial class Account : AggregateRoot<AccountId>, IMultiTenantEntity
 
     public AccountType Type { get; private set; }
 
-    private readonly List<JournalEntryLine> _journalEntryLines = new();
-    public virtual Brand Brand { get; private set; } = null!;
-    public virtual ICollection<JournalEntryLine> JournalEntryLines => _journalEntryLines.AsReadOnly();
-
     private Account() { }
 
         [SetsRequiredMembers]
@@ -46,20 +42,6 @@ public partial class Account : AggregateRoot<AccountId>, IMultiTenantEntity
     public void UpdateType(AccountType newType)
     {
         Type = newType;
-    }
-
-    public void AddJournalEntryLine(JournalEntryLine line)
-    {
-        if (line == null)
-            throw new ArgumentNullException(nameof(line));
-
-        if (line.AccountId != Id)
-            throw new ArgumentException("Journal entry line does not belong to this account.");
-
-        if (_journalEntryLines.Any(l => l.Id == line.Id))
-            throw new InvalidOperationException("Journal entry line already added.");
-
-        _journalEntryLines.Add(line);
     }
 
     Guid IMultiTenantEntity.BrandId

@@ -25,6 +25,11 @@ namespace Infrastructure.Configurations
             builder.Property(c => c.LoyaltyPoints)
                 .HasDefaultValue(0);
 
+            builder.HasOne<Brand>()
+                .WithMany()
+                .HasForeignKey(c => c.BrandId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Optional One-to-One with ApplicationUser
             builder.HasOne<ApplicationUser>()
                 .WithOne()
@@ -34,14 +39,6 @@ namespace Infrastructure.Configurations
             builder.HasIndex(c => c.UserId)
                 .IsUnique()
                 .HasFilter("\"user_id\" IS NOT NULL");
-
-            // Configure Orders collection
-            builder.HasMany(d => d.Orders)
-                .WithOne(d => d.Customer)
-                .HasForeignKey(d => d.CustomerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Navigation(d => d.Orders).AutoInclude();
         }
     }
 }

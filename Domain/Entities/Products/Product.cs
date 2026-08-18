@@ -3,17 +3,13 @@ using Domain.Entities.Core;
 using Domain.Entities.Orders;
 using Domain.Entities.Purchasing;
 using Domain.Primitives;
+using Domain.Primitives.Events;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Domain.Entities.Products
 {
     public partial class Product : AggregateRoot<ProductId>, IMultiTenantEntity
     {
-        private readonly List<Batch> _batches = new();
-        private readonly List<PurchaseItem> _purchaseItems = new();
-        private readonly List<OrderItem> _orderItems = new();
-        private readonly List<StockMovement> _stockMovements = new();
-
         private Product()
         {
             // Required by EF Core
@@ -58,18 +54,6 @@ namespace Domain.Entities.Products
 
         #region Navigation Properties
 
-        public Brand Brand { get; private set; } = null!;
-
-        public ProductCategory Category { get; private set; } = null!;
-
-        public IReadOnlyCollection<Batch> Batches => _batches;
-
-        public IReadOnlyCollection<PurchaseItem> PurchaseItems => _purchaseItems;
-
-        public IReadOnlyCollection<OrderItem> OrderItems => _orderItems;
-
-        public IReadOnlyCollection<StockMovement> StockMovements => _stockMovements;
-
         Guid IMultiTenantEntity.BrandId { get => BrandId.Value; set => BrandId = new BrandId(value); }
 
         #endregion
@@ -99,7 +83,7 @@ namespace Domain.Entities.Products
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Product name cannot be empty.", nameof(name));
-
+            AddDomainEvent(new ProductRenamedEvent(Id, Name, name.Trim()));
             Name = name.Trim();
         }
 
@@ -143,30 +127,6 @@ namespace Domain.Entities.Products
         public void Deactivate()
         {
             IsActive = false;
-        }
-
-        #endregion
-
-        #region Batches
-
-        public void AddBatch(Batch batch)
-        {
-            ArgumentNullException.ThrowIfNull(batch);
-
-            if (batch.ProductId != Id)
-                throw new InvalidOperationException("Batch belongs to another product.");
-
-            if (_batches.Any(x => x.Id == batch.Id))
-                throw new InvalidOperationException("Batch already exists.");
-
-            _batches.Add(batch);
-        }
-
-        public void RemoveBatch(Batch batch)
-        {
-            ArgumentNullException.ThrowIfNull(batch);
-
-            _batches.Remove(batch);
         }
 
         #endregion

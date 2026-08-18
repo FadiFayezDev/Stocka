@@ -1,5 +1,6 @@
 ﻿using Domain.Bases;
 using Domain.Entities.Core;
+using Domain.Entities.Products;
 using Domain.Primitives;
 using System;
 using System.Collections.Generic;
@@ -21,10 +22,7 @@ namespace Domain.Entities.Purchasing
 
         private readonly List<PurchaseItem> _purchaseItems = new();
 
-        public virtual Brand Brand { get; private set; } = null!;
-        public virtual Branch? Branch { get; private set; }
         public virtual ICollection<PurchaseItem> PurchaseItems => _purchaseItems.AsReadOnly();
-        public virtual Supplier Supplier { get; private set; } = null!;
 
         private Purchase() { }
 
@@ -55,6 +53,13 @@ namespace Domain.Entities.Purchasing
             RecalculateTotal();
         }
 
+        public PurchaseItem AddPurchaseItem(ProductId productId, int quantity, decimal unitCost)
+        {
+            var item = new PurchaseItem(Id, productId, quantity, unitCost);
+            AddPurchaseItem(item);
+            return item;
+        }
+
         public void UpdatePurchaseDate(DateTime newDate)
         {
             if (newDate > DateTime.UtcNow)
@@ -70,6 +75,17 @@ namespace Domain.Entities.Purchasing
                 throw new ArgumentException("Purchase item not found.");
 
             _purchaseItems.Remove(item);
+            RecalculateTotal();
+        }
+
+        public void UpdatePurchaseItem(PurchaseItemId itemId, int quantity, decimal unitCost)
+        {
+            var item = _purchaseItems.FirstOrDefault(pi => pi.Id == itemId);
+            if (item == null)
+                throw new ArgumentException("Purchase item not found.");
+
+            item.UpdateQuantity(quantity);
+            item.UpdateUnitCost(unitCost);
             RecalculateTotal();
         }
 

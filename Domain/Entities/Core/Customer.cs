@@ -1,10 +1,7 @@
 ﻿using Domain.Bases;
 using Domain.Entities.Orders;
 using Domain.Primitives;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Domain.Entities.Core
 {
@@ -13,10 +10,6 @@ namespace Domain.Entities.Core
         public Guid? UserId { get; private set; }
         public BrandId BrandId { get; private set; }
         public int LoyaltyPoints { get; private set; }
-
-        private readonly List<Order> _Orders = new();
-        public virtual Brand Brand { get; private set; } = null!;
-        public virtual ICollection<Order> Orders => _Orders.AsReadOnly();
 
         private Customer() { }
 
@@ -58,20 +51,6 @@ namespace Domain.Entities.Core
                 throw new ArgumentException("Loyalty points cannot be negative.", nameof(points));
 
             LoyaltyPoints = points;
-        }
-
-        public void AddOrder(Order Order)
-        {
-            if (Order == null)
-                throw new ArgumentNullException(nameof(Order));
-
-            if (Order.BrandId != BrandId)
-                throw new ArgumentException("Order does not belong to this customer's brand.");
-
-            if (_Orders.Any(s => s.Id == Order.Id))
-                throw new InvalidOperationException("Order already added.");
-
-            _Orders.Add(Order);
         }
 
         Guid IMultiTenantEntity.BrandId

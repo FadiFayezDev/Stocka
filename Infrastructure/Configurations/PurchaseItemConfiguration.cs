@@ -1,3 +1,4 @@
+using Domain.Entities.Products;
 using Domain.Entities.Purchasing;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
@@ -31,18 +32,10 @@ namespace Infrastructure.Configurations
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_PurchaseItems_Purchases_PurchaseId");
 
-            builder.HasOne(d => d.Product).WithMany(p => p.PurchaseItems)
+            builder.HasOne<Product>().WithMany()
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_PurchaseItems_Products_ProductId");
-
-            // Configure Batches collection
-            builder.HasMany(d => d.Batches)
-                .WithOne(d => d.PurchaseItem)
-                .HasForeignKey(d => d.PurchaseItemId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Navigation(d => d.Batches).AutoInclude();
         }
     }
 }

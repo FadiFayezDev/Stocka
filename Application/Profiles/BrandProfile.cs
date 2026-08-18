@@ -1,6 +1,6 @@
 using Application.Dtos.Core;
-using Application.UseCases.Commands.Brand.Create;
 using Application.UseCases.Commands.Brand.Update;
+using Application.UseCases.Brand;
 using AutoMapper;
 using Domain.Entities.Core;
 

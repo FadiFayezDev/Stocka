@@ -1,7 +1,5 @@
 using Application.Dtos.Expenses;
-using Application.Features.Commands.Expense;
-using Application.Features.Commands.Expense.Create;
-using Application.Features.Commands.Expense.Update;
+using Application.UseCases.ExpenseCases;
 using AutoMapper;
 using Domain.Entities.Expenses;
 
@@ -15,7 +13,7 @@ namespace Application.Profiles
             CreateMap<Expense, ExpenseDto>().ReverseMap();
 
             // Command ? Entity
-            CreateMap<CreateExpenseCommand, Expense>();
+            CreateMap<RecordExpenseCommand, Expense>();
             CreateMap<UpdateExpenseCommand, Expense>();
         }
     }

@@ -1,10 +1,6 @@
 ﻿using Domain.Bases;
-using Domain.Entities.Core;
 using Domain.Primitives;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace Domain.Entities.Core
 {

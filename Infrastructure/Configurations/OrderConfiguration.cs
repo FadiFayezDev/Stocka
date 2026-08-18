@@ -1,3 +1,4 @@
+using Domain.Entities.Core;
 using Domain.Entities.Orders;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
@@ -36,22 +37,22 @@ namespace Infrastructure.Configurations
                 .HasColumnType("decimal(18, 2)")
                 .HasDefaultValue(0);
 
-            builder.HasOne(d => d.Brand).WithMany(p => p.Orders)
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Orders_Brands_BrandId");
 
-            builder.HasOne(d => d.Branch).WithMany()
+            builder.HasOne<Branch>().WithMany()
                 .HasForeignKey(d => d.BranchId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Orders_Branches_BranchId");
 
-            builder.HasOne(d => d.Employee).WithMany()
+            builder.HasOne<Employee>().WithMany()
                 .HasForeignKey(d => d.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Orders_Employees_EmployeeId");
 
-            builder.HasOne(d => d.Customer).WithMany(p => p.Orders)
+            builder.HasOne<Customer>().WithMany()
                 .HasForeignKey(d => d.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Orders_Customers_CustomerId");

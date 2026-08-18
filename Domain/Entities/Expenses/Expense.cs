@@ -20,11 +20,6 @@ public partial class Expense : AggregateRoot<ExpenseId>, IMultiTenantEntity, IBr
 
     public string? Notes { get; private set; }
 
-    public virtual Brand Brand { get; private set; } = null!;
-    public virtual Branch? Branch { get; private set; }
-
-    public virtual ExpenseCategory Category { get; private set; } = null!;
-
     private Expense() { }
 
         [SetsRequiredMembers]

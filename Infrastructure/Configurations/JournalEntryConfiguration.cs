@@ -1,4 +1,5 @@
 using Domain.Entities.Accounting;
+using Domain.Entities.Core;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -23,7 +24,7 @@ namespace Infrastructure.Configurations
             builder.Property(e => e.Description)
                 .HasMaxLength(500);
 
-            builder.HasOne(d => d.Brand).WithMany(p => p.JournalEntries)
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_JournalEntries_Brands_BrandId");

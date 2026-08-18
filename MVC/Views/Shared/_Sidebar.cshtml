@@ -1,0 +1,158 @@
+@functions {
+    string CurrentController => ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+
+    string CurrentAction => ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty;
+
+    bool IsCurrent(string controller, string? action = null) =>
+        string.Equals(CurrentController, controller, StringComparison.OrdinalIgnoreCase) &&
+        (string.IsNullOrEmpty(action) || string.Equals(CurrentAction, action, StringComparison.OrdinalIgnoreCase));
+
+    // Returns "is-active aria-current=\"page\"" (or empty) for a nav item.
+    string ActiveAttrs(string controller, string? action = null) =>
+        IsCurrent(controller, action) ? "is-active aria-current=\"page\"" : string.Empty;
+
+    // Returns "is-open" when any of the given controllers is the current one,
+    // so the group containing the active page stays expanded.
+    string GroupState(params string[] controllers) =>
+        controllers.Any(c => string.Equals(CurrentController, c, StringComparison.OrdinalIgnoreCase))
+            ? "is-open"
+            : string.Empty;
+}
+
+<aside class="app-sidebar" id="appSidebar" aria-label="Primary">
+    <div class="sidebar-brand">
+        <a class="brand" href="@Url.Action("Index", "Home")" aria-label="Stocka — Dashboard" title="Stocka">
+            <span class="brand__mark" aria-hidden="true">
+                <svg viewBox="0 0 32 32" width="20" height="20" fill="none">
+                    <rect x="6.5" y="5.5" width="2.75" height="21" rx="1.375" fill="currentColor" opacity="0.45" />
+                    <rect x="22.75" y="5.5" width="2.75" height="21" rx="1.375" fill="currentColor" opacity="0.45" />
+                    <rect x="9.5" y="8.5" width="13" height="2.75" rx="1.375" fill="currentColor" />
+                    <rect x="9.5" y="14.5" width="9" height="2.75" rx="1.375" fill="#3DD69A" />
+                    <rect x="9.5" y="20.5" width="13" height="2.75" rx="1.375" fill="currentColor" />
+                </svg>
+            </span>
+            <span class="brand__name">Stocka</span>
+        </a>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Main navigation">
+        <ul class="nav-tree">
+
+            <li class="nav-section">
+                <span class="nav-section__label">General</span>
+            </li>
+
+            <li class="nav-tree__item">
+                <a class="nav-link @ActiveAttrs("Home", "Index")" href="@Url.Action("Index", "Home")" title="Dashboard">
+                    <i class="bi bi-grid-1x2 nav-link__icon" aria-hidden="true"></i>
+                    <span class="nav-link__label">Dashboard</span>
+                </a>
+            </li>
+
+            <li class="nav-section">
+                <span class="nav-section__label">Operations</span>
+            </li>
+
+            <li class="nav-tree__group @GroupState("Products", "ProductCategory", "Brand", "Warehouse")">
+                <button type="button" class="nav-link nav-link--group" aria-expanded="false" aria-controls="nav-inventory" data-nav-group>
+                    <i class="bi bi-box-seam nav-link__icon" aria-hidden="true"></i>
+                    <span class="nav-link__label">Inventory</span>
+                    <i class="bi bi-chevron-down nav-link__chevron" aria-hidden="true"></i>
+                </button>
+                <ul class="nav-sub" id="nav-inventory">
+                    <li class="nav-sub__inner">
+                        <span class="nav-sub__header">Inventory</span>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Products", "Index")" href="@Url.Action("Index", "Products")">Products</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("ProductCategory")" href="#">Categories</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Brand")" href="#">Brands</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Warehouse")" href="#">Warehouses</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-tree__group @GroupState("Supplier", "PurchaseOrder", "Purchase")">
+                <button type="button" class="nav-link nav-link--group" aria-expanded="false" aria-controls="nav-purchasing" data-nav-group>
+                    <i class="bi bi-cart nav-link__icon" aria-hidden="true"></i>
+                    <span class="nav-link__label">Purchasing</span>
+                    <i class="bi bi-chevron-down nav-link__chevron" aria-hidden="true"></i>
+                </button>
+                <ul class="nav-sub" id="nav-purchasing">
+                    <li class="nav-sub__inner">
+                        <span class="nav-sub__header">Purchasing</span>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Supplier")" href="#">Suppliers</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("PurchaseOrder", "Index")" href="#">Purchase Orders</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-tree__group @GroupState("Customer", "Order", "Invoice")">
+                <button type="button" class="nav-link nav-link--group" aria-expanded="false" aria-controls="nav-sales" data-nav-group>
+                    <i class="bi bi-graph-up nav-link__icon" aria-hidden="true"></i>
+                    <span class="nav-link__label">Sales</span>
+                    <i class="bi bi-chevron-down nav-link__chevron" aria-hidden="true"></i>
+                </button>
+                <ul class="nav-sub" id="nav-sales">
+                    <li class="nav-sub__inner">
+                        <span class="nav-sub__header">Sales</span>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Customer")" href="#">Customers</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Order", "Index")" href="#">Orders</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Invoice")" href="#">Invoices</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-section">
+                <span class="nav-section__label">Insight</span>
+            </li>
+
+            <li class="nav-tree__item">
+                <a class="nav-link @ActiveAttrs("Finance")" href="#" title="Finance">
+                    <i class="bi bi-wallet2 nav-link__icon" aria-hidden="true"></i>
+                    <span class="nav-link__label">Finance</span>
+                </a>
+            </li>
+
+            <li class="nav-tree__item">
+                <a class="nav-link @ActiveAttrs("Reports")" href="#" title="Reports">
+                    <i class="bi bi-bar-chart-line nav-link__icon" aria-hidden="true"></i>
+                    <span class="nav-link__label">Reports</span>
+                </a>
+            </li>
+
+            <li class="nav-section">
+                <span class="nav-section__label">System</span>
+            </li>
+
+            <li class="nav-tree__group @GroupState("User", "Role", "Permission")">
+                <button type="button" class="nav-link nav-link--group" aria-expanded="false" aria-controls="nav-admin" data-nav-group>
+                    <i class="bi bi-shield-check nav-link__icon" aria-hidden="true"></i>
+                    <span class="nav-link__label">Administration</span>
+                    <i class="bi bi-chevron-down nav-link__chevron" aria-hidden="true"></i>
+                </button>
+                <ul class="nav-sub" id="nav-admin">
+                    <li class="nav-sub__inner">
+                        <span class="nav-sub__header">Administration</span>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("User")" href="#">Users</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Role")" href="#">Roles</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Permission")" href="#">Permissions</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-tree__item">
+                <a class="nav-link @ActiveAttrs("Settings")" href="#" title="Settings">
+                    <i class="bi bi-gear nav-link__icon" aria-hidden="true"></i>
+                    <span class="nav-link__label">Settings</span>
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+
+    <div class="sidebar-foot">Stocka ERP</div>
+
+    <div class="nav-flyout" id="navFlyout" role="group" aria-label="Navigation">
+        <div class="nav-flyout__header" id="navFlyoutHeader"></div>
+        <div id="navFlyoutList"></div>
+    </div>
+</aside>

@@ -1,3 +1,4 @@
+using Domain.Entities.Core;
 using Domain.Entities.Purchasing;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
@@ -30,17 +31,17 @@ namespace Infrastructure.Configurations
                 .HasColumnType("decimal(18, 2)")
                 .HasDefaultValue(0);
 
-            builder.HasOne(d => d.Brand).WithMany(p => p.Purchases)
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Purchases_Brands_BrandId");
 
-            builder.HasOne(d => d.Branch).WithMany()
+            builder.HasOne<Branch>().WithMany()
                 .HasForeignKey(d => d.BranchId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Purchases_Branches_BranchId");
 
-            builder.HasOne(d => d.Supplier).WithMany(p => p.Purchases)
+            builder.HasOne<Supplier>().WithMany()
                 .HasForeignKey(d => d.SupplierId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Purchases_Suppliers_SupplierId");

@@ -2,7 +2,7 @@ using API.Attributes;
 using API.Controllers.Base;
 using Application.Dtos.Auth;
 using Application.DTOs;
-using Application.UseCases.Commands.Auth;
+using Application.UseCases.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

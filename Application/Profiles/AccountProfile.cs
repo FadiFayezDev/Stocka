@@ -1,6 +1,5 @@
 using Application.Dtos.Accounting;
-using Application.UseCases.Commands.Account.Create;
-using Application.UseCases.Commands.Account.Update;
+using Application.UseCases.Account;
 using AutoMapper;
 using Domain.Entities.Accounting;
 using Domain.Enums;
@@ -18,7 +17,7 @@ namespace Application.Profiles
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => Enum.Parse<AccountType>(src.Type)));
 
             // Command ? Entity
-            CreateMap<CreateAccountCommand, Account>()
+            CreateMap<OpenAccountCommand, Account>()
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (AccountType)src.Type));
 
             CreateMap<UpdateAccountCommand, Account>()

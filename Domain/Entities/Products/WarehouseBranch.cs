@@ -6,16 +6,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Domain.Entities.Products
 {
-    public class WarehouseBranch : AggregateRoot<WarehouseBranchId>, IMultiTenantEntity
+    public class WarehouseBranch : Entity<WarehouseBranchId>, IMultiTenantEntity
     {
         public BrandId BrandId { get; private set; }
-        public virtual Brand Brand { get; private set; } = null!;
 
         public BranchId BranchId { get; private set; }
         public Branch Branch { get; private set; } = null!;
 
         public WarehouseId WarehouseId { get; private set; }
-        public Warehouse Warehouse { get; private set; } = null!;
 
         private WarehouseBranch() { }
 

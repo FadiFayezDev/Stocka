@@ -1,6 +1,5 @@
 using Application.Dtos.Products;
-using Application.Features.Commands.Batch.Create;
-using Application.Features.Commands.Batch.Update;
+using Application.UseCases.BatchCases;
 using AutoMapper;
 using Domain.Entities.Products;
 
@@ -14,7 +13,7 @@ namespace Application.Profiles
             CreateMap<Batch, BatchDto>().ReverseMap();
 
             // Command ? Entity
-            CreateMap<CreateBatchCommand, Batch>();
+            CreateMap<RegisterBatchCommand, Batch>();
             CreateMap<UpdateBatchCommand, Batch>();
         }
     }

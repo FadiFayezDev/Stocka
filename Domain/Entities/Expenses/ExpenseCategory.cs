@@ -14,10 +14,6 @@ public partial class ExpenseCategory : AggregateRoot<ExpenseCategoryId>, IMultiT
 
     public string Name { get; private set; } = null!;
 
-    private readonly List<Expense> _expenses = new();
-    public virtual Brand Brand { get; private set; } = null!;
-    public virtual ICollection<Expense> Expenses => _expenses.AsReadOnly();
-
     private ExpenseCategory() { }
 
         [SetsRequiredMembers]
@@ -38,20 +34,6 @@ public partial class ExpenseCategory : AggregateRoot<ExpenseCategoryId>, IMultiT
             throw new ArgumentException("Expense category name cannot be empty.", nameof(newName));
 
         Name = newName.Trim();
-    }
-
-    public void AddExpense(Expense expense)
-    {
-        if (expense == null)
-            throw new ArgumentNullException(nameof(expense));
-
-        if (expense.CategoryId != Id)
-            throw new ArgumentException("Expense does not belong to this category.");
-
-        if (_expenses.Any(e => e.Id == expense.Id))
-            throw new InvalidOperationException("Expense already added to this category.");
-
-        _expenses.Add(expense);
     }
 
     Guid IMultiTenantEntity.BrandId

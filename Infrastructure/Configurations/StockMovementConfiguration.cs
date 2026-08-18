@@ -1,3 +1,4 @@
+using Domain.Entities.Core;
 using Domain.Entities.Products;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
@@ -39,22 +40,22 @@ namespace Infrastructure.Configurations
             builder.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("NOW()");
 
-            builder.HasOne(d => d.Batch).WithMany(p => p.StockMovements)
+            builder.HasOne<Batch>().WithMany()
                 .HasForeignKey(d => d.BatchId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_StockMovements_Batches_BatchId");
 
-            builder.HasOne(d => d.Product).WithMany(p => p.StockMovements)
+            builder.HasOne<Product>().WithMany()
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_StockMovements_Products_ProductId");
 
-            builder.HasOne(d => d.Warehouse).WithMany(p => p.StockMovements)
+            builder.HasOne<Warehouse>().WithMany()
                 .HasForeignKey(d => d.WarehouseId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_StockMovements_Warehouses_WarehouseId");
 
-            builder.HasOne(d => d.Brand).WithMany()
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Restrict);
         }

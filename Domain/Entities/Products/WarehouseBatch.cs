@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Domain.Entities.Products;
 
-public partial class WarehouseBatch : AggregateRoot<WarehouseBatchId>, IMultiTenantEntity
+public partial class WarehouseBatch : Entity<WarehouseBatchId>, IMultiTenantEntity
 {
     public WarehouseId WarehouseId { get; private set; }
     public BatchId BatchId { get; private set; }
@@ -16,9 +16,6 @@ public partial class WarehouseBatch : AggregateRoot<WarehouseBatchId>, IMultiTen
     public BrandId BrandId { get; private set; }
 
     public virtual Warehouse Warehouse { get; private set; } = null!;
-    public virtual Batch Batch { get; private set; } = null!;
-
-    public virtual Brand Brand { get; private set; } = null!;
 
     private WarehouseBatch() { }
 

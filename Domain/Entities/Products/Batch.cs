@@ -21,18 +21,6 @@ namespace Domain.Entities.Products
         public decimal UnitCost { get; private set; }
         public DateTime CreatedAt { get; private set; }
 
-        private readonly List<OrderItem> _OrderItems = new();
-        private readonly List<StockMovement> _stockMovements = new();
-        private readonly List<WarehouseBatch> _warehouseBatches = new();
-
-        public virtual Product Product { get; private set; } = null!;
-        public virtual PurchaseItem PurchaseItem { get; private set; } = null!;
-        public virtual Brand Brand { get; private set; } = null!;
-
-        public virtual ICollection<OrderItem> OrderItems => _OrderItems.AsReadOnly();
-        public virtual ICollection<StockMovement> StockMovements => _stockMovements.AsReadOnly();
-        public virtual IReadOnlyCollection<WarehouseBatch> WarehouseBatches => _warehouseBatches.AsReadOnly();
-
         private Batch() { }
 
         [SetsRequiredMembers]
@@ -80,11 +68,6 @@ namespace Domain.Entities.Products
                 throw new ArgumentException("Unit cost must be greater than zero.", nameof(newUnitCost));
 
             UnitCost = newUnitCost;
-        }
-
-        public void DistributeToWarehouse(WarehouseId warehouseId, int quantity)
-        {
-            _warehouseBatches.Add(new WarehouseBatch(warehouseId, Id, BrandId, quantity));
         }
 
         public bool IsExhausted => RemainingQuantity == 0;

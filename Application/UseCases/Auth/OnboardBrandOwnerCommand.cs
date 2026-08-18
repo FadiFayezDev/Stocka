@@ -93,10 +93,13 @@ namespace Application.UseCases.Auth
                 var warehouse = new Warehouse(brand.Id, "Main Warehouse", WarehouseType.Shop, "Main Warehouse");
 
                 branch.AddWarehouse(warehouse); 
-                brand.AddBranch(branch);
                 brand.AddMember(createdUser.UserId, BrandRole.Owner);
            
                 await _brandRepository.CreateAsync(brand);
+
+                await _branchRepository.CreateAsync(branch);
+
+                await _warehouseRepository.CreateAsync(warehouse);
 
          
                 var result = await _unitOfWork.SaveChangesAsync(cancellationToken);

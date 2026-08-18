@@ -1,0 +1,27 @@
+/* ---------------------------------------------------------------------------
+ * Stocka — Self-hosted typefaces
+ *
+ * Inter (variable)     : primary UI face for Latin scripts (English)
+ * Cairo (variable)     : primary UI face for Arabic scripts (RTL)
+ *
+ * Each file is a single variable woff2 covering the full weight range
+ * (100–900). Files are referenced here and the browser only downloads the
+ * one(s) that contain the glyphs actually used on the page, so the latin
+ * and arabic subsets never both load on a single-language page.
+ * ------------------------------------------------------------------------ */
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('../fonts/inter-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+    font-family: 'Cairo';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('../fonts/cairo-arabic-wght-normal.woff2') format('woff2-variations');
+}

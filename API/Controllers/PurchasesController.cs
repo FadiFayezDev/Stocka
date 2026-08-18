@@ -1,7 +1,6 @@
 using Application.Dtos.Purchasing;
 using Application.QueryRepositories;
-using Application.Features.Commands.Purchase.Create;
-using Application.Features.Commands.Purchase.Update;
+using Application.UseCases.Purchase;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,14 +35,14 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreatePurchaseCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromBody] ReceivePurchaseCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePurchaseCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateReceivedPurchaseCommand command, CancellationToken cancellationToken)
         {
             command.Id = id;
             var result = await _mediator.Send(command, cancellationToken);

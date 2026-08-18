@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Domain.Entities.Accounting;
 
-public partial class JournalEntryLine : AggregateRoot<JournalEntryLineId>, IMultiTenantEntity
+public partial class JournalEntryLine : Entity<JournalEntryLineId>
 {
     public JournalEntryId JournalEntryId { get; private set; }
 
@@ -19,11 +19,7 @@ public partial class JournalEntryLine : AggregateRoot<JournalEntryLineId>, IMult
 
     public decimal Credit { get; private set; }
 
-    public virtual Account Account { get; private set; } = null!;
-
     public virtual JournalEntry JournalEntry { get; private set; } = null!; 
-    
-    public virtual Brand Brand { get; private set; } = null!;
 
     private JournalEntryLine() { }
 
@@ -73,10 +69,4 @@ public partial class JournalEntryLine : AggregateRoot<JournalEntryLineId>, IMult
     public decimal GetAmount => Math.Max(Debit, Credit);
     public bool IsDebit => Debit > 0;
     public bool IsCredit => Credit > 0;
-
-    Guid IMultiTenantEntity.BrandId
-    {
-        get => BrandId.Value;
-        set => BrandId = new BrandId(value);
-    }
 }

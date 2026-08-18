@@ -16,7 +16,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateWarehouseAsync([FromBody] CreateWarehouseCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateWarehouseAsync([FromBody] RegisterWarehouseCommand command, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -37,7 +37,7 @@ namespace API.Controllers
         }
 
         [HttpPatch]
-        public async Task<IActionResult> PartialUpdateWarehouseAsync([FromBody] PartialUpdateWarehouseCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> PartialUpdateWarehouseAsync([FromBody] UpdateWarehouseInformationCommand command, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

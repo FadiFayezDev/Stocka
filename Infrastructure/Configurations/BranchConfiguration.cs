@@ -22,7 +22,7 @@ namespace Infrastructure.Configurations
                 .IsRequired()
                 .HasMaxLength(200);
 
-            builder.HasOne(d => d.Brand).WithMany(p => p.Branches)
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Branches_Brands_BrandId");

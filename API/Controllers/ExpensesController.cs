@@ -1,7 +1,5 @@
 using Application.QueryRepositories;
-using Application.Features.Commands.Expense.Create;
-using Application.Features.Commands.Expense.Update;
-using Application.Features.Commands.Expense.Delete;
+using Application.UseCases.ExpenseCases;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,7 +34,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateExpenseCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromBody] RecordExpenseCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
@@ -53,7 +51,7 @@ namespace API.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new DeleteExpenseCommand { Id = id }, cancellationToken);
+            var result = await _mediator.Send(new VoidExpenseCommand { Id = id }, cancellationToken);
             return Ok(result);
         }
     }

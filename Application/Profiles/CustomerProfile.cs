@@ -1,6 +1,5 @@
 using Application.Dtos.Core;
-using Application.UseCases.Commands.Customer.Create;
-using Application.UseCases.Commands.Customer.Update;
+using Application.UseCases.CustomerCases;
 using AutoMapper;
 using Domain.Entities.Core;
 
@@ -14,8 +13,8 @@ namespace Application.Profiles
             CreateMap<Customer, CustomerDto>().ReverseMap();
 
             // Command ? Entity
-            CreateMap<CreateCustomerCommand, Customer>();
-            CreateMap<UpdateCustomerCommand, Customer>();
+            CreateMap<RegisterCustomerCommand, Customer>();
+            CreateMap<UpdateCustomerProfileCommand, Customer>();
         }
     }
 }

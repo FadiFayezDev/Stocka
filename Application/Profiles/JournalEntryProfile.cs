@@ -1,7 +1,5 @@
 using Application.Dtos.Accounting;
-using Application.Features.Commands.JournalEntry;
-using Application.Features.Commands.JournalEntry.Create;
-using Application.Features.Commands.JournalEntry.Update;
+using Application.UseCases.JournalEntryCases;
 using AutoMapper;
 using Domain.Entities.Accounting;
 
@@ -15,7 +13,7 @@ namespace Application.Profiles
             CreateMap<JournalEntry, JournalEntryDto>().ReverseMap();
 
             // Command ? Entity
-            CreateMap<CreateJournalEntryCommand, JournalEntry>();
+            CreateMap<RecordJournalEntryCommand, JournalEntry>();
             CreateMap<UpdateJournalEntryCommand, JournalEntry>();
         }
     }

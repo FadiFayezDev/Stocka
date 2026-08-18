@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Expenses;
+﻿using Domain.Entities.Core;
+using Domain.Entities.Expenses;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,18 +23,10 @@ namespace Infrastructure.Configurations
                 .IsRequired()
                 .HasMaxLength(200);
 
-            builder.HasOne(d => d.Brand).WithMany(p => p.ExpenseCategories)
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_ExpenseCategories_Brands_BrandId");
-
-            // Configure Expenses collection
-            builder.HasMany(d => d.Expenses)
-                .WithOne(d => d.Category)
-                .HasForeignKey(d => d.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Navigation(d => d.Expenses).AutoInclude();
         }
     }
 }

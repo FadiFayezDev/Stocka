@@ -21,15 +21,9 @@ namespace Domain.Entities.Products
 
         public WarehouseType Type { get; private set; }
 
-        private readonly List<StockMovement> _stockMovements = new();
-        private readonly List<WarehouseBranch> _warehouseBranches = new();
         private readonly List<WarehouseBatch> _warehouseBatches = new();
 
-        public virtual Brand Brand { get; private set; } = null!;
-
-        public virtual ICollection<StockMovement> StockMovements => _stockMovements.AsReadOnly();
         public virtual ICollection<WarehouseBatch> WarehouseBatches => _warehouseBatches.AsReadOnly();
-        public virtual ICollection<WarehouseBranch> WarehouseBranches => _warehouseBranches.AsReadOnly();
 
         private Warehouse() { }
 
@@ -90,18 +84,43 @@ namespace Domain.Entities.Products
             IsActive = false;
         }
 
-        public void AddStockMovement(StockMovement movement)
+        public void AddBatch(WarehouseBatch batch)
         {
-            if (movement == null)
-                throw new ArgumentNullException(nameof(movement));
+            if (batch == null)
+                throw new ArgumentNullException(nameof(batch));
 
-            if (movement.WarehouseId != Id)
-                throw new ArgumentException("Stock movement does not belong to this warehouse.");
+            if (batch.WarehouseId != Id)
+                throw new ArgumentException("Warehouse batch does not belong to this warehouse.");
 
-            if (_stockMovements.Any(m => m.Id == movement.Id))
-                throw new InvalidOperationException("Stock movement already added.");
+            if (_warehouseBatches.Any(wb => wb.Id == batch.Id))
+                throw new InvalidOperationException("Warehouse batch already added.");
 
-            _stockMovements.Add(movement);
+            _warehouseBatches.Add(batch);
+        }
+
+        public WarehouseBatch AddBatch(BatchId batchId, BrandId brandId, int quantity)
+        {
+            var batch = new WarehouseBatch(Id, batchId, brandId, quantity);
+            AddBatch(batch);
+            return batch;
+        }
+
+        public void UpdateBatchQuantity(WarehouseBatchId batchId, int newQuantity)
+        {
+            var batch = _warehouseBatches.FirstOrDefault(wb => wb.Id == batchId);
+            if (batch == null)
+                throw new ArgumentException("Warehouse batch not found.");
+
+            batch.UpdateQuantity(newQuantity);
+        }
+
+        public void RemoveBatch(WarehouseBatchId batchId)
+        {
+            var batch = _warehouseBatches.FirstOrDefault(wb => wb.Id == batchId);
+            if (batch == null)
+                throw new ArgumentException("Warehouse batch not found.");
+
+            _warehouseBatches.Remove(batch);
         }
 
         Guid IMultiTenantEntity.BrandId

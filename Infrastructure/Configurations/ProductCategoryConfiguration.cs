@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Products;
+﻿using Domain.Entities.Core;
+using Domain.Entities.Products;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,18 +23,10 @@ namespace Infrastructure.Configurations
                 .IsRequired()
                 .HasMaxLength(200);
 
-            builder.HasOne(d => d.Brand).WithMany(p => p.ProductCategories)
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_ProductCategories_Brands_BrandId");
-
-            // Configure Products collection
-            builder.HasMany(d => d.Products)
-                .WithOne(d => d.Category)
-                .HasForeignKey(d => d.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Navigation(d => d.Products).AutoInclude();
         }
     }
 }

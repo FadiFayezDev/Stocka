@@ -1,7 +1,5 @@
 using Application.Dtos.Purchasing;
-using Application.Features.Commands.Supplier;
-using Application.Features.Commands.Supplier.Create;
-using Application.Features.Commands.Supplier.Update;
+using Application.UseCases.SupplierCases;
 using AutoMapper;
 using Domain.Entities.Purchasing;
 
@@ -16,9 +14,9 @@ namespace Application.Profiles
                 .ReverseMap();
 
             // Command ? Entity
-            CreateMap<CreateSupplierCommand, Supplier>();
+            CreateMap<RegisterSupplierCommand, Supplier>();
 
-            CreateMap<UpdateSupplierCommand, Supplier>();
+            CreateMap<UpdateSupplierProfileCommand, Supplier>();
         }
     }
 }

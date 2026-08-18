@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Domain.Entities.Orders
 {
-    public partial class OrderItem : AggregateRoot<OrderItemId>
+    public partial class OrderItem : Entity<OrderItemId>
     {
         public OrderId OrderId { get; private set; }
 
@@ -23,10 +23,6 @@ namespace Domain.Entities.Orders
         public decimal UnitPrice { get; private set; }
 
         public decimal CostPrice { get; private set; }
-
-        public virtual Batch Batch { get; private set; } = null!;
-
-        public virtual Product Product { get; private set; } = null!;
 
         public virtual Order Order { get; private set; } = null!;
 

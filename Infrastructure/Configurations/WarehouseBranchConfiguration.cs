@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Products;
+﻿using Domain.Entities.Core;
+using Domain.Entities.Products;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -41,8 +42,8 @@ namespace Infrastructure.Configurations
                 .IsUnique();
 
             builder
-                .HasOne(wb => wb.Warehouse)
-                .WithMany(w => w.WarehouseBranches)
+                .HasOne<Warehouse>()
+                .WithMany()
                 .HasForeignKey(wb => wb.WarehouseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -53,7 +54,7 @@ namespace Infrastructure.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
              builder
-                .HasOne(wb => wb.Brand)
+                .HasOne<Brand>()
                 .WithMany()
                 .HasForeignKey(wb => wb.BrandId)
                 .OnDelete(DeleteBehavior.Cascade);

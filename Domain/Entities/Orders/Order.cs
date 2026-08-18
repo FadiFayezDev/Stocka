@@ -1,5 +1,6 @@
 ﻿using Domain.Bases;
 using Domain.Entities.Core;
+using Domain.Entities.Products;
 using Domain.Enums;
 using Domain.Primitives;
 using System;
@@ -26,13 +27,6 @@ namespace Domain.Entities.Orders
         public decimal TotalAmount { get; private set; }
 
         private readonly List<OrderItem> _orderItems = new();
-
-        public virtual Brand Brand { get; private set; } = null!;
-        public virtual Branch? Branch { get; private set; }
-
-        public virtual Employee? Employee { get; private set; }
-
-        public virtual Customer? Customer { get; private set; }
 
         public virtual ICollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
 
@@ -70,6 +64,13 @@ namespace Domain.Entities.Orders
             RecalculateTotal();
         }
 
+        public OrderItem AddOrderItem(ProductId productId, BatchId batchId, int quantity, decimal unitPrice, decimal costPrice)
+        {
+            var item = new OrderItem(Id, productId, batchId, quantity, unitPrice, costPrice);
+            AddOrderItem(item);
+            return item;
+        }
+
         public void RemoveOrderItem(OrderItemId itemId)
         {
             if (Status == OrderStatus.Cancelled)
@@ -80,6 +81,20 @@ namespace Domain.Entities.Orders
                 throw new ArgumentException("Order item not found.");
 
             _orderItems.Remove(item);
+            RecalculateTotal();
+        }
+
+        public void UpdateOrderItem(OrderItemId itemId, int quantity, decimal unitPrice, decimal costPrice)
+        {
+            if (Status == OrderStatus.Cancelled)
+                throw new InvalidOperationException("Cannot update items of a cancelled order.");
+
+            var item = _orderItems.FirstOrDefault(si => si.Id == itemId);
+            if (item == null)
+                throw new ArgumentException("Order item not found.");
+
+            item.UpdateQuantity(quantity);
+            item.UpdatePricing(unitPrice, costPrice);
             RecalculateTotal();
         }
 

@@ -1,6 +1,5 @@
 using Application.Dtos.Core;
-using Application.UseCases.Commands.Employee.Create;
-using Application.UseCases.Commands.Employee.Update;
+using Application.UseCases.EmployeeCases;
 using AutoMapper;
 using Domain.Entities.Core;
 
@@ -15,10 +14,10 @@ namespace Application.Profiles
                 .ReverseMap()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.ApplicationUserId == Guid.Empty ? (Guid?)null : src.ApplicationUserId));
 
-            CreateMap<CreateEmployeeCommand, Employee>()
+            CreateMap<HireEmployeeCommand, Employee>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => (Guid?)src.ApplicationUserId));
 
-            CreateMap<UpdateEmployeeCommand, Employee>()
+            CreateMap<UpdateEmployeeProfileCommand, Employee>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => (Guid?)src.ApplicationUserId));
         }
     }

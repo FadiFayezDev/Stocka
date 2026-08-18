@@ -1,7 +1,5 @@
 using Application.Dtos.Products;
-using Application.Features.Commands.ProductCategory;
-using Application.Features.Commands.ProductCategory.Create;
-using Application.Features.Commands.ProductCategory.Update;
+using Application.UseCases.Category;
 using AutoMapper;
 using Domain.Entities.Products;
 
@@ -17,7 +15,7 @@ namespace Application.Profiles
             CreateMap<ProductCategory, ProductCategoryIncludedBrandDto>().ReverseMap();
 
             // Command ? Entity
-            CreateMap<CreateProductCategoryCommand, ProductCategory>();
+            CreateMap<RegisterProductCategoryCommand, ProductCategory>();
             CreateMap<UpdateProductCategoryCommand, ProductCategory>();
         }
     }

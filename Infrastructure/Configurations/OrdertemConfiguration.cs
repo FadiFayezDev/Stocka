@@ -1,4 +1,5 @@
 using Domain.Entities.Orders;
+using Domain.Entities.Products;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -33,12 +34,12 @@ namespace Infrastructure.Configurations
             builder.Property(e => e.UnitPrice)
                 .HasColumnType("decimal(18, 2)");
 
-            builder.HasOne(d => d.Batch).WithMany(p => p.OrderItems)
+            builder.HasOne<Batch>().WithMany()
                 .HasForeignKey(d => d.BatchId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_OrderItems_Batches_BatchId");
 
-            builder.HasOne(d => d.Product).WithMany(p => p.OrderItems)
+            builder.HasOne<Product>().WithMany()
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_OrderItems_Products_ProductId");

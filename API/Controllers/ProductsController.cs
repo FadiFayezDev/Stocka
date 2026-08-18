@@ -36,19 +36,15 @@ namespace API.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var command = new CreateProductCommand
+            var command = new RegisterProductCommand
             {
                 CategoryId = request.CategoryId,
                 Name = request.Name,
                 SellingPrice = request.SellingPrice,
                 Barcode = request.Barcode,
+                Image = request.Image?.OpenReadStream(),
+                ImageExtension = request.Image != null ? Path.GetExtension(request.Image.FileName) : null
             };
-
-            if (request.Image != null)
-            {
-                command.Image = request.Image.OpenReadStream();
-                command.ImageExtension = Path.GetExtension(request.Image.FileName);
-            }
 
             return Ok(await _mediator.Send(command, cancellationToken));
         }
@@ -59,7 +55,7 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var command = new PartialUpdateProductCommand
+            var command = new UpdateProductDetailsCommand
             {
                 Id = request.Id,
                 CategoryId = request.CategoryId,
@@ -85,7 +81,7 @@ namespace API.Controllers
         }
 
         [HttpPost("categories")]
-        public async Task<IActionResult> CreateCategoryAsync([FromBody] CreateCategoryCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateCategoryAsync([FromBody] RegisterProductCategoryCommand command, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

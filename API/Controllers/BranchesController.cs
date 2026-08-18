@@ -1,6 +1,5 @@
 ﻿using API.Controllers.Base;
 using Application.UseCases.BranchCases;
-using Application.UseCases.ProductCases;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +32,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateProductCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromBody] RegisterBranchCommand command, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -41,7 +40,7 @@ namespace API.Controllers
         }
 
         [HttpPatch]
-        public async Task<IActionResult> PartialUpdate([FromBody] PartialUpdateProductCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> PartialUpdate([FromBody] UpdateBranchInformationCommand command, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

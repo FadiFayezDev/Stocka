@@ -72,9 +72,10 @@ namespace Application.UseCases.Brand
                 var brand = new Domain.Entities.Core.Brand(request.Name, request.Slug); 
                 var branch = new Branch(brand.Id, "Main Branch");
 
-                brand.AddBranch(branch);
                 brand.AddMember(user.UserId, BrandRole.Owner);
                 await _brandRepository.CreateAsync(brand);
+
+                await _branchRepository.CreateAsync(branch);
 
                 var warehouse = new Warehouse(brand.Id, "Main Warehouse", WarehouseType.Shop, "unnon");
 

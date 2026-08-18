@@ -1,4 +1,6 @@
+using Domain.Entities.Core;
 using Domain.Entities.Products;
+using Domain.Entities.Purchasing;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -31,36 +33,18 @@ namespace Infrastructure.Configurations
             builder.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("NOW()");  // ? ????? ?? GETUTCDATE() ??? NOW()
 
-            builder.HasOne(d => d.Product).WithMany(p => p.Batches)
+            builder.HasOne<Product>().WithMany()
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Batches_Products_ProductId");
 
-            builder.HasOne(d => d.PurchaseItem).WithMany(p => p.Batches)
+            builder.HasOne<PurchaseItem>().WithMany()
                 .HasForeignKey(d => d.PurchaseItemId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Batches_PurchaseItems_PurchaseItemId");
 
-            builder.HasOne(d => d.Brand).WithMany()
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Configure OrderItems collection
-            builder.HasMany(d => d.OrderItems)
-                .WithOne(d => d.Batch)
-                .HasForeignKey(d => d.BatchId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Configure StockMovements collection
-            builder.HasMany(d => d.StockMovements)
-                .WithOne(d => d.Batch)
-                .HasForeignKey(d => d.BatchId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Configure WarehouseBatches collection
-            builder.HasMany(d => d.WarehouseBatches)
-                .WithOne(d => d.Batch)
-                .HasForeignKey(d => d.BatchId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

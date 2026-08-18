@@ -23,11 +23,6 @@ namespace Domain.Entities.Products
 
         public DateTime CreatedAt { get; private set; }
 
-        public virtual Batch Batch { get; private set; } = null!;
-        public virtual Product Product { get; private set; } = null!;
-        public virtual Warehouse Warehouse { get; private set; } = null!;
-        public virtual Brand Brand { get; private set; } = null!;
-
         private StockMovement() { } // For EF
 
         [SetsRequiredMembers]

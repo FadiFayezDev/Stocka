@@ -1,4 +1,5 @@
 using Domain.Entities.Accounting;
+using Domain.Entities.Core;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -29,7 +30,7 @@ namespace Infrastructure.Configurations
             builder.Property(e => e.Debit)
                 .HasColumnType("decimal(18, 2)");
 
-            builder.HasOne(d => d.Account).WithMany(p => p.JournalEntryLines)
+            builder.HasOne<Account>().WithMany()
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_JournalEntryLines_Accounts_AccountId");
@@ -39,7 +40,7 @@ namespace Infrastructure.Configurations
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_JournalEntryLines_JournalEntries_JournalEntryId");
 
-            builder.HasOne(d => d.Brand).WithMany()
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Cascade);
 

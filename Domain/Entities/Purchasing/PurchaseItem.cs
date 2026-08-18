@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Domain.Entities.Purchasing
 {
-    public partial class PurchaseItem : AggregateRoot<PurchaseItemId>
+    public partial class PurchaseItem : Entity<PurchaseItemId>
     {
         public PurchaseId PurchaseId { get; private set; }
 
@@ -19,10 +19,6 @@ namespace Domain.Entities.Purchasing
 
         public decimal UnitCost { get; private set; }
 
-        private readonly List<Batch> _batches = new();
-
-        public virtual ICollection<Batch> Batches => _batches.AsReadOnly();
-        public virtual Product Product { get; private set; } = null!;
         public virtual Purchase Purchase { get; private set; } = null!;
 
         [NotMapped]
@@ -61,22 +57,6 @@ namespace Domain.Entities.Purchasing
                 throw new ArgumentException("Unit cost must be greater than zero.", nameof(newUnitCost));
 
             UnitCost = newUnitCost;
-        }
-
-        public void AddBatch(Batch batch)
-        {
-            if (batch == null)
-                throw new ArgumentNullException(nameof(batch));
-
-            if (batch.PurchaseItemId != Id)
-                throw new ArgumentException("Batch does not belong to this purchase item.");
-
-            var totalBatchesQuantity = _batches.Sum(b => b.InitialQuantity);
-
-            if (totalBatchesQuantity + batch.InitialQuantity > Quantity)
-                throw new InvalidOperationException("Batch quantity exceeds purchase item quantity.");
-
-            _batches.Add(batch);
         }
     }
 }

@@ -18,8 +18,6 @@ public partial class JournalEntry : AggregateRoot<JournalEntryId>, IMultiTenantE
 
     private readonly List<JournalEntryLine> _journalEntryLines = new();
 
-    public virtual Brand Brand { get; private set; } = null!;
-
     public virtual ICollection<JournalEntryLine> JournalEntryLines => _journalEntryLines.AsReadOnly();
 
     private JournalEntry() { }
@@ -62,6 +60,13 @@ public partial class JournalEntry : AggregateRoot<JournalEntryId>, IMultiTenantE
         _journalEntryLines.Add(line);
     }
 
+    public JournalEntryLine AddJournalEntryLine(AccountId accountId, BrandId brandId, decimal debit, decimal credit)
+    {
+        var line = new JournalEntryLine(Id, accountId, brandId, debit, credit);
+        AddJournalEntryLine(line);
+        return line;
+    }
+
     public void RemoveJournalEntryLine(JournalEntryLineId lineId)
     {
         var line = _journalEntryLines.FirstOrDefault(l => l.Id == lineId);
@@ -71,12 +76,32 @@ public partial class JournalEntry : AggregateRoot<JournalEntryId>, IMultiTenantE
         _journalEntryLines.Remove(line);
     }
 
+    public void UpdateJournalEntryLine(JournalEntryLineId lineId, decimal debit, decimal credit)
+    {
+        var line = _journalEntryLines.FirstOrDefault(l => l.Id == lineId);
+        if (line == null)
+            throw new ArgumentException("Journal entry line not found.");
+
+        line.UpdateDebit(debit);
+        line.UpdateCredit(credit);
+        ValidateBalancedState();
+    }
+
     private void ValidateBalance(JournalEntryLine newLine)
     {
         decimal totalDebit = _journalEntryLines.Sum(l => l.Debit) + newLine.Debit;
         decimal totalCredit = _journalEntryLines.Sum(l => l.Credit) + newLine.Credit;
 
         if (totalDebit != totalCredit && _journalEntryLines.Count > 0)
+            throw new InvalidOperationException("Journal entry must balance (Total Debit = Total Credit).");
+    }
+
+    private void ValidateBalancedState()
+    {
+        decimal totalDebit = _journalEntryLines.Sum(l => l.Debit);
+        decimal totalCredit = _journalEntryLines.Sum(l => l.Credit);
+
+        if (totalDebit != totalCredit)
             throw new InvalidOperationException("Journal entry must balance (Total Debit = Total Credit).");
     }
 

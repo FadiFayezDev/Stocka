@@ -1,50 +1,81 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@{
+    // Direction is driven by view data so the same layout serves both
+    // languages without duplication. A view can opt into RTL with:
+    //   ViewData["Lang"] = "ar";
+    //   ViewData["Dir"] = "rtl";
+    var lang = ViewData["Lang"] as string ?? "en";
+    var dir = ViewData["Dir"] as string ?? (lang == "ar" ? "rtl" : "ltr");
+    var title = ViewData["Title"] as string;
+}
+<!DOCTYPE html>
+<html lang="@lang" dir="@dir">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MVC</title>
-    <script type="importmap"></script>
+    <meta name="theme-color" content="#101826" />
+    <title>@(string.IsNullOrWhiteSpace(title) ? "Stocka" : $"{title} – Stocka")</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MVC.styles.css" asp-append-version="true" />
+
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3 bg-white">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MVC</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="app" id="app">
+        <partial name="_Sidebar" />
+
+        <div class="app-overlay" id="appOverlay" aria-hidden="true"></div>
+
+        <div class="app-main">
+            <header class="app-topbar">
+                <button type="button"
+                        class="topbar-btn"
+                        id="sidebarToggle"
+                        aria-controls="appSidebar"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation"
+                        title="Toggle navigation">
+                    <i class="bi bi-list" aria-hidden="true"></i>
                 </button>
-                <div class="navbar-collapse d-sm-inline-flex justify-content-between collapse">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index">Products</a>
-                        </li>
-                    </ul>
+
+                <div class="topbar-title">
+                    <span class="topbar-title__eyebrow">Stocka</span>
+                    <span class="topbar-title__label" id="pageTitle">@(string.IsNullOrWhiteSpace(title) ? "Overview" : title)</span>
                 </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+
+                <div class="topbar-actions">
+                    <button type="button"
+                            class="topbar-btn topbar-btn--text"
+                            title="Switch language"
+                            aria-label="Switch language">
+                        <i class="bi bi-translate" aria-hidden="true"></i>
+                        <span class="topbar-btn__label">@(lang == "ar" ? "EN" : "عربي")</span>
+                    </button>
+
+                    <button type="button"
+                            class="topbar-btn"
+                            title="Notifications"
+                            aria-label="Notifications">
+                        <i class="bi bi-bell" aria-hidden="true"></i>
+                        <span class="topbar-badge" aria-hidden="true">3</span>
+                    </button>
+
+                    <partial name="_UserMenu" />
+                </div>
+            </header>
+
+            <main class="app-content" id="main" tabindex="-1">
+                @RenderBody()
+            </main>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - MVC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

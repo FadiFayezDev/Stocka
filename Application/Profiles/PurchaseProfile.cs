@@ -1,7 +1,5 @@
 using Application.Dtos.Purchasing;
-using Application.Features.Commands.Purchase;
-using Application.Features.Commands.Purchase.Create;
-using Application.Features.Commands.Purchase.Update;
+using Application.UseCases.Purchase;
 using AutoMapper;
 using Domain.Entities.Purchasing;
 
@@ -15,8 +13,8 @@ namespace Application.Profiles
             CreateMap<Purchase, PurchaseDto>().ReverseMap();
 
             // Command ? Entity
-            CreateMap<CreatePurchaseCommand, Purchase>();
-            CreateMap<UpdatePurchaseCommand, Purchase>();
+            CreateMap<ReceivePurchaseCommand, Purchase>();
+            CreateMap<UpdateReceivedPurchaseCommand, Purchase>();
         }
     }
 }

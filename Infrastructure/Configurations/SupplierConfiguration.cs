@@ -1,3 +1,4 @@
+using Domain.Entities.Core;
 using Domain.Entities.Purchasing;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
@@ -30,18 +31,10 @@ namespace Infrastructure.Configurations
             builder.Property(e => e.Address)
                 .HasMaxLength(500);
 
-            builder.HasOne(d => d.Brand).WithMany(p => p.Suppliers)
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Suppliers_Brands_BrandId");
-
-            // Configure Purchases collection
-            builder.HasMany(d => d.Purchases)
-                .WithOne(d => d.Supplier)
-                .HasForeignKey(d => d.SupplierId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Navigation(d => d.Purchases).AutoInclude();
         }
     }
 }

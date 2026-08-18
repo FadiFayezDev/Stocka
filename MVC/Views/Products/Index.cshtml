@@ -90,17 +90,16 @@
                         <div class="card-footer border-0 bg-white">
 
                             <div class="d-flex gap-2">
-
-                                <a href="#"
-                                       class="btn btn-outline-primary flex-fill">
+                                <a asp-action="Edit"
+                                       asp-route-id="@product.Id"
+                                       class="btn btn-outline-secondary flex-fill">
                                     Edit
                                 </a>
-
-                                <a href="#"
+                                <a asp-action="Details"
+                                       asp-route-id="@product.Id"
                                        class="btn btn-outline-secondary flex-fill">
                                     Details
                                 </a>
-
                             </div>
 
                         </div>

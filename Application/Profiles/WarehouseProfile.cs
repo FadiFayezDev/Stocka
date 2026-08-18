@@ -1,7 +1,5 @@
 using Application.Dtos.Products;
-using Application.Features.Commands.Warehouse;
-using Application.Features.Commands.Warehouse.Create;
-using Application.Features.Commands.Warehouse.Update;
+using Application.UseCases.WarehouseCases;
 using AutoMapper;
 using Domain.Entities.Products;
 using Domain.Enums;
@@ -19,12 +17,9 @@ namespace Application.Profiles
                 .ReverseMap()
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => Enum.Parse<WarehouseType>(src.Type)));
 
-            CreateMap<CreateWarehouseCommand, Warehouse>()
+            CreateMap<RegisterWarehouseCommand, Warehouse>()
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (WarehouseType)src.Type))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-            
-            CreateMap<UpdateWarehouseCommand, Warehouse>()
-               .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (WarehouseType)src.Type));
         }
     }
 }

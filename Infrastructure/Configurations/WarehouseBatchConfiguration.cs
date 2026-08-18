@@ -1,3 +1,4 @@
+using Domain.Entities.Core;
 using Domain.Entities.Products;
 using Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +32,7 @@ namespace Infrastructure.Configurations
             builder.HasIndex(e => new { e.WarehouseId, e.BatchId }, "ix_warehouse_batches_warehouse_id_batch_id")
                 .IsUnique();
 
-            builder.HasOne(d => d.Batch).WithMany(p => p.WarehouseBatches)
+            builder.HasOne<Batch>().WithMany()
                 .HasForeignKey(d => d.BatchId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_WarehouseBatches_Batches_BatchId");
@@ -41,7 +42,7 @@ namespace Infrastructure.Configurations
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_WarehouseBatches_Warehouses_WarehouseId");
 
-            builder.HasOne(d => d.Brand).WithMany()
+            builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
