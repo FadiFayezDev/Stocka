@@ -22,7 +22,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<ProductDto?> GetByIdAsync(Guid id)
         {
-            var query = $"SELECT id, brand_id AS BrandId, category_id AS CategoryId, name AS Name, barcode AS Barcode FROM {TableProducts} WHERE id = @Id";
+            var query = $"SELECT id, brand_id AS BrandId, category_id AS CategoryId, name AS Name, barcode AS Barcode, selling_price AS SellingPrice, is_active AS IsActive FROM {TableProducts} WHERE id = @Id";
             var parameters = new { Id = id };
             var result = await _connection.QuerySingleOrDefaultAsync<ProductDto>(query, parameters);
             return result;
@@ -30,14 +30,14 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<ProductDto>> GetAllTableAsync()
         {
-            var query = $"SELECT id, brand_id AS BrandId, category_id AS CategoryId, name AS Name, barcode AS Barcode FROM {TableProducts}";
+            var query = $"SELECT id, brand_id AS BrandId, category_id AS CategoryId, name AS Name, barcode AS Barcode, selling_price AS SellingPrice, is_active AS IsActive FROM {TableProducts}";
             var result = await _connection.QueryAsync<ProductDto>(query);
             return result;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = $"SELECT id, brand_id AS BrandId, category_id AS CategoryId, name AS Name, barcode AS Barcode FROM {TableProducts} WHERE brand_id = @BrandId";
+            var query = $"SELECT id, brand_id AS BrandId, category_id AS CategoryId, name AS Name, barcode AS Barcode, selling_price AS SellingPrice, is_active AS IsActive FROM {TableProducts} WHERE brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<ProductDto>(query, parameters);
             return result;
@@ -73,7 +73,7 @@ namespace Infrastructure.Repositories.Queries
             return result;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetProductsWithQuantities(Guid brandId)
+        public async Task<IEnumerable<ProductDto>> GetProductsWithQuantities(Guid brandId, Guid? warehouseId = null)
         {
             var query = $@"
                 SELECT 
@@ -88,10 +88,12 @@ namespace Infrastructure.Repositories.Queries
                     p.is_active AS IsActive
                 FROM {TableProducts} p
                 LEFT JOIN {TableBatches} b ON p.id = b.product_id
-                LEFT JOIN {TableWarehouseBatches} wb ON b.id = wb.batch_id
+                LEFT JOIN {TableWarehouses} w ON w.brand_id = p.brand_id AND w.type = 'Shop'
+                    AND (@WarehouseId IS NULL OR w.id = @WarehouseId)
+                LEFT JOIN {TableWarehouseBatches} wb ON b.id = wb.batch_id AND wb.warehouse_id = w.id
                 WHERE p.brand_id = @BrandId
                 GROUP BY p.id, p.brand_id, p.category_id, p.name, p.barcode";
-            var parameters = new { BrandId = brandId };
+            var parameters = new { BrandId = brandId, WarehouseId = warehouseId };
             var result = await _connection.QueryAsync<ProductDto>(query, parameters);
 
             result = result.Select(p => new ProductDto
@@ -164,7 +166,7 @@ namespace Infrastructure.Repositories.Queries
                 FROM {TableProducts} p
                 LEFT JOIN {TableBatches} b ON p.id = b.product_id
                 LEFT JOIN {TableWarehouseBatches} wb ON b.id = wb.batch_id
-                WHERE p.brand_id = @BrandId AND p.is_active = 1
+                WHERE p.brand_id = @BrandId AND p.is_active = true
                 GROUP BY p.id, p.name, p.barcode
                 HAVING COALESCE(SUM(wb.quantity), 0) <= @Threshold
                 ORDER BY TotalQuantity ASC";

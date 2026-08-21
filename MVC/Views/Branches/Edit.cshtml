@@ -1,0 +1,179 @@
+@using MVC.Models.Branches
+@model BranchFormModel
+
+@{
+    ViewData["Title"] = "تعديل الفرع";
+}
+
+<div class="form-page">
+    <div class="page-head">
+        <div class="page-head__text">
+            <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">الفروع</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">تعديل الفرع</li>
+                </ol>
+            </nav>
+            <h1 class="page-head__title">تعديل الفرع</h1>
+            <p class="page-head__subtitle text-muted mb-0">عدّل اسم الفرع أو مخازنه المرتبطة</p>
+        </div>
+        <div class="page-head__actions">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-right"></i>
+                <span>رجوع للقائمة</span>
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="Edit" method="post" class="card border-0 shadow-sm form-card">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <div class="card-body p-lg-5 p-4">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+            <div class="row g-5">
+                <div class="col-lg-7">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-info-circle"></i> بيانات الفرع
+                    </h5>
+
+                    <div class="mb-4">
+                        <label asp-for="Name" class="form-label fw-semibold">اسم الفرع <span class="text-danger">*</span></label>
+                        <input asp-for="Name" class="form-control form-control-lg" placeholder="مثال: فرع الجيزة" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-shop"></i> ربط المخازن
+                    </h5>
+                    <p class="small text-muted mb-3">
+                        اربط الفرع بالمخازن التي يبيع منها — ستستخدم نقطة البيع رفوف هذا الفرع تلقائياً.
+                    </p>
+
+                    @if (Model.Warehouses.Count == 0)
+                    {
+                        <div class="alert alert-light border small mb-0">لا توجد مخازن مسجّلة لهذه العلامة حالياً.</div>
+                    }
+                    else
+                    {
+                        <div class="warehouse-check-list">
+                            @for (var i = 0; i < Model.Warehouses.Count; i++)
+                            {
+                                var warehouse = Model.Warehouses[i];
+                                var isShop = string.Equals(warehouse.Type, "Shop", StringComparison.OrdinalIgnoreCase);
+                                <div class="warehouse-check">
+                                    <input type="checkbox"
+                                           name="SelectedWarehouseIds"
+                                           value="@warehouse.Id"
+                                           id="warehouse-@warehouse.Id"
+                                           checked="@(Model.SelectedWarehouseIds.Contains(warehouse.Id))" />
+                                    <label for="warehouse-@warehouse.Id" class="d-flex justify-content-between align-items-center w-100">
+                                        <span>
+                                            <i class="bi @(isShop ? "bi-shop" : "bi-box-seam") me-1"></i>@warehouse.Name
+                                        </span>
+                                        <span class="badge @(isShop ? "bg-success-subtle text-success" : "bg-info-subtle text-primary")">@(isShop ? "بيع" : "تخزين")</span>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer px-lg-5 border-0 bg-white px-4 pb-4">
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-outline-secondary px-4">إلغاء</a>
+                <button type="submit" class="btn btn-primary px-5">
+                    <i class="bi bi-check-lg me-1"></i> حفظ التعديلات
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .form-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .form-section-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 18px;
+    }
+
+    .warehouse-check-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 420px;
+        overflow-y: auto;
+    }
+
+    .warehouse-check {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 4px 10px;
+        transition: border-color .15s ease, background-color .15s ease;
+    }
+
+    .warehouse-check:has(input:checked) {
+        border-color: var(--accent);
+        background: var(--accent-soft, rgba(61, 214, 154, .08));
+    }
+
+    .warehouse-check input {
+        margin-left: 8px;
+    }
+
+    .warehouse-check label {
+        cursor: pointer;
+        padding: 6px 0;
+        font-size: .875rem;
+    }
+</style>

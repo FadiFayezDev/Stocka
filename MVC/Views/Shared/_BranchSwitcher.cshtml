@@ -1,0 +1,88 @@
+@using Application.Common.Interfaces
+@using Application.QueryRepositories
+
+@inject IBranchQueryRepository BranchQuery
+@inject ICurrentUserContext CurrentUser
+
+@{
+    Guid? activeBranchId = null;
+    string activeBranchName = "الفرع";
+    List<Application.Dtos.Core.BranchDto> branches = new();
+
+    try
+    {
+        activeBranchId = CurrentUser.ActiveBranchId;
+        branches = (await BranchQuery.GetAllByBrandIdAsync(CurrentUser.ActiveBrandId))
+            .Where(b => b.Id != Guid.Empty)
+            .OrderBy(b => b.Name)
+            .ToList();
+
+        var active = branches.FirstOrDefault(b => b.Id == activeBranchId);
+        if (active != null)
+            activeBranchName = active.Name;
+    }
+    catch
+    {
+        // Not signed in or no active brand — hide the switcher.
+    }
+}
+
+@if (User.Identity?.IsAuthenticated == true && branches.Count > 0)
+{
+    <div class="dropdown branch-switcher">
+        <button type="button"
+                class="topbar-btn topbar-btn--text"
+                data-bs-toggle="dropdown"
+                data-bs-display="static"
+                aria-expanded="false"
+                title="تبديل الفرع">
+            <i class="bi bi-diagram-3" aria-hidden="true"></i>
+            <span class="topbar-btn__label">@activeBranchName</span>
+        </button>
+
+        <div class="dropdown-menu dropdown-menu-end branch-switcher__menu">
+            <h6 class="dropdown-header">الفرع النشط</h6>
+            @foreach (var b in branches)
+            {
+                <button type="button"
+                        class="dropdown-item d-flex justify-content-between align-items-center"
+                        data-branch-id="@b.Id">
+                    <span>@b.Name</span>
+                    @if (b.Id == activeBranchId)
+                    {
+                        <i class="bi bi-check2 text-primary" aria-hidden="true"></i>
+                    }
+                </button>
+            }
+        </div>
+    </div>
+}
+
+<form id="branchSwitchForm" method="post" class="d-none" action="@Url.Action("Switch", "BranchSwitcher")">
+    @Html.AntiForgeryToken()
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-branch-id]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const branchId = btn.dataset.branchId;
+                const token = document.querySelector('#branchSwitchForm input[name="__RequestVerificationToken"]').value;
+                const response = await fetch('@Url.Action("Switch", "BranchSwitcher")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    },
+                    body: 'branchId=' + encodeURIComponent(branchId)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    alert(result.message || 'تعذر تبديل الفرع.');
+                }
+            });
+        });
+    });
+</script>

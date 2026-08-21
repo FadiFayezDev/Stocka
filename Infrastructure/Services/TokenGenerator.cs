@@ -8,7 +8,7 @@ using Infrastructure.Helpers;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Infrastructure.Serviecs
+namespace Infrastructure.Services
 {
     public class TokenGenerator : ITokenGenerator
     {

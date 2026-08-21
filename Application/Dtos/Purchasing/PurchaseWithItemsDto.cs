@@ -11,6 +11,7 @@ namespace Application.Dtos.Purchasing
         public Guid SupplierId { get; set; }
         public DateTime PurchaseDate { get; set; }
         public decimal TotalAmount { get; set; }
+        public string Status { get; set; } = "Ordered";
         public List<PurchaseItemDto> Items { get; set; } = new();
     }
 }

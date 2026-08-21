@@ -1,0 +1,145 @@
+@using MVC.Models.Products
+@model CategoryFormModel
+
+@{
+    ViewData["Title"] = "تعديل الفئة";
+}
+
+<div class="form-page">
+    <div class="page-head">
+        <div class="page-head__text">
+            <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">الفئات</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">تعديل الفئة</li>
+                </ol>
+            </nav>
+            <h1 class="page-head__title">تعديل الفئة</h1>
+            <p class="page-head__subtitle text-muted mb-0">@Model.Name</p>
+        </div>
+        <div class="page-head__actions">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-right"></i>
+                <span>رجوع للقائمة</span>
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="Edit" method="post" class="card border-0 shadow-sm form-card" style="max-width: 560px;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <div class="card-body p-lg-5 p-4">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+            <div class="mb-4">
+                <label asp-for="Name" class="form-label fw-semibold">اسم الفئة <span class="text-danger">*</span></label>
+                <input asp-for="Name" class="form-control form-control-lg" placeholder="اسم الفئة" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="status-box">
+                <div>
+                    <div class="fw-semibold">حالة الفئة</div>
+                    <small class="text-muted">فعّل الفئة أو عطّلها حسب الحاجة.</small>
+                </div>
+                <div class="form-check form-switch">
+                    <input type="checkbox" asp-for="IsActive" class="form-check-input" />
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer px-lg-5 border-0 bg-white px-4 pb-4">
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-outline-secondary px-4">إلغاء</a>
+                <button type="submit" class="btn btn-primary px-5">
+                    <i class="bi bi-check-lg me-1"></i> حفظ التعديلات
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .form-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 10px 14px;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(14, 159, 110, 0.12);
+        border-color: var(--accent);
+    }
+
+    .status-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 18px;
+        background: var(--surface-muted);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+    }
+
+    .form-check-input {
+        width: 2.8em;
+        height: 1.4em;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    .card-footer {
+        border-top: 1px solid var(--border) !important;
+        padding-top: 1.25rem !important;
+    }
+</style>

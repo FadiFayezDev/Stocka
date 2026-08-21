@@ -19,8 +19,8 @@ namespace Infrastructure.Repositories.Commands
         public async Task<IReadOnlyList<Batch>> GetAvailableBatchesForProductAsync(Guid productId, Guid brandId)
         {
             return await _context.Batches
-                .Where(b => b.ProductId.Value == productId 
-                         && b.BrandId.Value == brandId 
+                .Where(b => b.ProductId == new ProductId(productId)
+                         && b.BrandId == new BrandId(brandId)
                          && b.RemainingQuantity > 0)
                 .OrderBy(b => b.CreatedAt)
                 .ToListAsync();

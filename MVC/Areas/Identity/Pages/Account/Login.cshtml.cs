@@ -1,5 +1,6 @@
 ﻿#nullable disable
 
+using Application.Common.Interfaces;
 using Application.UseCases.Auth;
 using Infrastructure.Identity;
 using MediatR;
@@ -21,15 +22,19 @@ namespace MVC.Areas.Identity.Pages.Account
         private readonly IMediator _mediator;
         private readonly ILogger<LoginModel> _logger;
 
+        private readonly IIdentityService _identityService;
+
         public LoginModel(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             IMediator mediator,
+            IIdentityService identityService,
             ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _mediator = mediator;
+            _identityService = identityService;
             _logger = logger;
         }
 
@@ -108,6 +113,22 @@ namespace MVC.Areas.Identity.Pages.Account
                     Response.Cookies.Append("access_token", authResponse.Token, cookieOptions);
 
                     _logger.LogInformation("User logged in.");
+
+                    // Check if user has a brand, if not redirect to create brand
+                    var currentUserIdString = await _userManager.GetUserIdAsync(user);
+                    if (Guid.TryParse(currentUserIdString, out var currentUserId))
+                    {
+                        var hasBrand = await _identityService.GetBrandMembershipsAsync(currentUserId) is { Count: > 0 };
+                        if (!hasBrand)
+                        {
+                            return RedirectToPage("/Account/CreateBrand", new { userId = currentUserIdString, returnUrl = returnUrl });
+                        }
+                    }
+                    else
+                    {
+                        // Invalid user ID format, redirect to create brand as fallback
+                        return RedirectToPage("/Account/CreateBrand", new { userId = currentUserIdString, returnUrl = returnUrl });
+                    }
 
                     return LocalRedirect(returnUrl);
                 }

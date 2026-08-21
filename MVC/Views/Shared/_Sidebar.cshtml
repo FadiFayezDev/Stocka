@@ -19,9 +19,9 @@
             : string.Empty;
 }
 
-<aside class="app-sidebar" id="appSidebar" aria-label="Primary">
+<aside class="app-sidebar" id="appSidebar" aria-label="القائمة الرئيسية">
     <div class="sidebar-brand">
-        <a class="brand" href="@Url.Action("Index", "Home")" aria-label="Stocka — Dashboard" title="Stocka">
+        <a class="brand" href="@Url.Action("Index", "Home")" aria-label="ستوكا — لوحة التحكم" title="ستوكا">
             <span class="brand__mark" aria-hidden="true">
                 <svg viewBox="0 0 32 32" width="20" height="20" fill="none">
                     <rect x="6.5" y="5.5" width="2.75" height="21" rx="1.375" fill="currentColor" opacity="0.45" />
@@ -31,41 +31,49 @@
                     <rect x="9.5" y="20.5" width="13" height="2.75" rx="1.375" fill="currentColor" />
                 </svg>
             </span>
-            <span class="brand__name">Stocka</span>
+            <span class="brand__name">ستوكا</span>
         </a>
     </div>
 
-    <nav class="sidebar-nav" aria-label="Main navigation">
+    <nav class="sidebar-nav" aria-label="التنقل الرئيسي">
         <ul class="nav-tree">
 
             <li class="nav-section">
-                <span class="nav-section__label">General</span>
+                <span class="nav-section__label">عام</span>
             </li>
 
             <li class="nav-tree__item">
-                <a class="nav-link @ActiveAttrs("Home", "Index")" href="@Url.Action("Index", "Home")" title="Dashboard">
+                <a class="nav-link @ActiveAttrs("Home", "Index")" href="@Url.Action("Index", "Home")" title="لوحة التحكم">
                     <i class="bi bi-grid-1x2 nav-link__icon" aria-hidden="true"></i>
-                    <span class="nav-link__label">Dashboard</span>
+                    <span class="nav-link__label">لوحة التحكم</span>
                 </a>
             </li>
 
             <li class="nav-section">
-                <span class="nav-section__label">Operations</span>
+                <span class="nav-section__label">العمليات</span>
             </li>
 
-            <li class="nav-tree__group @GroupState("Products", "ProductCategory", "Brand", "Warehouse")">
+            <li class="nav-tree__item">
+                <a class="nav-link nav-link--pos @ActiveAttrs("Pos")" href="@Url.Action("Index", "Pos")" title="نقطة البيع">
+                    <i class="bi bi-shop nav-link__icon" aria-hidden="true"></i>
+                    <span class="nav-link__label">نقطة البيع</span>
+                </a>
+            </li>
+
+            <li class="nav-tree__group @GroupState("Products", "ProductCategories", "Brand", "Warehouse", "Warehouses")">
                 <button type="button" class="nav-link nav-link--group" aria-expanded="false" aria-controls="nav-inventory" data-nav-group>
                     <i class="bi bi-box-seam nav-link__icon" aria-hidden="true"></i>
-                    <span class="nav-link__label">Inventory</span>
+                    <span class="nav-link__label">المخزون</span>
                     <i class="bi bi-chevron-down nav-link__chevron" aria-hidden="true"></i>
                 </button>
                 <ul class="nav-sub" id="nav-inventory">
                     <li class="nav-sub__inner">
-                        <span class="nav-sub__header">Inventory</span>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("Products", "Index")" href="@Url.Action("Index", "Products")">Products</a>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("ProductCategory")" href="#">Categories</a>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("Brand")" href="#">Brands</a>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("Warehouse")" href="#">Warehouses</a>
+                        <span class="nav-sub__header">المخزون</span>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Products", "Index")" href="@Url.Action("Index", "Products")">المنتجات</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("ProductCategories")" href="@Url.Action("Index", "ProductCategories")">الفئات</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Warehouses")" href="@Url.Action("Index", "Warehouses")">المخازن</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Warehouses", "Transfer")" href="@Url.Action("Transfer", "Warehouses")">تحويل مخزون</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("StockMovements")" href="@Url.Action("Index", "StockMovements")">حركة المخزون</a>
                     </li>
                 </ul>
             </li>
@@ -73,14 +81,14 @@
             <li class="nav-tree__group @GroupState("Supplier", "PurchaseOrder", "Purchase")">
                 <button type="button" class="nav-link nav-link--group" aria-expanded="false" aria-controls="nav-purchasing" data-nav-group>
                     <i class="bi bi-cart nav-link__icon" aria-hidden="true"></i>
-                    <span class="nav-link__label">Purchasing</span>
+                    <span class="nav-link__label">المشتريات</span>
                     <i class="bi bi-chevron-down nav-link__chevron" aria-hidden="true"></i>
                 </button>
                 <ul class="nav-sub" id="nav-purchasing">
                     <li class="nav-sub__inner">
-                        <span class="nav-sub__header">Purchasing</span>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("Supplier")" href="#">Suppliers</a>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("PurchaseOrder", "Index")" href="#">Purchase Orders</a>
+                        <span class="nav-sub__header">المشتريات</span>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Supplier")" href="#">الموردون</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Purchases")" href="@Url.Action("Index", "Purchases")">أوامر الشراء</a>
                     </li>
                 </ul>
             </li>
@@ -88,70 +96,77 @@
             <li class="nav-tree__group @GroupState("Customer", "Order", "Invoice")">
                 <button type="button" class="nav-link nav-link--group" aria-expanded="false" aria-controls="nav-sales" data-nav-group>
                     <i class="bi bi-graph-up nav-link__icon" aria-hidden="true"></i>
-                    <span class="nav-link__label">Sales</span>
+                    <span class="nav-link__label">المبيعات</span>
                     <i class="bi bi-chevron-down nav-link__chevron" aria-hidden="true"></i>
                 </button>
                 <ul class="nav-sub" id="nav-sales">
                     <li class="nav-sub__inner">
-                        <span class="nav-sub__header">Sales</span>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("Customer")" href="#">Customers</a>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("Order", "Index")" href="#">Orders</a>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("Invoice")" href="#">Invoices</a>
+                        <span class="nav-sub__header">المبيعات</span>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Orders")" href="@Url.Action("Index", "Orders")">المبيعات</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Customer")" href="#">العملاء</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Invoice")" href="#">الفواتير</a>
                     </li>
                 </ul>
             </li>
 
             <li class="nav-section">
-                <span class="nav-section__label">Insight</span>
+                <span class="nav-section__label">التقارير</span>
             </li>
 
             <li class="nav-tree__item">
-                <a class="nav-link @ActiveAttrs("Finance")" href="#" title="Finance">
+                <a class="nav-link @ActiveAttrs("Finance")" href="#" title="المالية">
                     <i class="bi bi-wallet2 nav-link__icon" aria-hidden="true"></i>
-                    <span class="nav-link__label">Finance</span>
+                    <span class="nav-link__label">المالية</span>
                 </a>
             </li>
 
             <li class="nav-tree__item">
-                <a class="nav-link @ActiveAttrs("Reports")" href="#" title="Reports">
+                <a class="nav-link @ActiveAttrs("Reports")" href="#" title="التقارير">
                     <i class="bi bi-bar-chart-line nav-link__icon" aria-hidden="true"></i>
-                    <span class="nav-link__label">Reports</span>
+                    <span class="nav-link__label">التقارير</span>
                 </a>
             </li>
 
             <li class="nav-section">
-                <span class="nav-section__label">System</span>
+                <span class="nav-section__label">النظام</span>
             </li>
 
             <li class="nav-tree__group @GroupState("User", "Role", "Permission")">
                 <button type="button" class="nav-link nav-link--group" aria-expanded="false" aria-controls="nav-admin" data-nav-group>
                     <i class="bi bi-shield-check nav-link__icon" aria-hidden="true"></i>
-                    <span class="nav-link__label">Administration</span>
+                    <span class="nav-link__label">الإدارة</span>
                     <i class="bi bi-chevron-down nav-link__chevron" aria-hidden="true"></i>
                 </button>
                 <ul class="nav-sub" id="nav-admin">
                     <li class="nav-sub__inner">
-                        <span class="nav-sub__header">Administration</span>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("User")" href="#">Users</a>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("Role")" href="#">Roles</a>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("Permission")" href="#">Permissions</a>
+                        <span class="nav-sub__header">الإدارة</span>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("User")" href="#">المستخدمون</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Role")" href="#">الأدوار</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Permission")" href="#">الصلاحيات</a>
                     </li>
                 </ul>
             </li>
 
             <li class="nav-tree__item">
-                <a class="nav-link @ActiveAttrs("Settings")" href="#" title="Settings">
+                <a class="nav-link @ActiveAttrs("Branches")" href="@Url.Action("Index", "Branches")" title="الفروع">
+                    <i class="bi bi-diagram-3 nav-link__icon" aria-hidden="true"></i>
+                    <span class="nav-link__label">الفروع</span>
+                </a>
+            </li>
+
+            <li class="nav-tree__item">
+                <a class="nav-link @ActiveAttrs("Settings")" href="#" title="الإعدادات">
                     <i class="bi bi-gear nav-link__icon" aria-hidden="true"></i>
-                    <span class="nav-link__label">Settings</span>
+                    <span class="nav-link__label">الإعدادات</span>
                 </a>
             </li>
 
         </ul>
     </nav>
 
-    <div class="sidebar-foot">Stocka ERP</div>
+    <div class="sidebar-foot">ستوكا — نظام إدارة الأعمال</div>
 
-    <div class="nav-flyout" id="navFlyout" role="group" aria-label="Navigation">
+    <div class="nav-flyout" id="navFlyout" role="group" aria-label="التنقل">
         <div class="nav-flyout__header" id="navFlyoutHeader"></div>
         <div id="navFlyoutList"></div>
     </div>

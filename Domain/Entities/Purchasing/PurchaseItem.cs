@@ -17,6 +17,8 @@ namespace Domain.Entities.Purchasing
 
         public int Quantity { get; private set; }
 
+        public int ReceivedQuantity { get; private set; }
+
         public decimal UnitCost { get; private set; }
 
         public virtual Purchase Purchase { get; private set; } = null!;
@@ -57,6 +59,19 @@ namespace Domain.Entities.Purchasing
                 throw new ArgumentException("Unit cost must be greater than zero.", nameof(newUnitCost));
 
             UnitCost = newUnitCost;
+        }
+
+        public int RemainingToReceive => Quantity - ReceivedQuantity;
+
+        public void AddReceived(int quantity)
+        {
+            if (quantity <= 0)
+                throw new ArgumentException("Received quantity must be greater than zero.", nameof(quantity));
+
+            if (ReceivedQuantity + quantity > Quantity)
+                throw new InvalidOperationException("Cannot receive more than the ordered quantity.");
+
+            ReceivedQuantity += quantity;
         }
     }
 }

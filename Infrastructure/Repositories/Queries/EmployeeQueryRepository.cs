@@ -34,6 +34,24 @@ namespace Infrastructure.Repositories.Queries
             return result;
         }
 
+        public async Task<EmployeeDto?> GetByUserIdAsync(Guid userId)
+        {
+            var query = $@"SELECT id, user_id AS ApplicationUserId, brand_id AS BrandId, branch_id AS BranchId, job_title AS JobTitle, salary AS Salary, hire_date AS HireDate, is_active AS IsActive 
+                           FROM {TableEmployees}
+                           WHERE user_id = @UserId
+                             AND (@BrandId IS NULL OR brand_id = @BrandId)
+                             AND (@ApplyBranchFilter = FALSE OR branch_id = @BranchId)";
+            var parameters = new
+            {
+                UserId = userId,
+                BrandId = ActiveBrandId,
+                ApplyBranchFilter = ApplyBranchScope,
+                BranchId = ActiveBranchId
+            };
+            var result = await _connection.QuerySingleOrDefaultAsync<EmployeeDto>(query, parameters);
+            return result;
+        }
+
         public async Task<IEnumerable<EmployeeDto>> GetAllTableAsync()
         {
             var query = $@"SELECT id, user_id AS ApplicationUserId, brand_id AS BrandId, branch_id AS BranchId, job_title AS JobTitle, salary AS Salary, hire_date AS HireDate, is_active AS IsActive 

@@ -1,0 +1,312 @@
+@using MVC.Models.Warehouses
+@model WarehouseFormModel
+
+@{
+    ViewData["Title"] = "إضافة مخزن";
+}
+
+<div class="form-page">
+    <div class="page-head">
+        <div class="page-head__text">
+            <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">المخازن</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">إضافة مخزن</li>
+                </ol>
+            </nav>
+            <h1 class="page-head__title">إضافة مخزن</h1>
+            <p class="page-head__subtitle text-muted mb-0">حدد نوع المخزن: بيع (رفوف المحل) أم تخزين (مخزن رئيسي)</p>
+        </div>
+        <div class="page-head__actions">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-right"></i>
+                <span>رجوع للقائمة</span>
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post" class="card border-0 shadow-sm form-card">
+        @Html.AntiForgeryToken()
+
+        <div class="card-body p-lg-5 p-4">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+            <div class="row g-5">
+                <div class="col-lg-8">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-info-circle"></i> بيانات المخزن
+                    </h5>
+
+                    <div class="mb-4">
+                        <label asp-for="Name" class="form-label fw-semibold">اسم المخزن <span class="text-danger">*</span></label>
+                        <input asp-for="Name" class="form-control form-control-lg" placeholder="مثال: المخزن الرئيسي / رفوف المحل" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold d-block">نوع المخزن <span class="text-danger">*</span></label>
+                        <div class="type-cards row g-3">
+                            <div class="col-md-6">
+                                <input type="radio" asp-for="Type" value="@WarehouseTypeLabels.Shop" id="type-shop" class="type-radio" />
+                                <label for="type-shop" class="type-card">
+                                    <i class="bi bi-shop type-card__icon"></i>
+                                    <div>
+                                        <strong>بيع (رفوف المحل)</strong>
+                                        <small class="d-block text-muted">البيع يسحب من هذا المخزن فقط، ويعرض الكمية فيه داخل نقطة البيع.</small>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="radio" asp-for="Type" value="@WarehouseTypeLabels.Storage" id="type-storage" class="type-radio" />
+                                <label for="type-storage" class="type-card">
+                                    <i class="bi bi-box-seam type-card__icon"></i>
+                                    <div>
+                                        <strong>تخزين (مخزن رئيسي)</strong>
+                                        <small class="d-block text-muted">المخزون الكامل؛ انقل منه إلى مخزن البيع ليُعرض للبيع.</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="Type" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Location" class="form-label fw-semibold">الموقع <span class="text-danger">*</span></label>
+                        <input asp-for="Location" class="form-control" placeholder="مثال: القاهرة - وسط البلد" />
+                        <span asp-validation-for="Location" class="text-danger small"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Description" class="form-label fw-semibold">الوصف</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="وصف اختياري للمخزن"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5 class="form-section-title">
+                            <i class="bi bi-diagram-3"></i> ربط الفروع
+                        </h5>
+                        <p class="small text-muted mb-3">
+                            اربط هذا المخزن بالفرع الذي يبيعه — ستستخدم نقطة البيع هذا المخزن تلقائياً عند فتحها من الفرع.
+                        </p>
+
+                        @if (Model.Branches.Count == 0)
+                        {
+                            <div class="alert alert-light border small mb-0">لا توجد فروع مسجّلة لهذه العلامة حالياً.</div>
+                        }
+                        else
+                        {
+                            <div class="branch-check-grid">
+                                @for (var i = 0; i < Model.Branches.Count; i++)
+                                {
+                                    var branch = Model.Branches[i];
+                                    <div class="branch-check">
+                                        <input type="checkbox"
+                                               name="SelectedBranchIds"
+                                               value="@branch.Id"
+                                               id="branch-@branch.Id"
+                                               checked="@(Model.SelectedBranchIds.Contains(branch.Id))" />
+                                        <label for="branch-@branch.Id">
+                                            <i class="bi bi-geo-alt me-1"></i>@branch.Name
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="tips-card p-4">
+                        <h5 class="form-section-title mb-3">
+                            <i class="bi bi-lightbulb"></i> كيف يعمل؟
+                        </h5>
+                        <ul class="tips-list mb-0">
+                            <li><i class="bi bi-check-circle-fill"></i> أنشئ مخزن تخزين لتخزين المشتريات والكميات الكبيرة.</li>
+                            <li><i class="bi bi-check-circle-fill"></i> أنشئ مخزن بيع يمثل رفوف المحل.</li>
+                            <li><i class="bi bi-check-circle-fill"></i> عند نفاد رفوف المحل، حوّل الكمية من مخزن التخزين.</li>
+                            <li><i class="bi bi-check-circle-fill"></i> نقطة البيع تعرض وتبيع من مخزن البيع فقط.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer px-lg-5 border-0 bg-white px-4 pb-4">
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-outline-secondary px-4">إلغاء</a>
+                <button type="submit" class="btn btn-primary px-5">
+                    <i class="bi bi-check-lg me-1"></i> حفظ المخزن
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .form-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .form-section-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 18px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-1);
+    }
+
+    .form-section-title i {
+        color: var(--accent);
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        padding: 10px 14px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: 0 0 0 0.2rem rgba(14, 159, 110, 0.12);
+        border-color: var(--accent);
+    }
+
+    .type-cards {
+        --bs-gutter-x: 1rem;
+    }
+
+    .type-radio {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .type-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+        cursor: pointer;
+        transition: border-color .15s ease, background-color .15s ease;
+        height: 100%;
+    }
+
+    .type-card:hover {
+        border-color: var(--accent);
+    }
+
+    .type-radio:checked + .type-card {
+        border-color: var(--accent);
+        background: rgba(14, 159, 110, .06);
+    }
+
+    .type-card__icon {
+        font-size: 1.6rem;
+        color: var(--accent);
+        line-height: 1;
+    }
+
+    .tips-card {
+        background: var(--surface-muted);
+        border-radius: 16px;
+    }
+
+    .tips-list {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-size: .875rem;
+    }
+
+    .tips-list i {
+        color: var(--accent);
+        margin-inline-end: 6px;
+    }
+
+    .card-footer {
+        border-top: 1px solid var(--border) !important;
+        padding-top: 1.25rem !important;
+    }
+
+    .branch-check-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 10px;
+    }
+
+    .branch-check {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 14px;
+        transition: border-color .15s ease, background-color .15s ease;
+    }
+
+    .branch-check:hover {
+        border-color: var(--accent);
+    }
+
+    .branch-check input {
+        accent-color: var(--accent);
+        margin-inline-end: 8px;
+    }
+
+    .branch-check input:checked + label {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .branch-check label {
+        cursor: pointer;
+        user-select: none;
+    }
+</style>

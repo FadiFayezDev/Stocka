@@ -22,6 +22,7 @@ namespace Application.UseCases.Brand
     {
         public string Name { get; set; } = null!;
         public string? Slug { get; set; }
+        public Guid? UserId { get; set; }
     }
 
     public class CreateBrandCommandHanlder : IRequestHandler<CreateBrandCommand, CreateBrandResponseDto>
@@ -61,7 +62,8 @@ namespace Application.UseCases.Brand
 
         public async Task<CreateBrandResponseDto> Handle(CreateBrandCommand request, CancellationToken cancellationToken)
         {
-            var user = await _identityService.GetUserDetailsAsync(_currentUserContext.UserId);
+            var userId = request.UserId ?? _currentUserContext.UserId;
+            var user = await _identityService.GetUserDetailsAsync(userId);
 
             if (user == null)
                 throw new BusinessException("User is not found.");

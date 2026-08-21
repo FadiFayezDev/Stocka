@@ -112,7 +112,7 @@ namespace Infrastructure.Repositories.Queries
             var orderIds = orders.Select(o => o.Id).ToList();
             var itemsQuery = $@"SELECT id, order_id AS OrderId, product_id AS ProductId, batch_id AS BatchId, quantity AS Quantity, unit_price AS UnitPrice, cost_price AS CostPrice 
                                 FROM {TableOrderItems} 
-                                WHERE order_id IN @OrderIds";
+                                WHERE order_id = ANY(@OrderIds)";
 
             var allItems = await _connection.QueryAsync<OrderItemDto>(itemsQuery, new { OrderIds = orderIds });
             var itemsByOrder = allItems.GroupBy(i => i.OrderId).ToDictionary(g => g.Key, g => g.ToList());
@@ -144,7 +144,7 @@ namespace Infrastructure.Repositories.Queries
             var orderIds = orders.Select(o => o.Id).ToList();
             var itemsQuery = $@"SELECT id, order_id AS OrderId, product_id AS ProductId, batch_id AS BatchId, quantity AS Quantity, unit_price AS UnitPrice, cost_price AS CostPrice 
                                 FROM {TableOrderItems} 
-                                WHERE order_id IN @OrderIds";
+                                WHERE order_id = ANY(@OrderIds)";
 
             var allItems = await _connection.QueryAsync<OrderItemDto>(itemsQuery, new { OrderIds = orderIds });
             var itemsByOrder = allItems.GroupBy(i => i.OrderId).ToDictionary(g => g.Key, g => g.ToList());

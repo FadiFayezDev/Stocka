@@ -1,0 +1,271 @@
+@using Application.Dtos.Products
+@using MVC.Models.Pos
+@model PosIndexModel
+
+@{
+    ViewData["Title"] = "نقطة البيع";
+    var activeProducts = Model.Products.Where(p => p.IsActive).ToList();
+}
+
+<div class="pos-screen">
+
+    <div class="pos-toolbar">
+        <div class="pos-toolbar__title">
+            <i class="bi bi-shop" aria-hidden="true"></i>
+            <div>
+                <h1 class="pos-toolbar__name">نقطة البيع</h1>
+                <span class="pos-toolbar__meta">الموظف: @Model.EmployeeName</span>
+            </div>
+        </div>
+        <div class="pos-toolbar__warehouse">
+            <label class="pos-toolbar__warehouse-label" for="posWarehouse">
+                <i class="bi bi-arrow-down-left-circle" aria-hidden="true"></i> البيع من:
+            </label>
+            <select id="posWarehouse" class="form-select form-select-sm" title="اختر مخزن البيع (الرفوف)">
+                @foreach (var warehouse in Model.SellingWarehouses)
+                {
+                    <option value="@warehouse.Id" selected="@(warehouse.Id == Model.SelectedWarehouseId)">@warehouse.Name</option>
+                }
+            </select>
+        </div>
+        <div class="pos-toolbar__actions">
+            <button type="button" class="btn btn-outline-secondary" id="posNewSale" title="مسح السلة وبدء فاتورة جديدة">
+                <i class="bi bi-plus-circle"></i> فاتورة جديدة
+            </button>
+            <button type="button" class="btn btn-outline-secondary" id="posToggleHistory" title="مبيعات اليوم">
+                <i class="bi bi-clock-history"></i> مبيعات اليوم
+                <span class="badge bg-secondary ms-1" id="posHistoryCount">@Model.RecentOrders.Count</span>
+            </button>
+        </div>
+    </div>
+
+    @if (Model.SellingWarehouses.Count == 0)
+    {
+        <div class="alert alert-warning pos-nowarehouse shadow-sm">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+            لا يوجد مخزن بيع (رفوف). <a asp-controller="Warehouses" asp-action="Create" class="alert-link">أنشئ مخزن بيع</a> أو حوّل كمية من المخزن الرئيسي لتتمكن من البيع.
+        </div>
+    }
+
+    <div class="pos-grid">
+
+        @* ===================== المنتجات ===================== *@
+        <section class="pos-panel pos-panel--products" aria-label="المنتجات">
+            <div class="pos-search">
+                <div class="pos-search__box">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <input type="text" id="posSearch" class="pos-input" placeholder="ابحث بالاسم أو الباركود..." autocomplete="off" />
+                </div>
+                <div class="pos-search__box pos-search__box--scanner" title="موقف الباركود: امسح ثم Enter">
+                    <i class="bi bi-upc-scan" aria-hidden="true"></i>
+                    <input type="text" id="posScanner" class="pos-input" placeholder="باركود..." autocomplete="off" />
+                </div>
+            </div>
+
+            <div class="pos-cats" id="posCats" aria-label="تصفية حسب الفئة">
+                <button type="button" class="pos-cat is-active" data-cat="">الكل</button>
+                @foreach (var cat in Model.Categories)
+                {
+                    <button type="button" class="pos-cat" data-cat="@cat.Id">@cat.Name</button>
+                }
+            </div>
+
+            <div class="pos-products" id="posProducts">
+                @foreach (var product in activeProducts)
+                {
+                    var outOfStock = product.TotalQuantity <= 0;
+                    <button type="button"
+                            class="pos-product @(outOfStock ? "is-out" : "")"
+                            data-id="@product.Id"
+                            data-name="@product.Name"
+                            data-barcode="@product.Barcode"
+                            data-price="@product.SellingPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                            data-stock="@product.TotalQuantity"
+                            data-cat="@product.CategoryId"
+                            @(outOfStock ? "disabled" : "")>
+                        <span class="pos-product__img">
+                            @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                            {
+                                <img src="@product.ImageUrl" alt="@product.Name" loading="lazy" />
+                            }
+                            else
+                            {
+                                <i class="bi bi-box-seam" aria-hidden="true"></i>
+                            }
+                        </span>
+                        <span class="pos-product__name" title="@product.Name">@product.Name</span>
+                        <span class="pos-product__price">
+                            @product.SellingPrice.ToString("N2")
+                            <small>ج.م</small>
+                        </span>
+                        @if (outOfStock)
+                        {
+                            <span class="pos-product__stock pos-product__stock--out">نفذت</span>
+                        }
+                        else if (product.TotalQuantity <= 5)
+                        {
+                            <span class="pos-product__stock pos-product__stock--low">متبقي @product.TotalQuantity</span>
+                        }
+                    </button>
+                }
+            </div>
+
+            @if (!activeProducts.Any())
+            {
+                <div class="pos-empty">
+                    <i class="bi bi-box-seam" aria-hidden="true"></i>
+                    <p>لا توجد منتجات نشطة. أضف منتجات أولاً.</p>
+                    <a asp-controller="Products" asp-action="Create" class="btn btn-sm btn-primary">إضافة منتج</a>
+                </div>
+            }
+        </section>
+
+        @* ===================== السلة ===================== *@
+        <aside class="pos-panel pos-panel--cart" aria-label="السلة">
+            <div class="pos-cart__head">
+                <span><i class="bi bi-receipt" aria-hidden="true"></i> الفاتورة الحالية</span>
+                <span class="pos-cart__count" id="posCartCount">0</span>
+            </div>
+
+            <div class="pos-cart__items" id="posCartItems">
+                <div class="pos-cart__empty">
+                    <i class="bi bi-cart-plus" aria-hidden="true"></i>
+                    <p>اضغط على منتج لإضافته إلى الفاتورة</p>
+                </div>
+            </div>
+
+            <div class="pos-cart__totals">
+                <div class="pos-total-row">
+                    <span>الإجمالي</span>
+                    <span class="pos-total-row__value" id="posSubtotal">0.00 ج.م</span>
+                </div>
+                <div class="pos-total-row">
+                    <span>الخصم</span>
+                    <div class="pos-total-input">
+                        <input type="number" id="posDiscount" class="pos-input pos-input--money" min="0" step="0.01" value="0" inputmode="decimal" />
+                        <span>ج.م</span>
+                    </div>
+                </div>
+                <div class="pos-total-row pos-total-row--grand">
+                    <span>الصافي</span>
+                    <span class="pos-total-row__value" id="posTotal">0.00 ج.م</span>
+                </div>
+            </div>
+
+            <div class="pos-cart__meta">
+                <label class="pos-field">
+                    <span class="pos-field__label">العميل</span>
+                    <select id="posCustomer" class="form-select form-select-sm">
+                        <option value="">عميل نقدي</option>
+                        @foreach (var customer in Model.Customers)
+                        {
+                            <option value="@customer.Id">عميل مسجل</option>
+                        }
+                    </select>
+                </label>
+                <label class="pos-field">
+                    <span class="pos-field__label">ملاحظات (اختياري)</span>
+                    <input type="text" id="posNotes" class="form-control form-control-sm" placeholder="مثال: عن طريق كاشير..." />
+                </label>
+            </div>
+
+            <div class="pos-cart__pay">
+                <div class="pos-total-row">
+                    <span>المدفوع</span>
+                    <div class="pos-total-input">
+                        <input type="number" id="posReceived" class="pos-input pos-input--money" min="0" step="0.01" value="0" inputmode="decimal" />
+                        <span>ج.م</span>
+                    </div>
+                </div>
+                <div class="pos-total-row">
+                    <span>الباقي</span>
+                    <span class="pos-total-row__value" id="posChange">0.00 ج.م</span>
+                </div>
+            </div>
+
+            <form id="posCheckoutForm">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="pos-checkout" id="posCheckout">
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    إتمام البيع
+                </button>
+            </form>
+        </aside>
+    </div>
+
+    @* ===================== مبيعات اليوم ===================== *@
+    <div class="pos-history" id="posHistory" hidden>
+        <div class="pos-history__head">
+            <h2><i class="bi bi-clock-history" aria-hidden="true"></i> مبيعات اليوم</h2>
+            <button type="button" class="btn-close" id="posHistoryClose" aria-label="إغلاق"></button>
+        </div>
+        @if (!Model.RecentOrders.Any())
+        {
+            <p class="text-muted text-center py-4 mb-0">لا توجد مبيعات اليوم بعد.</p>
+        }
+        else
+        {
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>الوقت</th>
+                        <th>المنتجات</th>
+                        <th class="text-end">الإجمالي</th>
+                        <th class="text-end">الفاتورة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        <tr>
+                            <td class="text-nowrap">@order.OrderDate.ToLocalTime().ToString("hh:mm tt")</td>
+                            <td>@order.Items.Sum(i => i.Quantity) صنف</td>
+                            <td class="text-end fw-bold">@order.TotalAmount.ToString("N2") ج.م</td>
+                            <td class="text-end">
+                                <a asp-action="Receipt" asp-route-id="@order.Id" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-receipt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <div class="pos-toast" id="posToast" role="alert" aria-live="assertive" hidden></div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pos.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/pos.js" asp-append-version="true"></script>
+    <script>
+        window.PosApp.init({
+            search: 'posSearch',
+            scanner: 'posScanner',
+            cats: 'posCats',
+            products: 'posProducts',
+            cartItems: 'posCartItems',
+            cartCount: 'posCartCount',
+            subtotal: 'posSubtotal',
+            discount: 'posDiscount',
+            total: 'posTotal',
+            received: 'posReceived',
+            change: 'posChange',
+            customer: 'posCustomer',
+            notes: 'posNotes',
+            checkoutForm: 'posCheckoutForm',
+            checkout: 'posCheckout',
+            newSale: 'posNewSale',
+            historyToggle: 'posToggleHistory',
+            historyClose: 'posHistoryClose',
+            history: 'posHistory',
+            toast: 'posToast',
+            historyCount: 'posHistoryCount',
+            warehouse: 'posWarehouse'
+        });
+    </script>
+}

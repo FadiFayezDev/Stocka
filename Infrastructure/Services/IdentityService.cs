@@ -10,7 +10,7 @@ using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Serviecs
+namespace Infrastructure.Services
 {
     public class IdentityService : IIdentityService
     {

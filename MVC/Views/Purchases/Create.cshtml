@@ -1,0 +1,195 @@
+@model MVC.Models.Purchases.PurchaseCreateModel
+@{
+    ViewData["Title"] ??= "أمر شراء جديد";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">أمر شراء جديد</h4>
+        <span class="text-secondary small">تسجل الأصناف بدون تأثير على المخزون — المخزون يُضاف عند استلام الدفعة</span>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">رجوع</a>
+</div>
+
+<form method="post" id="createForm">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" asp-for="SupplierId">المورد</label>
+                    <select asp-for="SupplierId" class="form-select" asp-items="@(new SelectList(Model.Suppliers, "Id", "Name"))">
+                        <option value="">— اختر المورد —</option>
+                    </select>
+                    <span asp-validation-for="SupplierId" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" asp-for="PurchaseDate">تاريخ الأمر</label>
+                    <input asp-for="PurchaseDate" type="date" class="form-control" />
+                    <span asp-validation-for="PurchaseDate" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">الأصناف</span>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="addLineBtn">
+                <i class="bi bi-plus-lg"></i> إضافة صنف
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0" id="linesTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="min-width: 200px;">الصنف</th>
+                        <th style="width: 110px;">الكمية</th>
+                        <th style="width: 140px;">سعر الشراء</th>
+                        <th style="width: 110px;">الإجمالي</th>
+                        <th style="width: 40px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Lines.Any())
+                    {
+                        <tr class="empty-row">
+                            <td colspan="5" class="text-center text-secondary py-4">لم تُضف أصناف بعد — أضف صنفاً للبدء.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @for (var i = 0; i < Model.Lines.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <select name="Lines[@i].ProductId" class="form-select product-select" asp-items="@(new SelectList(Model.Products, "Id", "Name"))">
+                                        <option value="">— اختر الصنف —</option>
+                                    </select>
+                                </td>
+                                <td><input name="Lines[@i].Quantity" type="number" min="1" class="form-control qty-input" value="@Model.Lines[i].Quantity" /></td>
+                                <td><input name="Lines[@i].UnitCost" type="number" step="0.01" min="0" class="form-control cost-input" value="@Model.Lines[i].UnitCost" /></td>
+                                <td class="line-total fw-semibold">0.00</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-line-btn"><i class="bi bi-x-lg"></i></button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white d-flex justify-content-end align-items-center gap-3">
+            <div class="me-auto">
+                <span class="text-secondary small">إجمالي قيمة الأمر</span>
+            </div>
+            <div class="fs-5 fw-bold" id="grandTotal">0.00</div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg"></i> حفظ أمر الشراء
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        const products = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Products.Select(p => new { p.Id, p.Name, p.Barcode, p.SellingPrice })));
+
+        const productOptionsHtml = products.map(p =>
+            `<option value="${p.Id}">${p.Name}</option>`).join('');
+
+        function addLine() {
+            const tbody = document.querySelector('#linesTable tbody');
+            const emptyRow = tbody.querySelector('.empty-row');
+            if (emptyRow) emptyRow.remove();
+
+            const idx = tbody.querySelectorAll('tr').length;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <select name="Lines[${idx}].ProductId" class="form-select product-select">
+                        <option value="">— اختر الصنف —</option>
+                        ${productOptionsHtml}
+                    </select>
+                </td>
+                <td><input name="Lines[${idx}].Quantity" type="number" min="1" class="form-control qty-input" value="1" /></td>
+                <td><input name="Lines[${idx}].UnitCost" type="number" step="0.01" min="0" class="form-control cost-input" value="0" /></td>
+                <td class="line-total fw-semibold">0.00</td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-line-btn"><i class="bi bi-x-lg"></i></button>
+                </td>`;
+            tbody.appendChild(tr);
+            recompute();
+        }
+
+        document.getElementById('addLineBtn').addEventListener('click', addLine);
+
+        document.querySelector('#linesTable tbody').addEventListener('input', recompute);
+        document.querySelector('#linesTable tbody').addEventListener('change', (e) => {
+            if (e.target.classList.contains('product-select')) {
+                const p = products.find(x => x.Id === e.target.value);
+                const row = e.target.closest('tr');
+                if (p && row) {
+                    row.querySelector('.cost-input').value = (p.SellingPrice || 0).toFixed(2);
+                    recompute();
+                }
+            }
+        });
+        document.querySelector('#linesTable tbody').addEventListener('click', (e) => {
+            if (e.target.closest('.remove-line-btn')) {
+                const row = e.target.closest('tr');
+                const tbody = row.parentElement;
+                row.remove();
+                reindex(tbody);
+                recompute();
+                if (!tbody.querySelectorAll('tr').length) {
+                    tbody.innerHTML = `<tr class="empty-row"><td colspan="5" class="text-center text-secondary py-4">لم تُضف أصناف بعد — أضف صنفاً للبدء.</td></tr>`;
+                }
+            }
+        });
+
+        function reindex(tbody) {
+            tbody.querySelectorAll('tr').forEach((row, i) => {
+                const selects = row.querySelectorAll('select, input');
+                selects.forEach(el => {
+                    const m = el.name.match(/^Lines\[\d+\]\.(\w+)$/);
+                    if (m) el.name = `Lines[${i}].${m[1]}`;
+                });
+            });
+        }
+
+        function recompute() {
+            let total = 0;
+            document.querySelectorAll('#linesTable tbody tr').forEach(row => {
+                if (row.classList.contains('empty-row')) return;
+                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+                const cost = parseFloat(row.querySelector('.cost-input').value) || 0;
+                const lineTotal = qty * cost;
+                row.querySelector('.line-total').textContent = lineTotal.toFixed(2);
+                total += lineTotal;
+            });
+            document.getElementById('grandTotal').textContent = total.toFixed(2);
+        }
+
+        document.getElementById('createForm').addEventListener('submit', (e) => {
+            const tbody = document.querySelector('#linesTable tbody');
+            const lines = [...tbody.querySelectorAll('tr')].filter(r => !r.classList.contains('empty-row'));
+            if (lines.length === 0) {
+                e.preventDefault();
+                alert('أضف صنفاً واحداً على الأقل.');
+                return;
+            }
+            const hasProduct = lines.some(r => r.querySelector('.product-select').value);
+            if (!hasProduct) {
+                e.preventDefault();
+                alert('اختر صنفاً لكل سطر.');
+            }
+        });
+    </script>
+}

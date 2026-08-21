@@ -1,9 +1,8 @@
 ﻿@{
-    // Direction is driven by view data so the same layout serves both
-    // languages without duplication. A view can opt into RTL with:
-    //   ViewData["Lang"] = "ar";
-    //   ViewData["Dir"] = "rtl";
-    var lang = ViewData["Lang"] as string ?? "en";
+    // Direction is driven by the language cookie so the same layout serves both
+    // languages without duplication. Default is Arabic (RTL). The top-bar toggle
+    // sets ?lang=ar|en which LocalizationMiddleware persists into the cookie.
+    var lang = Context.Request.Cookies["stocka.lang"] ?? "ar";
     var dir = ViewData["Dir"] as string ?? (lang == "ar" ? "rtl" : "ltr");
     var title = ViewData["Title"] as string;
 }
@@ -13,7 +12,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#101826" />
-    <title>@(string.IsNullOrWhiteSpace(title) ? "Stocka" : $"{title} – Stocka")</title>
+    <title>@(string.IsNullOrWhiteSpace(title) ? "ستوكا" : $"{title} – ستوكا")</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.css" />
@@ -25,7 +24,7 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">تخطَّ إلى المحتوى</a>
 
     <div class="app" id="app">
         <partial name="_Sidebar" />
@@ -39,38 +38,58 @@
                         id="sidebarToggle"
                         aria-controls="appSidebar"
                         aria-expanded="false"
-                        aria-label="Toggle navigation"
-                        title="Toggle navigation">
+                        aria-label="تبديل القائمة الجانبية"
+                        title="تبديل القائمة الجانبية">
                     <i class="bi bi-list" aria-hidden="true"></i>
                 </button>
 
                 <div class="topbar-title">
-                    <span class="topbar-title__eyebrow">Stocka</span>
-                    <span class="topbar-title__label" id="pageTitle">@(string.IsNullOrWhiteSpace(title) ? "Overview" : title)</span>
+                    <span class="topbar-title__eyebrow">ستوكا</span>
+                    <span class="topbar-title__label" id="pageTitle">@(string.IsNullOrWhiteSpace(title) ? "الرئيسية" : title)</span>
                 </div>
 
                 <div class="topbar-actions">
-                    <button type="button"
-                            class="topbar-btn topbar-btn--text"
-                            title="Switch language"
-                            aria-label="Switch language">
+                    <a href="?lang=@(lang == "ar" ? "en" : "ar")"
+                       class="topbar-btn topbar-btn--text"
+                       title="@(lang == "ar" ? "Switch to English" : "التبديل إلى العربية")"
+                       aria-label="@(lang == "ar" ? "Switch to English" : "التبديل إلى العربية")">
                         <i class="bi bi-translate" aria-hidden="true"></i>
                         <span class="topbar-btn__label">@(lang == "ar" ? "EN" : "عربي")</span>
-                    </button>
+                    </a>
 
                     <button type="button"
                             class="topbar-btn"
-                            title="Notifications"
-                            aria-label="Notifications">
+                            title="الإشعارات"
+                            aria-label="الإشعارات">
                         <i class="bi bi-bell" aria-hidden="true"></i>
                         <span class="topbar-badge" aria-hidden="true">3</span>
                     </button>
+
+                    <partial name="_BranchSwitcher" />
 
                     <partial name="_UserMenu" />
                 </div>
             </header>
 
             <main class="app-content" id="main" tabindex="-1">
+                @if (TempData["SuccessMessage"] is string success)
+                {
+                    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm" role="alert">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>@success</span>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="إغلاق"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] is string error)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm" role="alert">
+                        <i class="bi bi-x-circle-fill"></i>
+                        <span>@error</span>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="إغلاق"></button>
+                    </div>
+                }
+
                 @RenderBody()
             </main>
         </div>

@@ -44,5 +44,14 @@ namespace API.Controllers
 
             return Ok(await _mediator.Send(command, cancellationToken));
         }
+
+        [HttpPost("transfer")]
+        public async Task<IActionResult> TransferStockAsync([FromBody] TransferStockCommand command, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(await _mediator.Send(command, cancellationToken));
+        }
     }
 }

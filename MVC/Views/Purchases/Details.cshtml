@@ -1,0 +1,172 @@
+@model MVC.Models.Purchases.PurchaseDetailsModel
+@{
+    ViewData["Title"] ??= "أمر شراء";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-right"></i></a>
+        <div>
+            <h4 class="mb-1">أمر شراء #@Model.Id.ToString("N")[..8].ToUpper()</h4>
+            <span class="text-secondary small">@Model.PurchaseDate.ToString("dd-MM-yyyy") — المورد: <strong>@Model.SupplierName</strong></span>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge fs-6 @(Model.Status switch {
+            "Ordered" => "bg-warning-subtle text-warning",
+            "Completed" => "bg-success-subtle text-success",
+            "Cancelled" => "bg-secondary-subtle text-secondary",
+            _ => "bg-light text-dark" })">
+            @Model.StatusLabel
+        </span>
+        @if (Model.CanCancel)
+        {
+            <form method="post" asp-action="Cancel" asp-route-id="@Model.Id" onsubmit="return confirm('إلغاء أمر الشراء نهائياً؟');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> إلغاء الأمر</button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold">الأصناف</div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>الصنف</th>
+                    <th class="text-center">الكمية المطلوبة</th>
+                    <th class="text-center">تم استلامه</th>
+                    <th class="text-center">المتبقي</th>
+                    <th class="text-end">سعر الشراء</th>
+                    <th class="text-end">الإجمالي</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var i in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@i.ProductName</div>
+                            @if (!string.IsNullOrEmpty(i.Barcode))
+                            {
+                                <div class="text-secondary small">@i.Barcode</div>
+                            }
+                        </td>
+                        <td class="text-center">@i.Quantity</td>
+                        <td class="text-center text-success">@i.ReceivedQuantity</td>
+                        <td class="text-center">@i.RemainingToReceive</td>
+                        <td class="text-end">@i.UnitCost.ToString("N2")</td>
+                        <td class="text-end fw-semibold">@(i.UnitCost * i.Quantity)</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="table-light">
+                <tr>
+                    <td colspan="5" class="text-end fw-semibold">إجمالي قيمة الأمر</td>
+                    <td class="text-end fs-5 fw-bold">@Model.TotalAmount.ToString("N2") ج.م</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+@if (Model.CanReceive && Model.ReceiveForm.Lines.Any())
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white fw-semibold">
+            <i class="bi bi-box-arrow-down"></i> استلام دفعة (إضافة إلى المخازن)
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                عند استلام الدفعة تُضاف الكميات إلى <strong>حركة المخزون</strong> وتظهر كأصناف قابلة للبيع أو النقل. يمكنك استلام جزئي الآن واستكمال الباقي لاحقاً حتى بأسعار مختلفة.
+            </div>
+            <form method="post" asp-action="Receive" id="receiveForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="PurchaseId" value="@Model.ReceiveForm.PurchaseId" />
+                @for (var i = 0; i < Model.ReceiveForm.Lines.Count; i++)
+                {
+                    var line = Model.ReceiveForm.Lines[i];
+                    <div class="border rounded-3 p-3 mb-3">
+                        <div class="row g-3 align-items-end">
+                            <input type="hidden" name="Lines[@i].PurchaseItemId" value="@line.PurchaseItemId" />
+                            <div class="col-md-4">
+                                <label class="form-label small">الكمية المستلمة</label>
+                                <input type="number" min="1" max="@Model.Items.First(x => x.PurchaseItemId == line.PurchaseItemId).RemainingToReceive" name="Lines[@i].Quantity" class="form-control receive-qty" value="@line.Quantity" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small">سعر الوحدة لهذه الدفعة</label>
+                                <input type="number" step="0.01" min="0" name="Lines[@i].UnitCost" class="form-control receive-cost" value="@line.UnitCost.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" />
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small">توزيع الكمية على المخازن</label>
+                                <div class="d-flex flex-column gap-1">
+                                    @for (var j = 0; j < line.Allocations.Count; j++)
+                                    {
+                                        var a = line.Allocations[j];
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text flex-grow-1 bg-white">@a.WarehouseName</span>
+                                            <input type="hidden" name="Lines[@i].Allocations[@j].WarehouseId" value="@a.WarehouseId" />
+                                            <input type="number" min="0" name="Lines[@i].Allocations[@j].Quantity" class="form-control allocation-qty" style="max-width: 100px;" value="0" />
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg"></i> تأكيد الاستلام وإضافة إلى المخازن
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.getElementById('receiveForm')?.addEventListener('submit', (e) => {
+            let ok = true;
+            document.querySelectorAll('#receiveForm .receive-qty').forEach(input => {
+                const qty = parseFloat(input.value) || 0;
+                const max = parseFloat(input.max);
+                if (qty < 1 || qty > max) {
+                    ok = false;
+                    input.classList.add('is-invalid');
+                }
+            });
+            document.querySelectorAll('#receiveForm .receive-qty').forEach(input => {
+                const row = input.closest('.row');
+                if (row) {
+                    const allocs = row.querySelectorAll('.allocation-qty');
+                    const allocSum = [...allocs].reduce((s, a) => s + (parseFloat(a.value) || 0), 0);
+                    const qty = parseFloat(input.value) || 0;
+                    if (allocSum !== qty) {
+                        ok = false;
+                        row.classList.add('bg-danger-subtle', 'rounded-3');
+                        alert('مجموع توزيع المخازن يجب أن يساوي الكمية المستلمة بالضبط.');
+                    }
+                }
+            });
+            if (!ok) e.preventDefault();
+        });
+    </script>
+}

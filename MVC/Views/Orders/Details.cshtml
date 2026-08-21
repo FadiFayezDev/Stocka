@@ -1,0 +1,196 @@
+@using MVC.Models.Orders
+@model OrderDetailsModel
+
+@{
+    ViewData["Title"] = "فاتورة بيع";
+}
+
+<div class="page-head">
+    <div class="page-head__text">
+        <nav aria-label="breadcrumb" class="breadcrumb-nav">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                <li class="breadcrumb-item"><a asp-action="Index">المبيعات</a></li>
+                <li class="breadcrumb-item active" aria-current="page">تفاصيل الفاتورة</li>
+            </ol>
+        </nav>
+        <h1 class="page-head__title">فاتورة بيع #@Model.Id.ToString("N")[..8].ToUpper()</h1>
+        <p class="page-head__subtitle text-muted mb-0">تفاصيل الفاتورة المنفذة من نقطة البيع</p>
+    </div>
+    <div class="page-head__actions">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right"></i>
+            <span>رجوع للمبيعات</span>
+        </a>
+    </div>
+</div>
+
+<div class="invoice card border-0 shadow-sm">
+    <div class="card-body p-lg-5 p-4">
+        <div class="invoice__head d-flex flex-wrap justify-content-between gap-3 mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="bi bi-receipt fs-4 text-muted"></i>
+                    <span class="fs-5 fw-bold">فاتورة بيع</span>
+                </div>
+                <div class="text-muted small">رقم الفاتورة: <span class="font-monospace">@Model.Id.ToString("N")</span></div>
+            </div>
+            <div class="text-md-end">
+                <div class="fw-semibold">@Model.OrderDate.ToString("dd/MM/yyyy hh:mm tt")</div>
+                <div class="text-muted small">
+                    @if (!string.IsNullOrWhiteSpace(Model.BranchName))
+                    {
+                        <i class="bi bi-geo-alt me-1"></i>@Model.BranchName
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle mb-0 invoice-items">
+                <thead>
+                    <tr>
+                        <th scope="col" class="ps-4">المنتج</th>
+                        <th scope="col">الباركود</th>
+                        <th scope="col" class="text-center">الكمية</th>
+                        <th scope="col" class="text-center">سعر الوحدة</th>
+                        <th scope="col" class="text-center">التكلفة</th>
+                        <th scope="col" class="text-center">الربح</th>
+                        <th scope="col" class="text-end pe-4">الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-semibold">@item.ProductName</span>
+                            </td>
+                            <td>
+                                @if (string.IsNullOrWhiteSpace(item.Barcode))
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                                else
+                                {
+                                    <span class="font-monospace small">@item.Barcode</span>
+                                }
+                            </td>
+                            <td class="text-center">@item.Quantity</td>
+                            <td class="text-center">@item.UnitPrice.ToString("N2")</td>
+                            <td class="text-center text-muted">@item.CostPrice.ToString("N2")</td>
+                            <td class="text-center">
+                                <span class="text-success fw-semibold">@item.LineProfit.ToString("N2")</span>
+                            </td>
+                            <td class="text-end pe-4 fw-bold">@item.LineTotal.ToString("N2") <small class="text-muted fw-normal">ج.م</small></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="invoice__totals mt-4 d-flex justify-content-end">
+            <div class="totals-box">
+                <div class="d-flex justify-content-between gap-5 py-1">
+                    <span class="text-muted">إجمالي الوحدات</span>
+                    <span class="fw-semibold">@Model.TotalUnits</span>
+                </div>
+                <div class="d-flex justify-content-between gap-5 py-2 border-top">
+                    <span class="fw-bold fs-5">الإجمالي</span>
+                    <span class="fw-bold fs-5 text-primary">@Model.TotalAmount.ToString("N2") <small class="fw-normal">ج.م</small></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span class="small text-muted">
+                <i class="bi bi-check-circle text-success me-1"></i>الحالة: <span class="badge rounded-pill bg-success-subtle text-success ms-1">@Model.Status</span>
+            </span>
+            <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> طباعة الفاتورة
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .invoice {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .invoice-items thead th {
+        background: var(--surface-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-2);
+        border-bottom: 1px solid var(--border);
+        padding-block: 12px;
+    }
+
+    .invoice-items tbody tr {
+        border-bottom: 1px solid #f0f3f7;
+    }
+
+    .invoice-items tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .totals-box {
+        min-width: 280px;
+    }
+
+    @@media print {
+        .page-head, .app-sidebar, .app-topbar, .btn {
+            display: none !important;
+        }
+        .app-main {
+            margin-inline-start: 0 !important;
+        }
+        .invoice {
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+    }
+</style>

@@ -1,0 +1,81 @@
+@using Application.Dtos.Products
+@model ProductCategoryDto
+
+@{
+    ViewData["Title"] = "حذف الفئة";
+}
+
+<div class="confirm-page">
+    <div class="confirm-card card border-0 shadow-sm">
+        <div class="card-body p-lg-5 p-4 text-center">
+            <div class="confirm-icon bg-danger-subtle text-danger">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+
+            <h3 class="fw-bold mb-2">حذف الفئة</h3>
+            <p class="text-muted mb-1">هل أنت متأكد من رغبتك في حذف هذه الفئة؟</p>
+            <p class="text-muted small mb-4">
+                لا يمكن حذف الفئة إذا كانت مرتبطة بمنتجات. سيتم ربط المنتجات بها بشكل دائم.
+            </p>
+
+            <div class="confirm-item d-inline-flex align-items-center gap-3 bg-light rounded-3 px-4 py-3 mb-4">
+                <span class="confirm-icon-sm bg-primary-subtle text-primary">
+                    <i class="bi bi-tag"></i>
+                </span>
+                <div class="text-start">
+                    <div class="fw-bold">@Model.Name</div>
+                    <div class="text-muted small">#@Model.Id</div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger btn-lg px-5">
+                        <i class="bi bi-trash me-1"></i> نعم، احذف الفئة
+                    </button>
+                </form>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-5">إلغاء</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .confirm-page {
+        max-width: 560px;
+        margin: 0 auto;
+        padding-top: 24px;
+    }
+
+    .confirm-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .confirm-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .confirm-icon-sm {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex: 0 0 auto;
+    }
+
+    .confirm-item .text-start {
+        text-align: start !important;
+    }
+</style>

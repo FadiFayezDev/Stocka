@@ -23,7 +23,7 @@ namespace Infrastructure.Repositories.Commands
         public async Task<IEnumerable<JournalEntry>> GetAllByBrandIdAsync(Guid brandId)
         {
             return _context.JournalEntries
-                .Where(a => a.BrandId.Value == brandId)
+                .Where(a => a.BrandId == new BrandId(brandId))
                 .AsNoTracking()
                 .AsQueryable();
         }

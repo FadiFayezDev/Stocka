@@ -1,0 +1,152 @@
+@using MVC.Models.Branches
+@model BranchIndexModel
+
+@{
+    ViewData["Title"] = "الفروع";
+}
+
+<div class="branches-page">
+    <div class="page-head">
+        <div class="page-head__text">
+            <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">الفروع</li>
+                </ol>
+            </nav>
+            <h1 class="page-head__title">الفروع</h1>
+            <p class="page-head__subtitle text-muted mb-0">إدارة فروع نشاطك وربط كل فرع بالمخازن (الرفوف) التي يبيع منها</p>
+        </div>
+        <div class="page-head__actions">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>
+                <span>إضافة فرع</span>
+            </a>
+        </div>
+    </div>
+
+    @if (Model.Branches.Count == 0)
+    {
+        <div class="empty-state card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-diagram-3 fs-1 text-muted"></i>
+                <h4 class="mt-3">لا توجد فروع بعد</h4>
+                <p class="text-muted">أضف فرعاً ثم اربطه بالمخازن التي يبيع منها — ستستخدم نقطة البيع رفوف الفرع تلقائياً.</p>
+                <a asp-action="Create" class="btn btn-primary mt-2">
+                    <i class="bi bi-plus-lg me-1"></i> إضافة فرع
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var branch in Model.Branches)
+            {
+                var warehouses = Model.WarehouseNames.TryGetValue(branch.Id, out var w) ? w : new List<string>();
+                <div class="col-md-6 col-xl-4">
+                    <div class="card border-0 shadow-sm branch-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="branch-icon">
+                                        <i class="bi bi-diagram-3"></i>
+                                    </div>
+                                    <h5 class="mb-0 fw-bold">@branch.Name</h5>
+                                </div>
+                            </div>
+
+                            @if (warehouses.Count > 0)
+                            {
+                                <div class="mb-2">
+                                    <span class="text-muted small me-1">المخازن المرتبطة:</span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1 mb-3">
+                                    @foreach (var wName in warehouses)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">@wName</span>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-light border py-2 px-3 small mb-3">بدون ربط — ستقع نقطة البيع على أول مخزن بيع تلقائياً.</div>
+                            }
+                        </div>
+                        <div class="card-footer border-0 bg-white px-4 py-3 d-flex justify-content-end gap-2">
+                            <a asp-action="Edit" asp-route-id="@branch.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil me-1"></i> تعديل
+                            </a>
+                            <form method="post" asp-action="Delete" asp-route-id="@branch.Id" onsubmit="return confirm('حذف الفرع «@branch.Name» نهائياً؟');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash me-1"></i> حذف
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .branch-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        transition: box-shadow .2s ease, transform .2s ease;
+    }
+
+    .branch-card:hover {
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .08) !important;
+        transform: translateY(-2px);
+    }
+
+    .branch-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--surface-muted);
+        color: var(--accent);
+        font-size: 1.25rem;
+    }
+</style>

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -23,34 +24,29 @@ builder.Services.AddHealthChecks();
 
 // Application + Infrastructure
 builder.Services.AddApplicationRegisteration();
-builder.Services.AddInfrastructureRegistration(
-    builder.Configuration);
+builder.Services.AddInfrastructureRegistration(builder.Configuration);
 
 // Identity
 builder.Services
-.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-})
-.AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();
+    .AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
 // Identity Cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Identity/Account/Login";
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-
     options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-
     options.SlidingExpiration = false;
 });
 
 builder.Services.AddAuthorization();
 
-// JWT-cookie authentication: the MVC app authenticates with the JWT stored
-// in the "access_token" cookie (the same token the API validates). If the
-// cookie is missing or the token is expired, the user is redirected to the
-// Login page, and after a successful login they are sent back to Home.
+// JWT-cookie authentication
 const string JwtOrIdentityScheme = "JwtOrIdentity";
 const string AccessTokenCookieName = "access_token";
 
@@ -87,15 +83,12 @@ builder.Services.AddAuthentication(options =>
 
     options.Events = new JwtBearerEvents
     {
-        // Read the token from the HttpOnly cookie instead of the Authorization header.
         OnMessageReceived = context =>
         {
             context.Token = context.Request.Cookies[AccessTokenCookieName];
             return Task.CompletedTask;
         },
 
-        // Make the principal identity-friendly: NameIdentifier = user id (Guid),
-        // Name = user name, so Identity UI (UserManager, SignInManager) works.
         OnTokenValidated = context =>
         {
             var identity = (ClaimsIdentity)context.Principal!.Identity!;
@@ -117,8 +110,6 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         },
 
-        // Missing or expired token -> drop the dead cookie and go to Login,
-        // keeping the original URL so the user returns there after signing in.
         OnChallenge = context =>
         {
             context.HandleResponse();
@@ -141,6 +132,26 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+// Auto-Migration on Startup (Fail-fast strategy)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+
+    try
+    {
+        var dbContext = services.GetRequiredService<AppDbContext>();
+        logger.LogInformation("Applying database migrations...");
+        await dbContext.Database.MigrateAsync();
+        logger.LogInformation("Database migrations applied successfully!");
+    }
+    catch (Exception ex)
+    {
+        logger.LogCritical(ex, "FATAL: An error occurred while applying database migrations.");
+        throw; // إيقاف التطبيق فوراً لرؤية السبب في docker logs وعدم كتم الاستثناء
+    }
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -148,8 +159,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
+
+app.UseMiddleware<MVC.Middleware.LocalizationMiddleware>();
 
 app.UseRouting();
 

@@ -24,6 +24,9 @@ namespace Infrastructure.Configurations
                     value => new ProductId(value));
             builder.Property(e => e.Quantity)
                 .IsRequired();
+            builder.Property(e => e.ReceivedQuantity)
+                .IsRequired()
+                .HasDefaultValue(0);
             builder.Property(e => e.UnitCost)
                 .HasColumnType("decimal(18, 2)");
 

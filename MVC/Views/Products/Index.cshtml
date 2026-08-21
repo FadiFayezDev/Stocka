@@ -1,115 +1,352 @@
 ﻿@using Application.Dtos.Products
 @model IEnumerable<ProductDto>
 
-<div class="container py-4">
+@{
+    ViewData["Title"] = "المنتجات";
+    var search = ViewData["Search"] as string;
+    var status = ViewData["Status"] as string;
+}
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">Products</h2>
-
-        <a asp-action="Create" class="btn btn-success">
-            <i class="bi bi-plus-lg"></i>
-            Add Product
-        </a>
+<div class="page-head">
+    <div class="page-head__text">
+        <nav aria-label="breadcrumb" class="breadcrumb-nav">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                <li class="breadcrumb-item active" aria-current="page">المنتجات</li>
+            </ol>
+        </nav>
+        <h1 class="page-head__title">المنتجات</h1>
+        <p class="page-head__subtitle text-muted mb-0">إدارة المنتجات ومخزونها وأسعارها</p>
     </div>
 
-    @if (!Model.Any())
-    {
-        <div class="card border-0 shadow-sm">
-            <div class="card-body py-5 text-center">
-                <h5>No Products Found</h5>
-                <p class="text-muted mb-4">
-                    Start by adding your first product.
-                </p>
+    <div class="page-head__actions">
+        <a asp-action="Create" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-lg"></i>
+            <span>إضافة منتج</span>
+        </a>
+    </div>
+</div>
 
-                <a asp-action="Create" class="btn btn-primary">
-                    Create Product
-                </a>
+<form method="get" asp-action="Index" class="filter-bar" id="productFilterForm">
+    <div class="input-group">
+        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+        <input type="text"
+               name="search"
+               value="@search"
+               class="form-control"
+               placeholder="ابحث بالاسم أو الباركود..." />
+        <button type="submit" class="btn btn-primary">بحث</button>
+        @if (!string.IsNullOrWhiteSpace(search))
+        {
+            <a asp-action="Index" class="btn btn-outline-secondary" title="مسح البحث">
+                <i class="bi bi-x-lg"></i>
+            </a>
+        }
+    </div>
+
+    <div class="filter-tabs">
+        <a asp-action="Index" class="filter-tab @(string.IsNullOrEmpty(status) ? "is-active" : "")" data-status="">
+            الكل
+        </a>
+        <a asp-action="Index" asp-route-status="active" asp-route-search="@search"
+           class="filter-tab @(status == "active" ? "is-active" : "")" data-status="active">
+            نشط
+        </a>
+        <a asp-action="Index" asp-route-status="inactive" asp-route-search="@search"
+           class="filter-tab @(status == "inactive" ? "is-active" : "")" data-status="inactive">
+            غير نشط
+        </a>
+    </div>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm empty-state">
+        <div class="card-body text-center py-5">
+            <div class="empty-state__icon">
+                <i class="bi bi-box-seam"></i>
             </div>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-
-            @foreach (var product in Model)
+            <h5 class="fw-bold mb-2">لا توجد منتجات</h5>
+            <p class="text-muted mb-4">
+                @(string.IsNullOrWhiteSpace(search)
+                    ? "ابدأ بإضافة أول منتج لك."
+                    : "لا توجد نتائج مطابقة لبحثك.")
+            </p>
+            @if (string.IsNullOrWhiteSpace(search))
             {
-                <div class="col-lg-4 col-md-6">
+                <a asp-action="Create" class="btn btn-primary px-4">
+                    <i class="bi bi-plus-lg"></i> إضافة منتج
+                </a>
+            }
+            else
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-arrow-repeat"></i> عرض الكل
+                </a>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm table-card">
+        <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+            <span class="fw-semibold">قائمة المنتجات</span>
+            <span class="badge bg-light text-dark rounded-pill px-3">@Model.Count() منتج</span>
+        </div>
 
-                    <div class="card h-100 border-0 shadow-sm">
-
-                        <div class="card-body">
-
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-
-                                <h5 class="card-title fw-bold mb-0">
-                                    @product.Name
-                                </h5>
-
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 products-table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="ps-4">المنتج</th>
+                        <th scope="col">الباركود</th>
+                        <th scope="col">سعر البيع</th>
+                        <th scope="col">الكمية</th>
+                        <th scope="col">الحالة</th>
+                        <th scope="col" class="text-end pe-4">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="product-thumb">
+                                        @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                                        {
+                                            <img src="@product.ImageUrl" alt="@product.Name" />
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-box-seam"></i>
+                                        }
+                                    </div>
+                                    <div>
+                                        <a asp-action="Details" asp-route-id="@product.Id"
+                                           class="fw-semibold text-body text-decoration-none product-name">
+                                            @product.Name
+                                        </a>
+                                        <div class="text-muted small">
+                                            <i class="bi bi-tag"></i> #@product.Id.ToString("N")[..8].ToUpperInvariant()
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @if (string.IsNullOrWhiteSpace(product.Barcode))
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                                else
+                                {
+                                    <span class="font-monospace small">@product.Barcode</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="fw-bold text-primary">@product.SellingPrice.ToString("N2")</span>
+                                <small class="text-muted">ج.م</small>
+                            </td>
+                            <td>
+                                @if (product.TotalQuantity > 0)
+                                {
+                                    <span class="fw-semibold">@product.TotalQuantity</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger-subtle text-danger">نفذت الكمية</span>
+                                }
+                            </td>
+                            <td>
                                 @if (product.IsActive)
                                 {
-                                    <span class="badge bg-success">
-                                        Active
+                                    <span class="badge rounded-pill bg-success-subtle text-success">
+                                        <i class="bi bi-check-circle me-1"></i>نشط
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger">
-                                        Inactive
+                                    <span class="badge rounded-pill bg-danger-subtle text-danger">
+                                        <i class="bi bi-x-circle me-1"></i>غير نشط
                                     </span>
                                 }
-
-                            </div>
-
-                            <hr />
-
-                            <div class="mb-2">
-                                <small class="text-muted">Price</small>
-                                <div class="fw-semibold fs-5 text-primary">
-                                    @product.SellingPrice.ToString("N2") ج.م
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group action-group" role="group" aria-label="إجراءات المنتج">
+                                    <a asp-action="Edit" asp-route-id="@product.Id"
+                                       class="btn btn-sm btn-outline-secondary" title="تعديل">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@product.Id"
+                                       class="btn btn-sm btn-outline-secondary" title="التفاصيل">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@product.Id"
+                                       class="btn btn-sm btn-outline-danger" title="حذف">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
                                 </div>
-                            </div>
-
-                            <div class="mb-2">
-                                <small class="text-muted">Quantity</small>
-                                <div class="fw-semibold">
-                                    @product.TotalQuantity
-                                </div>
-                            </div>
-
-                            <div>
-                                <small class="text-muted">Barcode</small>
-                                <div class="font-monospace">
-                                    @(string.IsNullOrWhiteSpace(product.Barcode)
-                                        ? "-"
-                                        : product.Barcode)
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="card-footer border-0 bg-white">
-
-                            <div class="d-flex gap-2">
-                                <a asp-action="Edit"
-                                       asp-route-id="@product.Id"
-                                       class="btn btn-outline-secondary flex-fill">
-                                    Edit
-                                </a>
-                                <a asp-action="Details"
-                                       asp-route-id="@product.Id"
-                                       class="btn btn-outline-secondary flex-fill">
-                                    Details
-                                </a>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            }
-
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
+    </div>
+}
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
     }
 
-</div>
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .filter-bar .input-group {
+        max-width: 380px;
+        width: 100%;
+    }
+
+    .filter-tabs {
+        display: inline-flex;
+        gap: 4px;
+        background: #eef1f5;
+        padding: 4px;
+        border-radius: 10px;
+    }
+
+    .filter-tab {
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--text-2);
+        text-decoration: none;
+        transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+    }
+
+    .filter-tab:hover {
+        color: var(--text-1);
+    }
+
+    .filter-tab.is-active {
+        background: #fff;
+        color: var(--accent-ink);
+        box-shadow: var(--shadow-1);
+    }
+
+    .empty-state__icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .product-thumb {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: var(--surface-muted);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex: 0 0 auto;
+        color: var(--text-3);
+        font-size: 1.25rem;
+    }
+
+    .product-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-name:hover {
+        color: var(--accent) !important;
+    }
+
+    .action-group .btn {
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .table-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .table-card .card-header {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .products-table thead th {
+        background: var(--surface-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-2);
+        border-bottom: 1px solid var(--border);
+        padding-block: 12px;
+    }
+
+    .products-table tbody tr {
+        border-bottom: 1px solid #f0f3f7;
+    }
+
+    .products-table tbody tr:last-child {
+        border-bottom: 0;
+    }
+</style>

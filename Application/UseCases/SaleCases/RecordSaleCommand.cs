@@ -18,6 +18,7 @@ namespace Application.UseCases.SaleCases
         public Guid EmployeeId { get; set; }
         public Guid? CustomerId { get; set; }
         public string? Notes { get; set; }
+        public Guid? WarehouseId { get; set; }
         public List<SaleItemDto> Items { get; set; } = new();
     }
 
@@ -52,6 +53,7 @@ namespace Application.UseCases.SaleCases
         private readonly ICurrentUserContext _currentUser;
         private readonly IWarehouseCommandRepository _warehouseCommand;
         private readonly IWarehouseBatchQueryRepository _warehouseBatchQuery;
+        private readonly IWarehouseQueryRepository _warehouseQuery;
         private readonly IStockMovementCommandRepository _stockMovementRepo;
         private readonly IBatchCommandRepository _batchRepo;
         private readonly IUnitOfWork _unitOfWork;
@@ -63,6 +65,7 @@ namespace Application.UseCases.SaleCases
             ICurrentUserContext currentUser,
             IWarehouseCommandRepository warehouseCommand,
             IWarehouseBatchQueryRepository warehouseBatchQuery,
+            IWarehouseQueryRepository warehouseQuery,
             IStockMovementCommandRepository stockMovementRepo,
             IBatchCommandRepository batchRepo,
             IUnitOfWork unitOfWork,
@@ -72,6 +75,7 @@ namespace Application.UseCases.SaleCases
             _currentUser = currentUser;
             _warehouseCommand = warehouseCommand;
             _warehouseBatchQuery = warehouseBatchQuery;
+            _warehouseQuery = warehouseQuery;
             _stockMovementRepo = stockMovementRepo;
             _batchRepo = batchRepo;
             _unitOfWork = unitOfWork;
@@ -95,11 +99,11 @@ namespace Application.UseCases.SaleCases
             try
             {
                 var order = new Order(
-                    new BrandId(brandId),
-                    new EmployeeId(request.EmployeeId),
-                    request.CustomerId.HasValue ? new CustomerId(request.CustomerId.Value) : null,
+                    BrandId.From(brandId),
+                    EmployeeId.From(request.EmployeeId),
+                    request.CustomerId.HasValue ? CustomerId.From(request.CustomerId.Value) : null,
                     DateTime.UtcNow,
-                    branchId.HasValue ? new BranchId(branchId.Value) : null);
+                    branchId.HasValue ? BranchId.From(branchId.Value) : null);
                 
                 decimal totalAmount = 0;
                 decimal totalCost = 0;
@@ -113,10 +117,10 @@ namespace Application.UseCases.SaleCases
                     if (itemDto.UnitPrice <= 0)
                         return _responseHandler.BadRequest<SaleResultDto>($"Unit price must be positive for product {itemDto.ProductId}");
 
-                    var pickedBatches = await PickBatchesForSale(itemDto.ProductId, itemDto.Quantity, brandId);
+                    var pickedBatches = await PickBatchesForSale(itemDto.ProductId, itemDto.Quantity, brandId, request.WarehouseId);
 
                     if (pickedBatches.Sum(b => b.PickedQuantity) < itemDto.Quantity)
-                        return _responseHandler.BadRequest<SaleResultDto>($"Insufficient stock for product {itemDto.ProductId}");
+                        return _responseHandler.BadRequest<SaleResultDto>($"الكمية غير متوفرة في مخازن البيع (الرفوف). تأكد من تحويل الكمية من المخزن الرئيسي أولاً. المنتج: {itemDto.ProductId}");
 
                     decimal itemCost = 0;
                     foreach (var picked in pickedBatches)
@@ -194,17 +198,47 @@ namespace Application.UseCases.SaleCases
             }
         }
 
-        private async Task<List<PickedBatch>> PickBatchesForSale(Guid productId, int quantity, Guid brandId)
+        private async Task<List<PickedBatch>> PickBatchesForSale(Guid productId, int quantity, Guid brandId, Guid? warehouseId)
         {
             var availableBatches = await _batchRepo.GetAvailableBatchesForProductAsync(productId, brandId);
-            
+
             var sortedBatches = availableBatches
                 .Where(b => b.RemainingQuantity > 0)
                 .OrderBy(b => b.CreatedAt)
                 .ToList();
 
+            // البيع يتم حصرياً من مخازن البيع (الرفوف) — النوع Shop.
+            // الأولوية: المخزن الذي اختاره المستخدم، ثم مخزن الفرع الحالي، ثم أي مخزن بيع.
+            var sellingWarehouses = new HashSet<Guid>();
+
+            if (warehouseId.HasValue && warehouseId.Value != Guid.Empty)
+            {
+                var selected = (await _warehouseQuery.GetAllByBrandIdAsync(brandId))
+                    .FirstOrDefault(w =>
+                        w.Id == warehouseId.Value &&
+                        string.Equals(w.Type, nameof(WarehouseType.Shop), StringComparison.OrdinalIgnoreCase));
+
+                if (selected != null)
+                    sellingWarehouses.Add(selected.Id);
+            }
+            else if (_currentUser.ActiveBranchId.HasValue)
+            {
+                var branchWarehouses = await _warehouseQuery.GetByBranchIdAsync(_currentUser.ActiveBranchId.Value);
+                sellingWarehouses = branchWarehouses
+                    .Where(w => string.Equals(w.Type, nameof(WarehouseType.Shop), StringComparison.OrdinalIgnoreCase))
+                    .Select(w => w.Id)
+                    .ToHashSet();
+            }
+            else
+            {
+                sellingWarehouses = (await _warehouseQuery.GetAllByBrandIdAsync(brandId))
+                    .Where(w => string.Equals(w.Type, nameof(WarehouseType.Shop), StringComparison.OrdinalIgnoreCase))
+                    .Select(w => w.Id)
+                    .ToHashSet();
+            }
+
             var warehouseBatches = (await _warehouseBatchQuery.GetAllByBrandIdAsync(brandId))
-                .Where(wb => wb.Quantity > 0)
+                .Where(wb => wb.Quantity > 0 && sellingWarehouses.Contains(wb.WarehouseId))
                 .ToList();
 
             var pickedBatches = new List<PickedBatch>();

@@ -44,7 +44,7 @@ namespace Infrastructure.Repositories.Queries
                 FROM {TableProducts} p
                 LEFT JOIN {TableBatches} b ON p.id = b.product_id
                 LEFT JOIN {TableWarehouseBatches} wb ON b.id = wb.batch_id
-                WHERE p.brand_id = @BrandId AND p.is_active = 1
+                WHERE p.brand_id = @BrandId AND p.is_active = true
                 GROUP BY p.id
                 HAVING COALESCE(SUM(wb.quantity), 0) <= 10";
 

@@ -1,7 +1,6 @@
-﻿using Application.Bases;
-using Application.Common.Exceptions;
+﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using Application.Dtos.Products;
+using Application.Bases;
 using Domain.Repositories.Commands;
 using MediatR;
 
@@ -10,36 +9,41 @@ namespace Application.UseCases.ProductCases
     public class DiscontinueProductCommand : IRequest<Response<bool>>
     {
         public Guid Id { get; set; }
+
         public DiscontinueProductCommand(Guid id)
         {
             Id = id;
         }
     }
 
-    public class DiscontinueProductCommandHandler : BaseHandler<IProductCommandRepository>, IRequestHandler<DiscontinueProductCommand, Response<bool>>
+    public class DiscontinueProductCommandHandler
+        : BaseHandler<IProductCommandRepository>,
+          IRequestHandler<DiscontinueProductCommand, Response<bool>>
     {
-        private readonly IStorageService _storageService;
-        public DiscontinueProductCommandHandler(IProductCommandRepository productRepository, IUnitOfWork unitOfWork, IStorageService storageService)
+        public DiscontinueProductCommandHandler(
+            IProductCommandRepository productRepository,
+            IUnitOfWork unitOfWork)
             : base(null, productRepository, unitOfWork)
         {
-            _storageService = storageService;
         }
 
-        public async Task<Response<bool>> Handle(DiscontinueProductCommand request, CancellationToken cancellationToken)
+        public async Task<Response<bool>> Handle(
+            DiscontinueProductCommand request,
+            CancellationToken cancellationToken)
         {
             var existingProduct = await _repo.GetByIdAsync(request.Id);
             if (existingProduct == null)
                 throw new BusinessException("Product not found");
 
-            if (!string.IsNullOrEmpty(existingProduct.ImagePath))
-            {
-                await _storageService.RemoveAsync(existingProduct.ImagePath);
-            }
+            existingProduct.Deactivate();
 
-            return await ExecuteDeleteAsync(
-                existingProduct,
-                async (p) => await _repo.DeleteAsync(p),
-                cancellationToken);
+            await _repo.UpdateAsync(existingProduct);
+
+            var result = await _work.SaveChangesAsync(cancellationToken);
+            if (result < 0)
+                throw new BusinessException("Product is not saved");
+
+            return new Response<bool>(true, "Deleted Successfully");
         }
     }
 }

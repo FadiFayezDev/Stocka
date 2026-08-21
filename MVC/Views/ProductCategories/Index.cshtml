@@ -1,0 +1,203 @@
+@using Application.Dtos.Products
+@model IEnumerable<ProductCategoryDto>
+
+@{
+    ViewData["Title"] = "فئات المنتجات";
+}
+
+<div class="page-head">
+    <div class="page-head__text">
+        <nav aria-label="breadcrumb" class="breadcrumb-nav">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Products" asp-action="Index">المنتجات</a></li>
+                <li class="breadcrumb-item active" aria-current="page">الفئات</li>
+            </ol>
+        </nav>
+        <h1 class="page-head__title">فئات المنتجات</h1>
+        <p class="page-head__subtitle text-muted mb-0">نظّم منتجاتك في فئات يسهل البحث والتصنيف من خلالها</p>
+    </div>
+
+    <div class="page-head__actions">
+        <a asp-action="Create" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-lg"></i>
+            <span>إضافة فئة</span>
+        </a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm empty-state">
+        <div class="card-body text-center py-5">
+            <div class="empty-state__icon"><i class="bi bi-tags"></i></div>
+            <h5 class="fw-bold mb-2">لا توجد فئات</h5>
+            <p class="text-muted mb-4">ابدأ بإضافة أول فئة لتنظيم منتجاتك.</p>
+            <a asp-action="Create" class="btn btn-primary px-4">
+                <i class="bi bi-plus-lg"></i> إضافة فئة
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm table-card">
+        <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+            <span class="fw-semibold">قائمة الفئات</span>
+            <span class="badge bg-light text-dark rounded-pill px-3">@Model.Count() فئة</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 categories-table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="ps-4">اسم الفئة</th>
+                        <th scope="col">الحالة</th>
+                        <th scope="col" class="text-end pe-4">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="category-icon"><i class="bi bi-tag"></i></span>
+                                    <span class="fw-semibold">@category.Name</span>
+                                </div>
+                            </td>
+                            <td>
+                                @if (category.IsActive)
+                                {
+                                    <span class="badge rounded-pill bg-success-subtle text-success">
+                                        <i class="bi bi-check-circle me-1"></i>نشطة
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill bg-danger-subtle text-danger">
+                                        <i class="bi bi-x-circle me-1"></i>معطلة
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group action-group" role="group" aria-label="إجراءات الفئة">
+                                    <a asp-action="Edit" asp-route-id="@category.Id"
+                                       class="btn btn-sm btn-outline-secondary" title="تعديل">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@category.Id"
+                                       class="btn btn-sm btn-outline-danger" title="حذف">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .empty-state__icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .category-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        flex: 0 0 auto;
+    }
+
+    .table-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .table-card .card-header {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .categories-table thead th {
+        background: var(--surface-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-2);
+        border-bottom: 1px solid var(--border);
+        padding-block: 12px;
+    }
+
+    .categories-table tbody tr {
+        border-bottom: 1px solid #f0f3f7;
+    }
+
+    .categories-table tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .action-group .btn {
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+</style>

@@ -9,6 +9,7 @@ namespace Application.QueryRepositories
     public interface IEmployeeQueryRepository
     {
         Task<EmployeeDto?> GetByIdAsync(Guid id);
+        Task<EmployeeDto?> GetByUserIdAsync(Guid userId);
         Task<IEnumerable<EmployeeDto>> GetAllTableAsync();
         Task<IEnumerable<EmployeeDto>> GetAllByBrandIdAsync(Guid brandId);
     }

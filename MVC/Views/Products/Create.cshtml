@@ -1,89 +1,257 @@
 ﻿@using MVC.Models.Products
 @model CreateProductModel
 
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-7 col-md-9">
+@{
+    ViewData["Title"] = "إضافة منتج جديد";
+}
 
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Create Product</h4>
-                </div>
-
-                <div class="card-body">
-
-                    <form asp-action="CreateConfirm" method="post" novalidate>
-
-                        @Html.AntiForgeryToken()
-
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-
-                        <div class="form-floating mb-3">
-                            <select asp-for="Command.CategoryId" class="form-select">
-                                <option value="" disabled selected>-- Select Category --</option>
-
-                                @foreach (var category in Model.Categories)
-                                {
-                                    <option value="@category.Key">
-                                        @category.Value
-                                    </option>
-                                }
-                            </select>
-
-                            <label asp-for="Command.CategoryId"></label>
-                            <span asp-validation-for="Command.CategoryId" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input asp-for="Command.Name"
-                                   class="form-control"
-                                   autocomplete="name"
-                                   placeholder=" " />
-
-                            <label asp-for="Command.Name"></label>
-                            <span asp-validation-for="Command.Name" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input asp-for="Command.Barcode"
-                                   class="form-control"
-                                   autocomplete="off"
-                                   inputmode="numeric"
-                                   placeholder=" " />
-
-                            <label asp-for="Command.Barcode"></label>
-                            <span asp-validation-for="Command.Barcode" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-floating mb-4">
-                            <input asp-for="Command.SellingPrice"
-                                   type="number"
-                                   step="0.01"
-                                   min="0"
-                                   class="form-control"
-                                   autocomplete="off"
-                                   placeholder=" " />
-
-                            <label asp-for="Command.SellingPrice"></label>
-                            <span asp-validation-for="Command.SellingPrice" class="text-danger"></span>
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                Create Product
-                            </button>
-                        </div>
-
-                    </form>
-
-                </div>
-            </div>
-
+<div class="form-page">
+    <div class="page-head">
+        <div class="page-head__text">
+            <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">المنتجات</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">إضافة منتج</li>
+                </ol>
+            </nav>
+            <h1 class="page-head__title">إضافة منتج جديد</h1>
+            <p class="page-head__subtitle text-muted mb-0">أدخل بيانات المنتج ثم احفظه ليظهر في قائمة المنتجات</p>
+        </div>
+        <div class="page-head__actions">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-right"></i>
+                <span>رجوع للقائمة</span>
+            </a>
         </div>
     </div>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="card border-0 shadow-sm form-card">
+        @Html.AntiForgeryToken()
+
+        <div class="card-body p-lg-5 p-4">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+            <div class="row g-5">
+                <div class="col-lg-8">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-info-circle"></i> بيانات المنتج
+                    </h5>
+
+                    <div class="mb-4">
+                        <label asp-for="Name" class="form-label fw-semibold">اسم المنتج <span class="text-danger">*</span></label>
+                        <input asp-for="Name" class="form-control form-control-lg" placeholder="مثال: قميص قطني" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label asp-for="CategoryId" class="form-label fw-semibold">الفئة <span class="text-danger">*</span></label>
+                            <select asp-for="CategoryId" class="form-select">
+                                <option value="" disabled selected>— اختر الفئة —</option>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <option value="@category.Key">@category.Value</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Barcode" class="form-label fw-semibold">الباركود</label>
+                            <input asp-for="Barcode" class="form-control" inputmode="numeric" placeholder="مثال: 6223000000000" />
+                            <span asp-validation-for="Barcode" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label asp-for="SellingPrice" class="form-label fw-semibold">سعر البيع <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input asp-for="SellingPrice" type="number" step="0.01" min="0" class="form-control form-control-lg" placeholder="0.00" />
+                            <span class="input-group-text">ج.م</span>
+                        </div>
+                        <span asp-validation-for="SellingPrice" class="text-danger small"></span>
+                    </div>
+
+                    @if (Model.Categories.Count == 0)
+                    {
+                        <div class="alert alert-warning mt-4 mb-0 py-2 small">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            لا توجد فئات متاحة. <a asp-controller="ProductCategories" asp-action="Create" class="alert-link">أضف فئة أولاً</a>.
+                        </div>
+                    }
+                </div>
+
+                <div class="col-lg-4">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-image"></i> صورة المنتج
+                    </h5>
+
+                    <div class="image-upload">
+                        <div class="image-preview" id="imagePreview">
+                            <i class="bi bi-image"></i>
+                            <span>لا توجد صورة</span>
+                        </div>
+
+                        <label for="ImageFile" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-upload me-1"></i> اختيار صورة
+                        </label>
+                        <input type="file" id="ImageFile" asp-for="ImageFile" class="d-none" accept="image/*" />
+
+                        <small class="text-muted d-block mt-2 text-center">
+                            الصيغ المدعومة: JPG, PNG, WebP
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer px-lg-5 border-0 bg-white px-4 pb-4">
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-outline-secondary px-4">إلغاء</a>
+                <button type="submit" class="btn btn-primary px-5">
+                    <i class="bi bi-check-lg me-1"></i> حفظ المنتج
+                </button>
+            </div>
+        </div>
+    </form>
 </div>
 
-@section Scripts
-{
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const input = document.getElementById("ImageFile");
+            const preview = document.getElementById("imagePreview");
+            if (!input || !preview) return;
+
+            input.addEventListener("change", function () {
+                const file = this.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="صورة المنتج" />`;
+                };
+                reader.readAsDataURL(file);
+            });
+        })();
+    </script>
 }
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .form-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .form-section-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 18px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-1);
+    }
+
+    .form-section-title i {
+        color: var(--accent);
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        padding: 10px 14px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: 0 0 0 0.2rem rgba(14, 159, 110, 0.12);
+        border-color: var(--accent);
+    }
+
+    .input-group .input-group-text {
+        border-radius: 0 10px 10px 0;
+        background: var(--surface-muted);
+    }
+
+    [dir="rtl"] .input-group .input-group-text {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .image-upload {
+        width: 100%;
+    }
+
+    .image-preview {
+        width: 100%;
+        height: 260px;
+        border: 2px dashed var(--border-strong);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-3);
+        margin-bottom: 15px;
+        overflow: hidden;
+        background: var(--surface-muted);
+    }
+
+    .image-preview i {
+        font-size: 3.5rem;
+        margin-bottom: 10px;
+    }
+
+    .image-preview span {
+        font-size: 0.9rem;
+    }
+
+    .image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .card-footer {
+        border-top: 1px solid var(--border) !important;
+        padding-top: 1.25rem !important;
+    }
+</style>

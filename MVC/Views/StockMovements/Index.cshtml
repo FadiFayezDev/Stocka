@@ -1,0 +1,242 @@
+@using MVC.Models.StockMovements
+@model StockMovementListModel
+
+@{
+    ViewData["Title"] = "حركة المخزون";
+}
+
+<div class="page-head">
+    <div class="page-head__text">
+        <nav aria-label="breadcrumb" class="breadcrumb-nav">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Warehouses" asp-action="Index">المخازن</a></li>
+                <li class="breadcrumb-item active" aria-current="page">حركة المخزون</li>
+            </ol>
+        </nav>
+        <h1 class="page-head__title">حركة المخزون</h1>
+        <p class="page-head__subtitle text-muted mb-0">سجل كل الحركات: شراء، بيع، تحويل، تسوية</p>
+    </div>
+    <div class="page-head__actions">
+        <a asp-controller="Warehouses" asp-action="Transfer" class="btn btn-primary btn-lg">
+            <i class="bi bi-arrow-left-right"></i>
+            <span>تحويل مخزون</span>
+        </a>
+    </div>
+</div>
+
+@if (!Model.Movements.Any())
+{
+    <div class="card border-0 shadow-sm empty-state">
+        <div class="card-body text-center py-5">
+            <div class="empty-state__icon">
+                <i class="bi bi-arrow-left-right"></i>
+            </div>
+            <h5 class="fw-bold mb-2">لا توجد حركات بعد</h5>
+            <p class="text-muted mb-0">ستظهر هنا كل حركات المخزون بمجرد بدء البيع أو الشراء أو التحويل.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon stat-icon--success"><i class="bi bi-box-arrow-in-down"></i></div>
+                    <div>
+                        <div class="stat-value">@Model.TotalIn.ToString("N0")</div>
+                        <div class="stat-label text-muted">وحدات داخلة</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon stat-icon--danger"><i class="bi bi-box-arrow-up"></i></div>
+                    <div>
+                        <div class="stat-value">@Model.TotalOut.ToString("N0")</div>
+                        <div class="stat-label text-muted">وحدات خارجة</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon stat-icon--accent"><i class="bi bi-list-ul"></i></div>
+                    <div>
+                        <div class="stat-value">@Model.TotalMovements.ToString("N0")</div>
+                        <div class="stat-label text-muted">إجمالي الحركات</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm table-card">
+        <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+            <span class="fw-semibold">آخر الحركات</span>
+            <span class="badge bg-light text-dark rounded-pill px-3">@Model.TotalMovements حركة</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 movements-table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="ps-4">التاريخ</th>
+                        <th scope="col">المنتج</th>
+                        <th scope="col">المخزن</th>
+                        <th scope="col">نوع الحركة</th>
+                        <th scope="col">المصدر</th>
+                        <th scope="col" class="text-end pe-4">الكمية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.Movements)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-semibold">@m.MovementDate.ToString("dd/MM/yyyy")</span>
+                                <div class="text-muted small">@m.MovementDate.ToString("hh:mm tt")</div>
+                            </td>
+                            <td>
+                                <span class="fw-semibold">@m.ProductName</span>
+                            </td>
+                            <td>@m.WarehouseName</td>
+                            <td>
+                                <span class="badge rounded-pill @(m.IsInbound ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
+                                    @(m.IsInbound ? "+" : "-") @m.TypeLabel
+                                </span>
+                            </td>
+                            <td>
+                                @if (string.IsNullOrWhiteSpace(m.ReferenceLabel))
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">@m.ReferenceLabel</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <span class="fw-bold @(m.IsInbound ? "text-success" : "text-danger")">
+                                    @(m.IsInbound ? "+" : "-")@m.Quantity
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .empty-state__icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .stat-card {
+        border-radius: var(--radius-lg);
+        height: 100%;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex: 0 0 auto;
+    }
+
+    .stat-icon--success { background: #e6f6ec; color: #0e9f6e; }
+    .stat-icon--danger { background: #fdecea; color: #dc2626; }
+    .stat-icon--accent { background: #fdf0dc; color: #d97706; }
+
+    .stat-value {
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .stat-label {
+        font-size: 0.8125rem;
+    }
+
+    .table-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .table-card .card-header {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .movements-table thead th {
+        background: var(--surface-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-2);
+        border-bottom: 1px solid var(--border);
+        padding-block: 12px;
+    }
+
+    .movements-table tbody tr {
+        border-bottom: 1px solid #f0f3f7;
+    }
+
+    .movements-table tbody tr:last-child {
+        border-bottom: 0;
+    }
+</style>

@@ -1,0 +1,231 @@
+@using MVC.Models.Pos
+@model ReceiptModel
+
+@{
+    ViewData["Title"] = "فاتورة بيع";
+    var order = Model.Order;
+    var items = order.Items;
+    var subtotal = items.Sum(i => i.Quantity * i.UnitPrice);
+    var total = subtotal - Model.Discount;
+    var change = Model.ReceivedAmount - total;
+}
+
+<div class="receipt-wrap">
+    <div class="receipt" id="receipt">
+        <div class="receipt__head">
+            <div class="receipt__brand">ستوكا</div>
+            <div class="receipt__shop">نقطة البيع</div>
+            <div class="receipt__meta">
+                <div>الفاتورة رقم: <strong>@order.Id.ToString("N")[..8].ToUpperInvariant()</strong></div>
+                <div>التاريخ: <strong>@order.OrderDate.ToLocalTime().ToString("yyyy/MM/dd hh:mm tt")</strong></div>
+                <div>الكاشير: <strong>@Model.EmployeeName</strong></div>
+            </div>
+        </div>
+
+        <hr class="receipt__rule" />
+
+        <table class="receipt__items">
+            <thead>
+                <tr>
+                    <th>الصنف</th>
+                    <th class="text-center">الكمية</th>
+                    <th class="text-end">السعر</th>
+                    <th class="text-end">الإجمالي</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in items)
+                {
+                    <tr>
+                        <td>@(Model.ProductNames.TryGetValue(item.ProductId, out var name) ? name : item.ProductId.ToString())</td>
+                        <td class="text-center">@item.Quantity</td>
+                        <td class="text-end">@item.UnitPrice.ToString("N2")</td>
+                        <td class="text-end">@((item.Quantity * item.UnitPrice).ToString("N2"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <hr class="receipt__rule" />
+
+        <div class="receipt__totals">
+            <div class="receipt__row"><span>الإجمالي</span><span>@subtotal.ToString("N2") ج.م</span></div>
+            @if (Model.Discount > 0)
+            {
+                <div class="receipt__row receipt__row--discount"><span>الخصم</span><span>- @Model.Discount.ToString("N2") ج.م</span></div>
+            }
+            <div class="receipt__row receipt__row--grand"><span>الصافي</span><span>@total.ToString("N2") ج.م</span></div>
+            @if (Model.ReceivedAmount > 0)
+            {
+                <div class="receipt__row"><span>المدفوع</span><span>@Model.ReceivedAmount.ToString("N2") ج.م</span></div>
+                <div class="receipt__row"><span>الباقي</span><span>@change.ToString("N2") ج.م</span></div>
+            }
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(order.Status) && order.Status != "Completed")
+        {
+            <div class="receipt__status">الحالة: @order.Status</div>
+        }
+
+        <hr class="receipt__rule" />
+
+        <div class="receipt__foot">
+            <p>شكراً لتعاملكم معنا</p>
+            <p class="receipt__foot-sub">ستوكا — نظام إدارة الأعمال</p>
+        </div>
+    </div>
+
+    <div class="receipt-actions">
+        <button type="button" class="btn btn-primary" onclick="window.print()">
+            <i class="bi bi-printer"></i> طباعة الفاتورة
+        </button>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right"></i> فاتورة جديدة
+        </a>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pos.css" asp-append-version="true" />
+    <style>
+        .receipt-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 24px 0;
+        }
+
+        .receipt {
+            width: 340px;
+            background: #fff;
+            color: #1a1a1a;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 0.8125rem;
+        }
+
+        .receipt__brand {
+            font-size: 1.35rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .receipt__shop {
+            text-align: center;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .receipt__meta {
+            font-size: 0.75rem;
+            color: #444;
+            line-height: 1.7;
+        }
+
+        .receipt__rule {
+            border: 0;
+            border-top: 1px dashed #bbb;
+            margin: 12px 0;
+        }
+
+        .receipt__items {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+        }
+
+        .receipt__items th {
+            font-size: 0.68rem;
+            color: #888;
+            padding-bottom: 6px;
+        }
+
+        .receipt__items td {
+            padding: 4px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .receipt__totals {
+            font-size: 0.8rem;
+        }
+
+        .receipt__row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+        }
+
+        .receipt__row--discount {
+            color: #c0392b;
+        }
+
+        .receipt__row--grand {
+            font-size: 1rem;
+            font-weight: 800;
+            border-top: 1px dashed #bbb;
+            margin-top: 4px;
+            padding-top: 8px;
+        }
+
+        .receipt__status {
+            text-align: center;
+            color: #c0392b;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .receipt__foot {
+            text-align: center;
+            color: #666;
+        }
+
+        .receipt__foot p {
+            margin: 2px 0;
+        }
+
+        .receipt__foot-sub {
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        .receipt-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        @@media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .receipt, .receipt * {
+                visibility: visible;
+            }
+
+            .receipt {
+                position: absolute;
+                inset: 0 auto auto 50%;
+                transform: translateX(-50%);
+                border: 0;
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                width: 80mm;
+            }
+
+            .receipt-actions {
+                display: none;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            window.print();
+        });
+    </script>
+}

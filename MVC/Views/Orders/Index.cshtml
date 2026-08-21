@@ -1,0 +1,255 @@
+@using MVC.Models.Orders
+@model OrderListModel
+
+@{
+    ViewData["Title"] = "المبيعات";
+}
+
+<div class="page-head">
+    <div class="page-head__text">
+        <nav aria-label="breadcrumb" class="breadcrumb-nav">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                <li class="breadcrumb-item active" aria-current="page">المبيعات</li>
+            </ol>
+        </nav>
+        <h1 class="page-head__title">المبيعات</h1>
+        <p class="page-head__subtitle text-muted mb-0">سجل فواتير البيع المنفذة من نقطة البيع</p>
+    </div>
+    <div class="page-head__actions">
+        <a asp-controller="Pos" asp-action="Index" class="btn btn-primary btn-lg">
+            <i class="bi bi-cart-plus"></i>
+            <span>بيع جديد</span>
+        </a>
+    </div>
+</div>
+
+@if (!Model.Orders.Any())
+{
+    <div class="card border-0 shadow-sm empty-state">
+        <div class="card-body text-center py-5">
+            <div class="empty-state__icon">
+                <i class="bi bi-receipt"></i>
+            </div>
+            <h5 class="fw-bold mb-2">لا توجد مبيعات بعد</h5>
+            <p class="text-muted mb-4">ابدأ ببيع أول منتج من نقطة البيع.</p>
+            <a asp-controller="Pos" asp-action="Index" class="btn btn-primary px-4">
+                <i class="bi bi-cart-plus"></i> فتح نقطة البيع
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon stat-icon--primary"><i class="bi bi-receipt"></i></div>
+                    <div>
+                        <div class="stat-value">@Model.TotalOrders</div>
+                        <div class="stat-label text-muted">إجمالي الفواتير</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon stat-icon--success"><i class="bi bi-currency-pound"></i></div>
+                    <div>
+                        <div class="stat-value">@Model.TotalSales.ToString("N2")</div>
+                        <div class="stat-label text-muted">إجمالي المبيعات</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon stat-icon--accent"><i class="bi bi-box-seam"></i></div>
+                    <div>
+                        <div class="stat-value">@Model.Orders.Sum(o => o.TotalUnits)</div>
+                        <div class="stat-label text-muted">وحدات مباعة</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm table-card">
+        <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+            <span class="fw-semibold">فواتير البيع</span>
+            <span class="badge bg-light text-dark rounded-pill px-3">@Model.TotalOrders فاتورة</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 orders-table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="ps-4">رقم الفاتورة</th>
+                        <th scope="col">التاريخ</th>
+                        <th scope="col">الفرع</th>
+                        <th scope="col">الأصناف</th>
+                        <th scope="col">الوحدات</th>
+                        <th scope="col">الإجمالي</th>
+                        <th scope="col" class="text-end pe-4">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <a asp-action="Details" asp-route-id="@order.Id"
+                                   class="fw-semibold text-body text-decoration-none order-link">
+                                    <i class="bi bi-receipt text-muted me-1"></i>
+                                    #@order.Id.ToString("N")[..8].ToUpper()
+                                </a>
+                            </td>
+                            <td>
+                                <span class="fw-semibold">@order.OrderDate.ToString("dd/MM/yyyy")</span>
+                                <div class="text-muted small">@order.OrderDate.ToString("hh:mm tt")</div>
+                            </td>
+                            <td>
+                                @if (string.IsNullOrWhiteSpace(order.BranchName))
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                                else
+                                {
+                                    <span>@order.BranchName</span>
+                                }
+                            </td>
+                            <td>@order.ItemCount</td>
+                            <td>@order.TotalUnits</td>
+                            <td>
+                                <span class="fw-bold text-primary">@order.TotalAmount.ToString("N2")</span>
+                                <small class="text-muted">ج.م</small>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a asp-action="Details" asp-route-id="@order.Id"
+                                   class="btn btn-sm btn-outline-primary" title="عرض الفاتورة">
+                                    <i class="bi bi-eye"></i>
+                                    <span class="ms-1">عرض</span>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .empty-state__icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .stat-card {
+        border-radius: var(--radius-lg);
+        height: 100%;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex: 0 0 auto;
+    }
+
+    .stat-icon--primary { background: #e8f0fe; color: #1a73e8; }
+    .stat-icon--success { background: #e6f6ec; color: #0e9f6e; }
+    .stat-icon--accent { background: #fdf0dc; color: #d97706; }
+
+    .stat-value {
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .stat-label {
+        font-size: 0.8125rem;
+    }
+
+    .table-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .table-card .card-header {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .orders-table thead th {
+        background: var(--surface-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-2);
+        border-bottom: 1px solid var(--border);
+        padding-block: 12px;
+    }
+
+    .orders-table tbody tr {
+        border-bottom: 1px solid #f0f3f7;
+    }
+
+    .orders-table tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .order-link:hover {
+        color: var(--accent) !important;
+    }
+</style>

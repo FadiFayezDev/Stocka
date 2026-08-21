@@ -31,6 +31,12 @@ namespace Infrastructure.Configurations
                 .HasColumnType("decimal(18, 2)")
                 .HasDefaultValue(0);
 
+            builder.Property(e => e.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired()
+                .HasDefaultValue(Domain.Enums.PurchaseStatus.Ordered);
+
             builder.HasOne<Brand>().WithMany()
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.Cascade)

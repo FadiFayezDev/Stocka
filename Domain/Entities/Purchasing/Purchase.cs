@@ -1,6 +1,7 @@
 ﻿using Domain.Bases;
 using Domain.Entities.Core;
 using Domain.Entities.Products;
+using Domain.Enums;
 using Domain.Primitives;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace Domain.Entities.Purchasing
 
         public decimal TotalAmount { get; private set; }
 
+        public PurchaseStatus Status { get; private set; } = PurchaseStatus.Ordered;
+
         private readonly List<PurchaseItem> _purchaseItems = new();
 
         public virtual ICollection<PurchaseItem> PurchaseItems => _purchaseItems.AsReadOnly();
@@ -36,6 +39,7 @@ namespace Domain.Entities.Purchasing
             SupplierId = supplierId;
             PurchaseDate = purchaseDate ?? DateTime.UtcNow;
             TotalAmount = 0;
+            Status = PurchaseStatus.Ordered;
         }
 
         public void AddPurchaseItem(PurchaseItem item)
@@ -92,6 +96,24 @@ namespace Domain.Entities.Purchasing
         private void RecalculateTotal()
         {
             TotalAmount = _purchaseItems.Sum(pi => pi.TotalCost);
+        }
+
+        public bool HasPendingItems => _purchaseItems.Any(pi => pi.ReceivedQuantity < pi.Quantity);
+
+        public void MarkCompleted()
+        {
+            if (Status == PurchaseStatus.Cancelled)
+                throw new InvalidOperationException("Cannot complete a cancelled purchase.");
+
+            Status = PurchaseStatus.Completed;
+        }
+
+        public void Cancel()
+        {
+            if (Status == PurchaseStatus.Completed)
+                throw new InvalidOperationException("Cannot cancel a completed purchase.");
+
+            Status = PurchaseStatus.Cancelled;
         }
 
         Guid IMultiTenantEntity.BrandId

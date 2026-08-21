@@ -11,6 +11,7 @@ namespace Application.Profiles
         {
             // Entity ? DTO
             CreateMap<Purchase, PurchaseDto>().ReverseMap();
+            CreateMap<Purchase, PurchaseWithItemsDto>();
 
             // Command ? Entity
             CreateMap<ReceivePurchaseCommand, Purchase>();

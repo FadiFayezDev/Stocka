@@ -18,18 +18,17 @@ namespace Infrastructure.Identity
 
         private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
 
+        public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
         public Guid UserId
         {
             get
             {
-                var id =
-                    User?.FindFirstValue(JwtRegisteredClaimNames.Sub) ??
-                    User?.FindFirstValue(ClaimNames.UserId) ??
-                    User?.FindFirstValue("UserId") ??
-                    User?.FindFirstValue(ClaimTypes.NameIdentifier);
+                var id = User?.FindFirstValue(JwtRegisteredClaimNames.Sub) ??
+                         User?.FindFirstValue(ClaimNames.UserId) ??
+                         User?.FindFirstValue("UserId") ??
+                         User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                return Guid.TryParse(id, out var userId) ? userId : 
-                    throw new ArgumentException("user id not found");
+                return Guid.TryParse(id, out var userId) ? userId : Guid.Empty;
             }
         }
 
@@ -42,9 +41,7 @@ namespace Infrastructure.Identity
                     User?.FindFirstValue("brand") ??
                     User?.FindFirstValue("brandId");
 
-                if (!Guid.TryParse(val, out var brandId))
-                    throw new ArgumentException("Brand id is not found.");
-                return brandId;
+                return Guid.TryParse(val, out var brandId) ? brandId : Guid.Empty;
             }
         }
 

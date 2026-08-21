@@ -18,7 +18,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<PurchaseDto?> GetByIdAsync(Guid id)
         {
-            var query = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount 
+            var query = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount, status AS Status 
                            FROM {TablePurchases}
                            WHERE id = @Id
                              AND brand_id = @BrandId
@@ -37,7 +37,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<PurchaseDto>> GetAllTableAsync()
         {
-            var query = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount 
+            var query = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount, status AS Status 
                            FROM {TablePurchases}
                            WHERE (@BrandId IS NULL OR brand_id = @BrandId)
                              AND (@ApplyBranchFilter = FALSE OR branch_id = @BranchId)";
@@ -52,7 +52,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<PurchaseDto>> GetAllByBrandIdAsync(Guid brandId)
         {
-            var query = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount 
+            var query = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount, status AS Status 
                            FROM {TablePurchases}
                            WHERE brand_id = @BrandId
                              AND (@ApplyBranchFilter = FALSE OR branch_id = @BranchId)";
@@ -68,7 +68,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<PurchaseWithItemsDto?> GetByIdWithItemsAsync(Guid purchaseId)
         {
-            var purchaseQuery = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount 
+            var purchaseQuery = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount, status AS Status 
                                    FROM {TablePurchases}
                                    WHERE id = @PurchaseId
                                      AND (@BrandId IS NULL OR brand_id = @BrandId)
@@ -84,7 +84,7 @@ namespace Infrastructure.Repositories.Queries
 
             if (purchase == null) return null;
 
-            var itemsQuery = $@"SELECT id, purchase_id AS PurchaseId, product_id AS ProductId, batch_id AS BatchId, quantity AS Quantity, unit_price AS UnitPrice, cost_price AS CostPrice 
+            var itemsQuery = $@"SELECT id, purchase_id AS PurchaseId, product_id AS ProductId, quantity AS Quantity, received_quantity AS ReceivedQuantity, unit_cost AS UnitCost 
                                 FROM {TablePurchaseItems} 
                                 WHERE purchase_id = @PurchaseId";
 
@@ -96,7 +96,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<PurchaseWithItemsDto>> GetAllWithItemsAsync()
         {
-            var purchasesQuery = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount 
+            var purchasesQuery = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount, status AS Status 
                                     FROM {TablePurchases}
                                     WHERE (@BrandId IS NULL OR brand_id = @BrandId)
                                       AND (@ApplyBranchFilter = FALSE OR branch_id = @BranchId)";
@@ -111,9 +111,9 @@ namespace Infrastructure.Repositories.Queries
             if (!purchases.Any()) return purchases;
 
             var purchaseIds = purchases.Select(p => p.Id).ToList();
-            var itemsQuery = $@"SELECT id, purchase_id AS PurchaseId, product_id AS ProductId, batch_id AS BatchId, quantity AS Quantity, unit_price AS UnitPrice, cost_price AS CostPrice 
+            var itemsQuery = $@"SELECT id, purchase_id AS PurchaseId, product_id AS ProductId, quantity AS Quantity, received_quantity AS ReceivedQuantity, unit_cost AS UnitCost 
                                 FROM {TablePurchaseItems} 
-                                WHERE purchase_id IN @PurchaseIds";
+                                WHERE purchase_id = ANY(@PurchaseIds)";
 
             var allItems = await _connection.QueryAsync<PurchaseItemDto>(itemsQuery, new { PurchaseIds = purchaseIds });
             var itemsByPurchase = allItems.GroupBy(i => i.PurchaseId).ToDictionary(g => g.Key, g => g.ToList());
@@ -128,7 +128,7 @@ namespace Infrastructure.Repositories.Queries
 
         public async Task<IEnumerable<PurchaseWithItemsDto>> GetAllWithItemsByBrandIdAsync(Guid brandId)
         {
-            var purchasesQuery = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount 
+            var purchasesQuery = $@"SELECT id, brand_id AS BrandId, branch_id AS BranchId, supplier_id AS SupplierId, purchase_date AS PurchaseDate, total_amount AS TotalAmount, status AS Status 
                                     FROM {TablePurchases}
                                     WHERE brand_id = @BrandId
                                       AND (@ApplyBranchFilter = FALSE OR branch_id = @BranchId)";
@@ -143,9 +143,9 @@ namespace Infrastructure.Repositories.Queries
             if (!purchases.Any()) return purchases;
 
             var purchaseIds = purchases.Select(p => p.Id).ToList();
-            var itemsQuery = $@"SELECT id, purchase_id AS PurchaseId, product_id AS ProductId, batch_id AS BatchId, quantity AS Quantity, unit_price AS UnitPrice, cost_price AS CostPrice 
+            var itemsQuery = $@"SELECT id, purchase_id AS PurchaseId, product_id AS ProductId, quantity AS Quantity, received_quantity AS ReceivedQuantity, unit_cost AS UnitCost 
                                 FROM {TablePurchaseItems} 
-                                WHERE purchase_id IN @PurchaseIds";
+                                WHERE purchase_id = ANY(@PurchaseIds)";
 
             var allItems = await _connection.QueryAsync<PurchaseItemDto>(itemsQuery, new { PurchaseIds = purchaseIds });
             var itemsByPurchase = allItems.GroupBy(i => i.PurchaseId).ToDictionary(g => g.Key, g => g.ToList());

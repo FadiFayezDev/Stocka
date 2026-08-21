@@ -35,8 +35,7 @@ namespace Infrastructure.Repositories.Queries
             var query = $@"SELECT wb.id, wb.warehouse_id AS WarehouseId, wb.batch_id AS BatchId, wb.quantity AS Quantity 
                          FROM {TableWarehouseBatches} wb
                          INNER JOIN Warehouses w ON wb.warehouse_id = w.id
-                         INNER JOIN {TableBranches} b ON w.branch_id = b.id
-                         WHERE b.brand_id = @BrandId";
+                         WHERE w.brand_id = @BrandId";
             var parameters = new { BrandId = brandId };
             var result = await _connection.QueryAsync<WarehouseBatchDto>(query, parameters);
             return result;

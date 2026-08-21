@@ -8,11 +8,12 @@ using Infrastructure.Helpers;
 using Infrastructure.Identity;
 using Infrastructure.Repositories.Commands;
 using Infrastructure.Repositories.Queries;
-using Infrastructure.Serviecs;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Minio;
 using Npgsql;
 using System.Data;
 
@@ -30,7 +31,10 @@ namespace Infrastructure
             #region Entity Framework Core registration
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseNpgsql(connectionString)
+                options.UseNpgsql(connectionString, npgsqlOptions =>
+                {
+                    npgsqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
+                })
                 .UseSnakeCaseNamingConvention();
             });
             #endregion
@@ -53,6 +57,19 @@ namespace Infrastructure
             services.AddScoped<ITokenGenerator, TokenGenerator>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IStorageService, StorageService>();
+            // Register Dummy Email Sender
+            services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, EmailSender>();
+            #endregion
+
+            #region Minio
+            services.AddMinio(options => options
+                .WithEndpoint(configuration["Minio:Endpoint"])
+                .WithCredentials(
+                    configuration["Minio:AccessKey"],
+                    configuration["Minio:SecretKey"]
+                )
+                .WithSSL(configuration.GetValue<bool>("Minio:UseSSL"))
+                .Build());
             #endregion
 
             #region Command Repositories

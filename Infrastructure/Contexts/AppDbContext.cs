@@ -120,7 +120,7 @@ namespace Infrastructure.Contexts
         private void EnforceScopeOnChanges()
         {
             // لو مفيش مستخدم أو لسه بيعمل Login، عدي العمليات
-            if (_userContext == null || _userContext.UserId == Guid.Empty)
+            if (_userContext == null || !_userContext.IsAuthenticated || _userContext.UserId == Guid.Empty)
                 return;
 
             bool isCreatingNewBrand = ChangeTracker.Entries()

@@ -1,0 +1,276 @@
+@using MVC.Models.Warehouses
+@model TransferStockModel
+
+@{
+    ViewData["Title"] = "تحويل مخزون";
+}
+
+<div class="form-page">
+    <div class="page-head">
+        <div class="page-head__text">
+            <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">المخازن</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">تحويل مخزون</li>
+                </ol>
+            </nav>
+            <h1 class="page-head__title">تحويل مخزون</h1>
+            <p class="page-head__subtitle text-muted mb-0">انقل الكمية من المخزن الرئيسي إلى مخزن البيع (الرفوف) ليُعرض المنتج للبيع</p>
+        </div>
+        <div class="page-head__actions">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-right"></i>
+                <span>رجوع للمخازن</span>
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string success)
+    {
+        <div class="alert alert-success shadow-sm d-flex align-items-center gap-2 py-3" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>@success</span>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] is string error)
+    {
+        <div class="alert alert-danger shadow-sm d-flex align-items-center gap-2 py-3" role="alert">
+            <i class="bi bi-x-circle-fill"></i>
+            <span>@error</span>
+        </div>
+    }
+
+    <form asp-action="Transfer" method="post" class="card border-0 shadow-sm form-card">
+        @Html.AntiForgeryToken()
+
+        <div class="card-body p-lg-5 p-4">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+            <div class="row g-5">
+                <div class="col-lg-8">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-arrow-left-right"></i> بيانات التحويل
+                    </h5>
+
+                    <div class="mb-4">
+                        <label asp-for="ProductId" class="form-label fw-semibold">المنتج <span class="text-danger">*</span></label>
+                        <input type="search" id="productSearch" class="form-control mb-2" placeholder="ابحث بالاسم أو الباركود..." autocomplete="off" />
+                        <select asp-for="ProductId" class="form-select" size="6">
+                            <option value="" disabled selected>— اختر المنتج —</option>
+                            @foreach (var product in Model.Products)
+                            {
+                                <option value="@product.Id" data-name="@product.Name" data-barcode="@product.Barcode">
+                                    @product.Name @(string.IsNullOrWhiteSpace(product.Barcode) ? "" : "(" + product.Barcode + ")") — متاح للبيع: @product.TotalQuantity
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="ProductId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="FromWarehouseId" class="form-label fw-semibold">مخزن التحويل (المصدر) <span class="text-danger">*</span></label>
+                            <select asp-for="FromWarehouseId" class="form-select">
+                                <option value="" disabled selected>— اختر المصدر —</option>
+                                @foreach (var warehouse in Model.Warehouses)
+                                {
+                                    var wt = WarehouseTypeLabels.Parse(warehouse.Type);
+                                    <option value="@warehouse.Id">@warehouse.Name (@WarehouseTypeLabels.Label(wt))</option>
+                                }
+                            </select>
+                            <span asp-validation-for="FromWarehouseId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="ToWarehouseId" class="form-label fw-semibold">المخزن المستهدف <span class="text-danger">*</span></label>
+                            <select asp-for="ToWarehouseId" class="form-select">
+                                <option value="" disabled selected>— اختر الهدف —</option>
+                                @foreach (var warehouse in Model.Warehouses)
+                                {
+                                    var wt = WarehouseTypeLabels.Parse(warehouse.Type);
+                                    <option value="@warehouse.Id">@warehouse.Name (@WarehouseTypeLabels.Label(wt))</option>
+                                }
+                            </select>
+                            <span asp-validation-for="ToWarehouseId" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Quantity" class="form-label fw-semibold">الكمية <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input asp-for="Quantity" type="number" min="1" step="1" class="form-control form-control-lg" placeholder="0" />
+                            <span class="input-group-text">وحدة</span>
+                        </div>
+                        <span asp-validation-for="Quantity" class="text-danger small"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Notes" class="form-label fw-semibold">ملاحظات</label>
+                        <textarea asp-for="Notes" class="form-control" rows="2" placeholder="ملاحظة اختيارية للتحويل"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="tips-card p-4">
+                        <h5 class="form-section-title mb-3">
+                            <i class="bi bi-lightbulb"></i> كيف يعمل؟
+                        </h5>
+                        <ul class="tips-list mb-0">
+                            <li><i class="bi bi-check-circle-fill"></i> البيع يسحب من مخازن «بيع (رفوف المحل)» فقط.</li>
+                            <li><i class="bi bi-check-circle-fill"></i> حوّل الكمية من «تخزين (مخزن رئيسي)» إلى «بيع» عند الحاجة.</li>
+                            <li><i class="bi bi-check-circle-fill"></i> التحويل يعتمد على نظام الأقدم أولاً (FIFO) لاختيار البتشات.</li>
+                            <li><i class="bi bi-check-circle-fill"></i> يُسجَّل التحويل كحركتي مخزون (صادر ووارد).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer px-lg-5 border-0 bg-white px-4 pb-4">
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-outline-secondary px-4">إلغاء</a>
+                <button type="submit" class="btn btn-primary px-5">
+                    <i class="bi bi-arrow-left-right me-1"></i> تنفيذ التحويل
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const search = document.getElementById("productSearch");
+            const select = document.getElementById("ProductId");
+            if (!search || !select) return;
+
+            search.addEventListener("input", function () {
+                const q = search.value.trim().toLowerCase();
+                Array.from(select.options).forEach(function (opt) {
+                    if (!opt.value) return;
+                    const name = (opt.dataset.name || "").toLowerCase();
+                    const barcode = (opt.dataset.barcode || "").toLowerCase();
+                    opt.hidden = q !== "" && !name.includes(q) && !barcode.includes(q);
+                });
+            });
+
+            const from = document.getElementById("FromWarehouseId");
+            const to = document.getElementById("ToWarehouseId");
+
+            function warnSame() {
+                if (from.value && to.value && from.value === to.value) {
+                    alert("لا يمكن التحويل من المخزن إلى نفسه. اختر مخزنين مختلفين.");
+                    to.value = "";
+                }
+            }
+            if (from) from.addEventListener("change", warnSame);
+            if (to) to.addEventListener("change", warnSame);
+        })();
+    </script>
+}
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .page-head__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .page-head__subtitle {
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-nav .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 0.8125rem;
+    }
+
+    .breadcrumb-nav .breadcrumb a {
+        color: var(--text-2);
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .form-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .form-section-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 18px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-1);
+    }
+
+    .form-section-title i {
+        color: var(--accent);
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        padding: 10px 14px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: 0 0 0 0.2rem rgba(14, 159, 110, 0.12);
+        border-color: var(--accent);
+    }
+
+    .input-group .input-group-text {
+        border-radius: 0 10px 10px 0;
+        background: var(--surface-muted);
+    }
+
+    [dir="rtl"] .input-group .input-group-text {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .tips-card {
+        background: var(--surface-muted);
+        border-radius: 16px;
+    }
+
+    .tips-list {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-size: .875rem;
+    }
+
+    .tips-list i {
+        color: var(--accent);
+        margin-inline-end: 6px;
+    }
+
+    .card-footer {
+        border-top: 1px solid var(--border) !important;
+        padding-top: 1.25rem !important;
+    }
+</style>

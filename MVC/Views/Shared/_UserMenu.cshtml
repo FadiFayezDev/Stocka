@@ -6,8 +6,8 @@
 
 @{
     var isSignedIn = SignInManager.IsSignedIn(User);
-    var displayName = "Guest";
-    var initial = "G";
+    var displayName = "ضيف";
+    var initial = "ض";
 
     if (isSignedIn)
     {
@@ -16,7 +16,7 @@
         {
             var fullName = $"{user.FirstName} {user.LastName}".Trim();
             displayName = string.IsNullOrWhiteSpace(fullName)
-                ? (user.Email ?? user.UserName ?? "User")
+                ? (user.Email ?? user.UserName ?? "مستخدم")
                 : fullName;
             initial = displayName[..1].ToUpperInvariant();
         }
@@ -29,7 +29,7 @@
             data-bs-toggle="dropdown"
             data-bs-display="static"
             aria-expanded="false"
-            aria-label="Account menu">
+            aria-label="قائمة الحساب">
         <span class="user-menu__avatar" aria-hidden="true">@initial</span>
         <span class="user-menu__meta d-none d-sm-inline-flex">
             <span class="user-menu__name">@displayName</span>
@@ -42,11 +42,11 @@
 
         <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
             <i class="bi bi-person" aria-hidden="true"></i>
-            Profile
+            الملف الشخصي
         </a>
         <a class="dropdown-item" href="#">
             <i class="bi bi-gear" aria-hidden="true"></i>
-            Settings
+            الإعدادات
         </a>
 
         <div class="dropdown-divider"></div>
@@ -61,7 +61,7 @@
                   class="mb-0">
                 <button type="submit" class="dropdown-item">
                     <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-                    Sign out
+                    تسجيل الخروج
                 </button>
             </form>
         }
@@ -69,7 +69,7 @@
         {
             <a class="dropdown-item" id="login" asp-area="Identity" asp-page="/Account/Login">
                 <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
-                Sign in
+                تسجيل الدخول
             </a>
         }
     </div>

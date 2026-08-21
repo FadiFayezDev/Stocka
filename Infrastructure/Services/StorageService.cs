@@ -3,7 +3,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Serviecs
+namespace Infrastructure.Services
 {
     public class StorageService : IStorageService
     {

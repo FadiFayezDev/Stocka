@@ -186,7 +186,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Core.Customer", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -221,7 +220,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Core.Employee", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -731,7 +729,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Products.WarehouseBranch", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -783,6 +780,14 @@ namespace Infrastructure.Migrations
                         .HasColumnName("purchase_date")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Ordered")
+                        .HasColumnName("status");
+
                     b.Property<Guid>("SupplierId")
                         .HasColumnType("uuid")
                         .HasColumnName("supplier_id");
@@ -825,6 +830,12 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
+
+                    b.Property<int>("ReceivedQuantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("received_quantity");
 
                     b.Property<decimal>("UnitCost")
                         .HasColumnType("decimal(18, 2)")
@@ -1190,38 +1201,34 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Accounting.Account", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
-                        .WithMany("Accounts")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Accounts_Brands_BrandId");
-
-                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("Domain.Entities.Accounting.JournalEntry", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
-                        .WithMany("JournalEntries")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_JournalEntries_Brands_BrandId");
-
-                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("Domain.Entities.Accounting.JournalEntryLine", b =>
                 {
-                    b.HasOne("Domain.Entities.Accounting.Account", "Account")
-                        .WithMany("JournalEntryLines")
+                    b.HasOne("Domain.Entities.Accounting.Account", null)
+                        .WithMany()
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_JournalEntryLines_Accounts_AccountId");
 
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
                         .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1235,28 +1242,22 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_JournalEntryLines_JournalEntries_JournalEntryId");
 
-                    b.Navigation("Account");
-
-                    b.Navigation("Brand");
-
                     b.Navigation("JournalEntry");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Branch", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
-                        .WithMany("Branches")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Branches_Brands_BrandId");
-
-                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Customer", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
                         .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1268,8 +1269,6 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("Domain.Entities.Core.Customer", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_customers_asp_net_users_user_id");
-
-                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Employee", b =>
@@ -1290,86 +1289,70 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Expenses.Expense", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Branch", "Branch")
+                    b.HasOne("Domain.Entities.Core.Branch", null)
                         .WithMany()
                         .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK_Expenses_Branches_BranchId");
 
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
-                        .WithMany("Expenses")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Expenses_Brands_BrandId");
 
-                    b.HasOne("Domain.Entities.Expenses.ExpenseCategory", "Category")
-                        .WithMany("Expenses")
+                    b.HasOne("Domain.Entities.Expenses.ExpenseCategory", null)
+                        .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Expenses_ExpenseCategories_CategoryId");
-
-                    b.Navigation("Branch");
-
-                    b.Navigation("Brand");
-
-                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("Domain.Entities.Expenses.ExpenseCategory", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
-                        .WithMany("ExpenseCategories")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_ExpenseCategories_Brands_BrandId");
-
-                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("Domain.Entities.Orders.Order", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Branch", "Branch")
+                    b.HasOne("Domain.Entities.Core.Branch", null)
                         .WithMany()
                         .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK_Orders_Branches_BranchId");
 
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
-                        .WithMany("Orders")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Orders_Brands_BrandId");
 
-                    b.HasOne("Domain.Entities.Core.Customer", "Customer")
-                        .WithMany("Orders")
+                    b.HasOne("Domain.Entities.Core.Customer", null)
+                        .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK_Orders_Customers_CustomerId");
 
-                    b.HasOne("Domain.Entities.Core.Employee", "Employee")
+                    b.HasOne("Domain.Entities.Core.Employee", null)
                         .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Orders_Employees_EmployeeId");
-
-                    b.Navigation("Branch");
-
-                    b.Navigation("Brand");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("Domain.Entities.Orders.OrderItem", b =>
                 {
-                    b.HasOne("Domain.Entities.Products.Batch", "Batch")
-                        .WithMany("OrderItems")
+                    b.HasOne("Domain.Entities.Products.Batch", null)
+                        .WithMany()
                         .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
@@ -1382,144 +1365,118 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_OrderItems_Orders_OrderId");
 
-                    b.HasOne("Domain.Entities.Products.Product", "Product")
-                        .WithMany("OrderItems")
+                    b.HasOne("Domain.Entities.Products.Product", null)
+                        .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_OrderItems_Products_ProductId");
 
-                    b.Navigation("Batch");
-
                     b.Navigation("Order");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Domain.Entities.Products.Batch", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
                         .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_batches_brands_brand_id");
 
-                    b.HasOne("Domain.Entities.Products.Product", "Product")
-                        .WithMany("Batches")
+                    b.HasOne("Domain.Entities.Products.Product", null)
+                        .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Batches_Products_ProductId");
 
-                    b.HasOne("Domain.Entities.Purchasing.PurchaseItem", "PurchaseItem")
-                        .WithMany("Batches")
+                    b.HasOne("Domain.Entities.Purchasing.PurchaseItem", null)
+                        .WithMany()
                         .HasForeignKey("PurchaseItemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Batches_PurchaseItems_PurchaseItemId");
-
-                    b.Navigation("Brand");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("PurchaseItem");
                 });
 
             modelBuilder.Entity("Domain.Entities.Products.Product", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
-                        .WithMany("Products")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Products_Brands_BrandId");
 
-                    b.HasOne("Domain.Entities.Products.ProductCategory", "Category")
-                        .WithMany("Products")
+                    b.HasOne("Domain.Entities.Products.ProductCategory", null)
+                        .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Products_ProductCategories_CategoryId");
-
-                    b.Navigation("Brand");
-
-                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("Domain.Entities.Products.ProductCategory", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
-                        .WithMany("ProductCategories")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_ProductCategories_Brands_BrandId");
-
-                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("Domain.Entities.Products.StockMovement", b =>
                 {
-                    b.HasOne("Domain.Entities.Products.Batch", "Batch")
-                        .WithMany("StockMovements")
+                    b.HasOne("Domain.Entities.Products.Batch", null)
+                        .WithMany()
                         .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_StockMovements_Batches_BatchId");
 
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
                         .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_stock_movements_brands_brand_id");
 
-                    b.HasOne("Domain.Entities.Products.Product", "Product")
-                        .WithMany("StockMovements")
+                    b.HasOne("Domain.Entities.Products.Product", null)
+                        .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_StockMovements_Products_ProductId");
 
-                    b.HasOne("Domain.Entities.Products.Warehouse", "Warehouse")
-                        .WithMany("StockMovements")
+                    b.HasOne("Domain.Entities.Products.Warehouse", null)
+                        .WithMany()
                         .HasForeignKey("WarehouseId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_StockMovements_Warehouses_WarehouseId");
-
-                    b.Navigation("Batch");
-
-                    b.Navigation("Brand");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Warehouse");
                 });
 
             modelBuilder.Entity("Domain.Entities.Products.Warehouse", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
                         .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_warehouses_brands_brand_id");
-
-                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("Domain.Entities.Products.WarehouseBatch", b =>
                 {
-                    b.HasOne("Domain.Entities.Products.Batch", "Batch")
-                        .WithMany("WarehouseBatches")
+                    b.HasOne("Domain.Entities.Products.Batch", null)
+                        .WithMany()
                         .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_WarehouseBatches_Batches_BatchId");
 
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
                         .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1533,10 +1490,6 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_WarehouseBatches_Warehouses_WarehouseId");
 
-                    b.Navigation("Batch");
-
-                    b.Navigation("Brand");
-
                     b.Navigation("Warehouse");
                 });
 
@@ -1549,60 +1502,50 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_warehouse_branch_branches_branch_id");
 
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
                         .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_warehouse_branch_brands_brand_id");
 
-                    b.HasOne("Domain.Entities.Products.Warehouse", "Warehouse")
-                        .WithMany("WarehouseBranches")
+                    b.HasOne("Domain.Entities.Products.Warehouse", null)
+                        .WithMany()
                         .HasForeignKey("WarehouseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_warehouse_branch_warehouses_warehouse_id");
 
                     b.Navigation("Branch");
-
-                    b.Navigation("Brand");
-
-                    b.Navigation("Warehouse");
                 });
 
             modelBuilder.Entity("Domain.Entities.Purchasing.Purchase", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Branch", "Branch")
+                    b.HasOne("Domain.Entities.Core.Branch", null)
                         .WithMany()
                         .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK_Purchases_Branches_BranchId");
 
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
-                        .WithMany("Purchases")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Purchases_Brands_BrandId");
 
-                    b.HasOne("Domain.Entities.Purchasing.Supplier", "Supplier")
-                        .WithMany("Purchases")
+                    b.HasOne("Domain.Entities.Purchasing.Supplier", null)
+                        .WithMany()
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Purchases_Suppliers_SupplierId");
-
-                    b.Navigation("Branch");
-
-                    b.Navigation("Brand");
-
-                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("Domain.Entities.Purchasing.PurchaseItem", b =>
                 {
-                    b.HasOne("Domain.Entities.Products.Product", "Product")
-                        .WithMany("PurchaseItems")
+                    b.HasOne("Domain.Entities.Products.Product", null)
+                        .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
@@ -1615,21 +1558,17 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PurchaseItems_Purchases_PurchaseId");
 
-                    b.Navigation("Product");
-
                     b.Navigation("Purchase");
                 });
 
             modelBuilder.Entity("Domain.Entities.Purchasing.Supplier", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Brand", "Brand")
-                        .WithMany("Suppliers")
+                    b.HasOne("Domain.Entities.Core.Brand", null)
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Suppliers_Brands_BrandId");
-
-                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("Domain.ValueObjects.BrandMembership", b =>
@@ -1718,11 +1657,6 @@ namespace Infrastructure.Migrations
                         .HasConstraintName("fk_asp_net_user_tokens_asp_net_users_user_id");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Accounting.Account", b =>
-                {
-                    b.Navigation("JournalEntryLines");
-                });
-
             modelBuilder.Entity("Domain.Entities.Accounting.JournalEntry", b =>
                 {
                     b.Navigation("JournalEntryLines");
@@ -1735,37 +1669,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Core.Brand", b =>
                 {
-                    b.Navigation("Accounts");
-
-                    b.Navigation("Branches");
-
-                    b.Navigation("ExpenseCategories");
-
-                    b.Navigation("Expenses");
-
-                    b.Navigation("JournalEntries");
-
                     b.Navigation("Memberships");
-
-                    b.Navigation("Orders");
-
-                    b.Navigation("ProductCategories");
-
-                    b.Navigation("Products");
-
-                    b.Navigation("Purchases");
-
-                    b.Navigation("Suppliers");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Core.Customer", b =>
-                {
-                    b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Expenses.ExpenseCategory", b =>
-                {
-                    b.Navigation("Expenses");
                 });
 
             modelBuilder.Entity("Domain.Entities.Orders.Order", b =>
@@ -1773,53 +1677,14 @@ namespace Infrastructure.Migrations
                     b.Navigation("OrderItems");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Products.Batch", b =>
-                {
-                    b.Navigation("OrderItems");
-
-                    b.Navigation("StockMovements");
-
-                    b.Navigation("WarehouseBatches");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Products.Product", b =>
-                {
-                    b.Navigation("Batches");
-
-                    b.Navigation("OrderItems");
-
-                    b.Navigation("PurchaseItems");
-
-                    b.Navigation("StockMovements");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Products.ProductCategory", b =>
-                {
-                    b.Navigation("Products");
-                });
-
             modelBuilder.Entity("Domain.Entities.Products.Warehouse", b =>
                 {
-                    b.Navigation("StockMovements");
-
                     b.Navigation("WarehouseBatches");
-
-                    b.Navigation("WarehouseBranches");
                 });
 
             modelBuilder.Entity("Domain.Entities.Purchasing.Purchase", b =>
                 {
                     b.Navigation("PurchaseItems");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Purchasing.PurchaseItem", b =>
-                {
-                    b.Navigation("Batches");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Purchasing.Supplier", b =>
-                {
-                    b.Navigation("Purchases");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>

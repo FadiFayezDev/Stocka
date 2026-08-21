@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Infrastructure.Serviecs
+namespace Infrastructure.Services
 {
     public class MediaStorage : IMediaStorage
     {

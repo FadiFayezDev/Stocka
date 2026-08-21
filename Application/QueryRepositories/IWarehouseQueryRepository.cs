@@ -12,5 +12,8 @@ namespace Application.QueryRepositories
         Task<WarehouseDto?> GetByIdAsync(Guid id);
         Task<IEnumerable<WarehouseDto>> GetAllTableAsync();
         Task<IEnumerable<WarehouseDto>> GetAllByBrandIdAsync(Guid brandId);
+        Task<IEnumerable<WarehouseDto>> GetByBranchIdAsync(Guid branchId);
+        Task<IDictionary<Guid, List<string>>> GetBranchNamesByWarehouseIdsAsync(Guid brandId);
+        Task<IDictionary<Guid, List<string>>> GetWarehouseNamesByBranchIdsAsync(Guid brandId);
     }
 }
