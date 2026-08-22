@@ -68,6 +68,16 @@ namespace Application.UseCases.Brand
             if (user == null)
                 throw new BusinessException("User is not found.");
 
+            // Ensure Identity role exists and user is assigned so [Authorize(Roles = "BrandOwner")] works
+            if (!await _identityService.RoleIsExistAsync(nameof(SystemRolesType.BrandOwner)))
+                await _identityService.CreateRoleAsync(nameof(SystemRolesType.BrandOwner));
+
+            var existingRoles = await _identityService.GetUserRolesAsync(user.UserId);
+            if (existingRoles == null || !existingRoles.Contains(nameof(SystemRolesType.BrandOwner)))
+            {
+                await _identityService.AssignUserToRole(user.UserName, new List<string> { nameof(SystemRolesType.BrandOwner) });
+            }
+
             await _unitOfWork.BeginTransactionAsync();
             try
             {

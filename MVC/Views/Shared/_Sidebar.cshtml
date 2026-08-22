@@ -78,7 +78,7 @@
                 </ul>
             </li>
 
-            <li class="nav-tree__group @GroupState("Supplier", "PurchaseOrder", "Purchase")">
+            <li class="nav-tree__group @GroupState("Suppliers", "PurchaseOrder", "Purchase")">
                 <button type="button" class="nav-link nav-link--group" aria-expanded="false" aria-controls="nav-purchasing" data-nav-group>
                     <i class="bi bi-cart nav-link__icon" aria-hidden="true"></i>
                     <span class="nav-link__label">المشتريات</span>
@@ -87,7 +87,7 @@
                 <ul class="nav-sub" id="nav-purchasing">
                     <li class="nav-sub__inner">
                         <span class="nav-sub__header">المشتريات</span>
-                        <a class="nav-link nav-link--sub @ActiveAttrs("Supplier")" href="#">الموردون</a>
+                        <a class="nav-link nav-link--sub @ActiveAttrs("Suppliers")" href="@Url.Action("Index", "Suppliers")">الموردون</a>
                         <a class="nav-link nav-link--sub @ActiveAttrs("Purchases")" href="@Url.Action("Index", "Purchases")">أوامر الشراء</a>
                     </li>
                 </ul>

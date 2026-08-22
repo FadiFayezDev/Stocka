@@ -76,23 +76,24 @@ namespace Infrastructure.Repositories.Queries
         public async Task<IEnumerable<ProductDto>> GetProductsWithQuantities(Guid brandId, Guid? warehouseId = null)
         {
             var query = $@"
-                SELECT 
-                    p.id AS Id, 
-                    p.brand_id AS BrandId, 
-                    p.category_id AS CategoryId, 
-                    p.name AS Name, 
-                    p.barcode AS Barcode,
-                    p.selling_price AS SellingPrice,
-                    COALESCE(SUM(wb.quantity), 0) AS TotalQuantity,
-                    p.image_path AS ImageUrl,
-                    p.is_active AS IsActive
-                FROM {TableProducts} p
-                LEFT JOIN {TableBatches} b ON p.id = b.product_id
-                LEFT JOIN {TableWarehouses} w ON w.brand_id = p.brand_id AND w.type = 'Shop'
-                    AND (@WarehouseId IS NULL OR w.id = @WarehouseId)
-                LEFT JOIN {TableWarehouseBatches} wb ON b.id = wb.batch_id AND wb.warehouse_id = w.id
-                WHERE p.brand_id = @BrandId
-                GROUP BY p.id, p.brand_id, p.category_id, p.name, p.barcode";
+        SELECT 
+            p.id AS Id, 
+            p.brand_id AS BrandId, 
+            p.category_id AS CategoryId, 
+            p.name AS Name, 
+            p.barcode AS Barcode,
+            p.selling_price AS SellingPrice,
+            COALESCE(SUM(wb.quantity), 0) AS TotalQuantity,
+            p.image_path AS ImageUrl,
+            p.is_active AS IsActive
+        FROM {TableProducts} p
+        LEFT JOIN {TableBatches} b ON p.id = b.product_id
+        LEFT JOIN {TableWarehouses} w ON w.brand_id = p.brand_id AND w.type = 'Shop'
+            AND (@WarehouseId IS NULL OR w.id = @WarehouseId)
+        LEFT JOIN {TableWarehouseBatches} wb ON b.id = wb.batch_id AND wb.warehouse_id = w.id
+        WHERE p.brand_id = @BrandId
+        GROUP BY p.id, p.brand_id, p.category_id, p.name, p.barcode";
+
             var parameters = new { BrandId = brandId, WarehouseId = warehouseId };
             var result = await _connection.QueryAsync<ProductDto>(query, parameters);
 
@@ -105,7 +106,10 @@ namespace Infrastructure.Repositories.Queries
                 Barcode = p.Barcode,
                 SellingPrice = p.SellingPrice,
                 TotalQuantity = p.TotalQuantity,
-                ImageUrl = string.IsNullOrEmpty(p.ImageUrl) ? null : $"{p.ImageUrl}{_sastoken}",
+                // استبدال minio:9000 بـ localhost:9000 مباشرة
+                ImageUrl = string.IsNullOrEmpty(p.ImageUrl)
+                    ? null
+                    : p.ImageUrl.Replace("minio:9000", "localhost:9000"),
                 IsActive = p.IsActive
             }).ToList();
 

@@ -1,0 +1,17 @@
+@model MVC.Models.Suppliers.SupplierDetailsModel
+
+@{
+    ViewData["Title"] = ViewData["Title"] ?? "حذف مورد";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="alert alert-warning">
+    هل أنت متأكد أنك تريد حذف المورد <strong>@Model.Name</strong> ؟
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">نعم، حذف</button>
+    <a class="btn btn-secondary" asp-action="Index">إلغاء</a>
+</form>

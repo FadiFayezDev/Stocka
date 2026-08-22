@@ -56,7 +56,8 @@ namespace Infrastructure
             services.AddScoped<IMediaStorage, MediaStorage>();
             services.AddScoped<ITokenGenerator, TokenGenerator>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IStorageService, StorageService>();
+            //services.AddScoped<IStorageService, StorageService>(); Azure
+            services.AddScoped<IStorageService, Storage.StorageService>(); // Minio
             // Register Dummy Email Sender
             services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, EmailSender>();
             #endregion
