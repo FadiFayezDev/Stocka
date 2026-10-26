@@ -1,0 +1,58 @@
+@model PaginatedResult<HistoricalBalanceDto>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var asOf = (DateTime)ViewBag.AsOf;
+}
+
+<div class="container-fluid py-4">
+    <h2 class="mb-1">Historical Balance</h2>
+    <p class="text-muted mb-3">
+        Stock balance reconstructed from the movement audit trail as of a date (inclusive).
+        Reliable from the first recorded movement onward &mdash; movements are never deleted or rewritten.
+        Rows with zero balance are omitted.
+    </p>
+
+    <form method="get" class="row g-2 mb-3" asp-area="Inventory" asp-controller="Reports" asp-action="Balance">
+        <div class="col-md-3"><input type="date" class="form-control" name="asOf" value="@asOf.ToString("yyyy-MM-dd")" /></div>
+        <div class="col-auto"><button class="btn btn-primary">Recalculate</button></div>
+    </form>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <table class="table-hover mb-0 table align-middle">
+                <thead class="table-light">
+                    <tr><th class="ps-4">Product</th><th>Warehouse</th><th>Balance</th><th>Movements considered</th></tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items.Any())
+                    {
+                        @foreach (var b in Model.Items)
+                         {
+                             <tr>
+                                 <td class="ps-4"><small>@b.ProductId</small></td>
+                                 <td><small>@b.WarehouseId</small></td>
+                                 <td>@b.Quantity</td>
+                                 <td>@b.MovementsConsidered</td>
+                             </tr>
+                         }
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" class="py-5 text-center text-muted">No stock existed at this date.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <small class="text-muted">Page @Model.Page of @Model.TotalPages</small>
+        <div class="btn-group">
+            <a asp-area="Inventory" asp-controller="Reports" asp-action="Balance" asp-route-asOf="@asOf.ToString("yyyy-MM-dd")" asp-route-page="@(Model.Page - 1)"
+               class="btn btn-sm btn-outline-secondary @(Model.HasPrevious ? "" : "disabled")">Previous</a>
+            <a asp-area="Inventory" asp-controller="Reports" asp-action="Balance" asp-route-asOf="@asOf.ToString("yyyy-MM-dd")" asp-route-page="@(Model.Page + 1)"
+               class="btn btn-sm btn-outline-secondary @(Model.HasNext ? "" : "disabled")">Next</a>
+        </div>
+    </div>
+    <div class="mb-5"></div>
+</div>

@@ -1,0 +1,46 @@
+﻿@model Inventory.Contracts.UseCases.WarehouseCases.UpdateWarehouseCommand
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4" style="max-width: 720px;">
+    <h2>Edit Warehouse</h2>
+    <p class="text-muted">Only provided fields are updated. Stock and movement history are never touched.</p>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form asp-area="Inventory" asp-controller="Warehouses" asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="WarehouseId" />
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Name">Name</label>
+                    <input class="form-control" asp-for="Name" maxlength="50" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Type">Type</label>
+                    <select class="form-select" asp-for="Type">
+                        <option value="0">Shop</option>
+                        <option value="1">Storage</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Location">Location</label>
+                    <input class="form-control" asp-for="Location" maxlength="100" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Description">Description</label>
+                    <textarea class="form-control" asp-for="Description" rows="3" maxlength="600"></textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <a class="btn btn-outline-secondary" asp-area="Inventory" asp-controller="Warehouses" asp-action="Details" asp-route-id="@Model.WarehouseId">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

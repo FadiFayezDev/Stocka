@@ -1,0 +1,28 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BuildingBlocks/BuildingBlocks.csproj" Id="a612e93e-cd2f-41ac-8808-a578ec024264" />
+  </Folder>
+  <Folder Name="/src/Hosts/">
+    <Project Path="src/Hosts/Stocka.MVC/Stocka.MVC.csproj" Id="e71d0c90-bf77-4441-93d3-34a7a979a334" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Catalog/">
+    <Project Path="src/Modules/Catalog/Catalog.Application/Catalog.Application.csproj" Id="d86c426d-a69d-4783-b24b-cc6276f4bea0" />
+    <Project Path="src/Modules/Catalog/Catalog.Domain/Catalog.Domain.csproj" Id="83f102b9-4bf9-4662-b17e-fdf483a6cd75" />
+    <Project Path="src/Modules/Catalog/Catalog.Infrastructure/Catalog.Infrastructure.csproj" Id="6091d9cb-01e0-42b6-8f31-e1af86e8acaf" />
+  </Folder>
+  <Folder Name="/src/Modules/Core/">
+    <Project Path="src/Modules/Core/Core.Application/Core.Application.csproj" />
+    <Project Path="src/Modules/Core/Core.Contracts/Core.Contracts.csproj" Id="d6214d4b-83ab-4daa-b011-8763ad41759e" />
+    <Project Path="src/Modules/Core/Core.Domain/Core.Domain.csproj" Id="ce09bc18-c10b-4d77-b7d9-7753aba26cb7" />
+    <Project Path="src/Modules/Core/Core.Infrastructure/Core.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Identity/" />
+  <Folder Name="/src/Modules/Inventory/">
+    <Project Path="src/Modules/Inventory/Inventory.Application/Inventory.Application.csproj" Id="6683794a-5343-421f-ac73-d5c8beb95767" />
+    <Project Path="src/Modules/Inventory/Inventory.Contracts/Inventory.Contracts.csproj" Id="95368008-4eda-41c3-b02d-4f127825c41e" />
+    <Project Path="src/Modules/Inventory/Inventory.Domain/Inventory.Domain.csproj" />
+    <Project Path="src/Modules/Inventory/Inventory.Infrastructure/Inventory.Infrastructure.csproj" Id="8148db5c-3fa7-43a6-afc8-ae7b4270efcf" />
+  </Folder>
+  <Project Path="test/test.csproj" Id="51d764df-7bed-4517-acb3-93669b0f3444" />
+</Solution>

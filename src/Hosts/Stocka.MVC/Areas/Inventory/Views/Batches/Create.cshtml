@@ -1,0 +1,46 @@
+﻿@model Inventory.Contracts.UseCases.BatchCases.RegisterBatchCommand
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4" style="max-width: 720px;">
+    <h2>Register Batch (receipt)</h2>
+    <p class="text-muted">
+        Registers stock received from a purchasing document. This does NOT place units into a warehouse &mdash;
+        use <strong>Allocate stock</strong> afterwards to distribute units.
+    </p>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form asp-area="Inventory" asp-controller="Batches" asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="ProductId">Product ID (Catalog)</label>
+                    <input class="form-control" asp-for="ProductId" placeholder="00000000-0000-0000-0000-000000000000" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="PurchaseItemId">Purchase item ID (Purchasing)</label>
+                    <input class="form-control" asp-for="PurchaseItemId" placeholder="00000000-0000-0000-0000-000000000000" />
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" asp-for="InitialQuantity">Initial quantity</label>
+                        <input type="number" class="form-control" asp-for="InitialQuantity" min="1" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" asp-for="UnitCost">Unit cost</label>
+                        <input type="number" step="0.01" class="form-control" asp-for="UnitCost" min="0.01" />
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Register batch</button>
+                    <a class="btn btn-outline-secondary" asp-area="Inventory" asp-controller="Batches" asp-action="Index">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

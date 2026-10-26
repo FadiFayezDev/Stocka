@@ -1,0 +1,51 @@
+@model PaginatedResult<ZeroStockProductDto>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <h2 class="mb-1">Zero-Stock Products</h2>
+    <p class="text-muted mb-3">
+        Products with recorded batches whose current total units in warehouses is 0. Distinguished from products
+        never present in a warehouse: Unallocated &gt; 0 means received stock still waiting for allocation.
+    </p>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <table class="table-hover mb-0 table align-middle">
+                <thead class="table-light">
+                    <tr><th class="ps-4">Product</th><th>Initial (all batches)</th><th>Unallocated</th><th>In warehouses</th></tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items.Any())
+                    {
+                        @foreach (var p in Model.Items)
+                         {
+                             <tr>
+                                 <td class="ps-4"><small>@p.ProductId</small></td>
+                                 <td>@p.InitialQuantity</td>
+                                 <td>@p.UnallocatedQuantity</td>
+                                 <td>@p.QuantityInWarehouses</td>
+                             </tr>
+                         }
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" class="py-5 text-center text-muted">No zero-stock products.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <small class="text-muted">Page @Model.Page of @Model.TotalPages (@Model.TotalCount products)</small>
+        <div class="btn-group">
+            <a asp-area="Inventory" asp-controller="Reports" asp-action="Products" asp-route-page="@(Model.Page - 1)"
+               class="btn btn-sm btn-outline-secondary @(Model.HasPrevious ? "" : "disabled")">Previous</a>
+            <a asp-area="Inventory" asp-controller="Reports" asp-action="Products" asp-route-page="@(Model.Page + 1)"
+               class="btn btn-sm btn-outline-secondary @(Model.HasNext ? "" : "disabled")">Next</a>
+        </div>
+    </div>
+    <div class="mb-5"></div>
+</div>

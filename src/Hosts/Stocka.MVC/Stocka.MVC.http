@@ -1,0 +1,5 @@
+﻿@Stocka.MVC_HostAddress = https://localhost:7196
+
+GET {{Stocka.MVC_HostAddress}}/Catalog/categories
+
+###

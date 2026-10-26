@@ -1,0 +1,87 @@
+﻿@model WarehouseDto
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var inventory = (PaginatedResult<Inventory.Contracts.DTOs.Reports.WarehouseInventoryItemDto>?)ViewBag.Inventory;
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">@Model.Name <span class="badge text-bg-@(Model.IsActive ? "success" : "secondary")">@(Model.IsActive ? "Active" : "Inactive")</span></h2>
+            <p class="text-muted mb-0">@Model.Location &middot; @(Model.Type == 0 ? "Shop" : "Storage") &middot; @ViewBag.TotalUnits current units (raw unit count)</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" asp-area="Inventory" asp-controller="Warehouses" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+            <a class="btn btn-outline-secondary" asp-area="Inventory" asp-controller="Stock" asp-action="Movements" asp-route-warehouseId="@Model.Id">Movements</a>
+            <a class="btn btn-outline-primary" asp-area="Inventory" asp-controller="Warehouses" asp-action="Index">Back to list</a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white"><strong>Warehouse details</strong></div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Name</dt><dd class="col-sm-9">@Model.Name</dd>
+                <dt class="col-sm-3">Location</dt><dd class="col-sm-9">@Model.Location</dd>
+                <dt class="col-sm-3">Description</dt><dd class="col-sm-9">@Model.Description</dd>
+                <dt class="col-sm-3">Brand</dt><dd class="col-sm-9">@Model.BrandId</dd>
+                <dt class="col-sm-3">Warehouse ID</dt><dd class="col-sm-9">@Model.Id</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white"><strong>Inventory (product &amp; batch breakdown)</strong></div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table-hover mb-0 table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Product</th>
+                            <th>Batch</th>
+                            <th>Quantity</th>
+                            <th>Batch unit cost</th>
+                            <th class="pe-4 text-end">Line cost (recorded, no valuation policy)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (inventory != null && inventory.Items.Any())
+                        {
+                            @foreach (var item in inventory.Items)
+                            {
+                                <tr>
+                                    <td class="ps-4"><small>@item.ProductId</small></td>
+                                    <td>
+                                        <a asp-area="Inventory" asp-controller="Batches" asp-action="Details" asp-route-id="@item.BatchId"><small>@item.BatchId</small></a>
+                                    </td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.BatchUnitCost.ToString("N2")</td>
+                                    <td class="pe-4 text-end">@item.LineCost.ToString("N2")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="py-5 text-center text-muted">No stock placements recorded in this warehouse.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @if (inventory != null)
+    {
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <small class="text-muted">Page @inventory.Page of @inventory.TotalPages (@inventory.TotalCount placements)</small>
+            <div class="btn-group">
+                <a asp-area="Inventory" asp-controller="Warehouses" asp-action="Details" asp-route-id="@Model.Id" asp-route-inventoryPage="@(inventory.Page - 1)"
+                   class="btn btn-sm btn-outline-secondary @(inventory.HasPrevious ? "" : "disabled")">Previous</a>
+                <a asp-area="Inventory" asp-controller="Warehouses" asp-action="Details" asp-route-id="@Model.Id" asp-route-inventoryPage="@(inventory.Page + 1)"
+                   class="btn btn-sm btn-outline-secondary @(inventory.HasNext ? "" : "disabled")">Next</a>
+            </div>
+        </div>
+    }
+
+    <div class="mb-5"></div>
+</div>

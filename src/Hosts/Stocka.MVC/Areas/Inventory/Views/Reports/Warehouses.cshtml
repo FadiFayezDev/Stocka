@@ -1,0 +1,117 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var rankedStock = (PaginatedResult<WarehouseStockSummaryDto>?)ViewBag.RankedByStock;
+    var rankedCost = (PaginatedResult<WarehouseStockSummaryDto>?)ViewBag.RankedByCost;
+    var zeroStock = (List<WarehouseStockSummaryDto>?)ViewBag.ZeroStock;
+    var inactiveWithStock = (List<WarehouseStockSummaryDto>?)ViewBag.InactiveWithStock;
+    var asc = (bool)ViewBag.Ascending;
+}
+
+<div class="container-fluid py-4">
+    <h2 class="mb-1">Warehouse Inventory Reports</h2>
+    <p class="text-muted mb-3">
+        TotalUnits is a raw unit count across products with different units of measure &mdash;
+        NOT a normalized measure of warehouse capacity. Cost = recorded batch unit costs (no approved valuation policy).
+    </p>
+
+    <div class="btn-group mb-3">
+        <a class="btn btn-sm btn-outline-secondary" asp-area="Inventory" asp-controller="Reports" asp-action="Warehouses" asp-route-order="stock" asp-route-asc="@(asc)">Stock @(asc ? "asc" : "desc")</a>
+        <a class="btn btn-sm btn-outline-secondary" asp-area="Inventory" asp-controller="Reports" asp-action="Warehouses" asp-route-order="cost" asp-route-asc="@(asc)">Cost @(asc ? "asc" : "desc")</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><strong>Ranked by total stock</strong></div>
+                <div class="card-body p-0">
+                    <table class="table-hover mb-0 table align-middle">
+                        <thead class="table-light"><tr><th class="ps-4">Warehouse</th><th>Active</th><th>Units</th><th class="pe-4 text-end">Products</th></tr></thead>
+                        <tbody>
+                            @if (rankedStock != null)
+                            {
+                                @foreach (var w in rankedStock.Items)
+                                 {
+                                     <tr><td class="ps-4">@w.Name</td><td>@(w.IsActive ? "Yes" : "No")</td><td>@w.TotalUnits</td><td class="pe-4 text-end">@w.DistinctProducts</td></tr>
+                                 }
+                                 if (!rankedStock.Items.Any())
+                                 {
+                                     <tr><td colspan="4" class="py-4 text-center text-muted">No warehouses.</td></tr>
+                                 }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><strong>Ranked by inventory cost (recorded)</strong></div>
+                <div class="card-body p-0">
+                    <table class="table-hover mb-0 table align-middle">
+                        <thead class="table-light"><tr><th class="ps-4">Warehouse</th><th>Units</th><th class="pe-4 text-end">Cost</th></tr></thead>
+                        <tbody>
+                            @if (rankedCost != null)
+                            {
+                                @foreach (var w in rankedCost.Items)
+                                 {
+                                     <tr><td class="ps-4">@w.Name</td><td>@w.TotalUnits</td><td class="pe-4 text-end">@w.TotalCost.ToString("N2")</td></tr>
+                                 }
+                                 if (!rankedCost.Items.Any())
+                                 {
+                                     <tr><td colspan="3" class="py-4 text-center text-muted">No warehouses.</td></tr>
+                                 }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white"><strong>Warehouses with no stock</strong></div>
+                <div class="card-body p-0">
+                    <table class="table-hover mb-0 table align-middle">
+                        <thead class="table-light"><tr><th class="ps-4">Warehouse</th><th>Status</th></tr></thead>
+                        <tbody>
+                            @if (zeroStock != null && zeroStock.Any())
+                            {
+                                @foreach (var w in zeroStock)
+                                 {
+                                     <tr><td class="ps-4">@w.Name</td><td><span class="badge text-bg-@(w.IsActive ? "success" : "secondary")">@(w.IsActive ? "Active" : "Inactive")</span></td></tr>
+                                 }
+                            }
+                            else
+                            {
+                                <tr><td colspan="2" class="py-4 text-center text-muted">Every warehouse currently holds stock.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white"><strong>Inactive warehouses containing stock (control)</strong></div>
+                <div class="card-body p-0">
+                    <table class="table-hover mb-0 table align-middle">
+                        <thead class="table-light"><tr><th class="ps-4">Warehouse</th><th>Units</th><th class="pe-4 text-end">Cost</th></tr></thead>
+                        <tbody>
+                            @if (inactiveWithStock != null && inactiveWithStock.Any())
+                            {
+                                @foreach (var w in inactiveWithStock)
+                                 {
+                                     <tr><td class="ps-4 text-warning-emphasis">@w.Name</td><td>@w.TotalUnits</td><td class="pe-4 text-end">@w.TotalCost.ToString("N2")</td></tr>
+                                 }
+                            }
+                            else
+                            {
+                                <tr><td colspan="3" class="py-4 text-center text-muted">None &mdash; no inactive warehouse holds stock.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mb-5"></div>
+</div>
