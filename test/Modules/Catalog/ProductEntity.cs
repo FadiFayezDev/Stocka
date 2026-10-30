@@ -1,5 +1,4 @@
-﻿using BuildingBlocks.Application.Primitives.Identifiers;
-using Catalog.Domain.Entities;
+﻿using Catalog.Domain.Entities;
 using Catalog.Domain.Primitives;
 using Catalog.Domain.Primitives.Identifiers;
 using Xunit;
@@ -10,10 +9,10 @@ namespace Catalog.Domain.Tests.Entities.Products
     {
         #region Test Data Helpers
 
-        private static (BrandId brandId, CategoryId categoryId, string name, decimal price, string? barcode) ValidData()
+        private static (Guid organizationId, CategoryId categoryId, string name, decimal price, string? barcode) ValidData()
         {
             return (
-                BrandId.New(),
+                Guid.NewGuid(),
                 CategoryId.New(),
                 "Gigabyte GeForce RTX 4060 TI Gaming OC 8GB",
                 21500m,
@@ -23,7 +22,7 @@ namespace Catalog.Domain.Tests.Entities.Products
         private static Product CreateValidProduct(string? barcode = null)
         {
             var data = ValidData();
-            return Product.Create(data.brandId, data.categoryId, data.name, data.price, barcode ?? data.barcode);
+            return Product.Create(data.organizationId, data.categoryId, data.name, data.price, barcode ?? data.barcode);
         }
 
         #endregion
@@ -33,11 +32,11 @@ namespace Catalog.Domain.Tests.Entities.Products
         [Fact]
         public void Create_WithValidData_ShouldSetAllPropertiesCorrectly()
         {
-            var (brandId, categoryId, name, price, barcode) = ValidData();
+            var (organizationId, categoryId, name, price, barcode) = ValidData();
 
-            var product = Product.Create(brandId, categoryId, name, price, barcode);
+            var product = Product.Create(organizationId, categoryId, name, price, barcode);
 
-            Assert.Equal(brandId, product.BrandId);
+            Assert.Equal(organizationId, product.OrganizationId);
             Assert.Equal(categoryId, product.CategoryId);
             Assert.Equal(name, product.Name);
             Assert.Equal(price, product.SellingPrice);
@@ -50,9 +49,9 @@ namespace Catalog.Domain.Tests.Entities.Products
         [Fact]
         public void Create_WithoutBarcode_ShouldSetBarcodeToNull()
         {
-            var (brandId, categoryId, name, price, _) = ValidData();
+            var (organizationId, categoryId, name, price, _) = ValidData();
 
-            var product = Product.Create(brandId, categoryId, name, price);
+            var product = Product.Create(organizationId, categoryId, name, price);
 
             Assert.Null(product.Barcode);
         }
@@ -62,9 +61,9 @@ namespace Catalog.Domain.Tests.Entities.Products
         [InlineData("ABC-999", "ABC-999")]
         public void Create_WithBarcodeContainingWhitespace_ShouldTrimBarcode(string input, string expected)
         {
-            var (brandId, categoryId, name, price, _) = ValidData();
+            var (organizationId, categoryId, name, price, _) = ValidData();
 
-            var product = Product.Create(brandId, categoryId, name, price, input);
+            var product = Product.Create(organizationId, categoryId, name, price, input);
 
             Assert.Equal(expected, product.Barcode);
         }
@@ -75,9 +74,9 @@ namespace Catalog.Domain.Tests.Entities.Products
         [InlineData("   ")]
         public void Create_WithNullOrWhitespaceBarcode_ShouldSetBarcodeToNull(string? barcode)
         {
-            var (brandId, categoryId, name, price, _) = ValidData();
+            var (organizationId, categoryId, name, price, _) = ValidData();
 
-            var product = Product.Create(brandId, categoryId, name, price, barcode);
+            var product = Product.Create(organizationId, categoryId, name, price, barcode);
 
             Assert.Null(product.Barcode);
         }
@@ -86,9 +85,9 @@ namespace Catalog.Domain.Tests.Entities.Products
         [InlineData("  Gigabyte RTX 4060  ", "Gigabyte RTX 4060")]
         public void Create_WithNameContainingWhitespace_ShouldTrimName(string input, string expected)
         {
-            var (brandId, categoryId, _, price, barcode) = ValidData();
+            var (organizationId, categoryId, _, price, barcode) = ValidData();
 
-            var product = Product.Create(brandId, categoryId, input, price, barcode);
+            var product = Product.Create(organizationId, categoryId, input, price, barcode);
 
             Assert.Equal(expected, product.Name);
         }
@@ -99,10 +98,10 @@ namespace Catalog.Domain.Tests.Entities.Products
         [InlineData("   ")]
         public void Create_WithNullOrWhitespaceName_ShouldThrowArgumentException(string? name)
         {
-            var (brandId, categoryId, _, price, barcode) = ValidData();
+            var (organizationId, categoryId, _, price, barcode) = ValidData();
 
             var ex = Assert.Throws<ArgumentException>(() =>
-                Product.Create(brandId, categoryId, name!, price, barcode));
+                Product.Create(organizationId, categoryId, name!, price, barcode));
 
             Assert.Equal("name", ex.ParamName);
         }
@@ -110,10 +109,10 @@ namespace Catalog.Domain.Tests.Entities.Products
         [Fact]
         public void Create_WithNegativeSellingPrice_ShouldThrowArgumentOutOfRangeException()
         {
-            var (brandId, categoryId, name, _, barcode) = ValidData();
+            var (organizationId, categoryId, name, _, barcode) = ValidData();
 
             var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
-                Product.Create(brandId, categoryId, name, -1m, barcode));
+                Product.Create(organizationId, categoryId, name, -1m, barcode));
 
             Assert.Equal("sellingPrice", ex.ParamName);
         }
@@ -121,9 +120,9 @@ namespace Catalog.Domain.Tests.Entities.Products
         [Fact]
         public void Create_WithZeroSellingPrice_ShouldBeAllowed()
         {
-            var (brandId, categoryId, name, _, barcode) = ValidData();
+            var (organizationId, categoryId, name, _, barcode) = ValidData();
 
-            var product = Product.Create(brandId, categoryId, name, 0m, barcode);
+            var product = Product.Create(organizationId, categoryId, name, 0m, barcode);
 
             Assert.Equal(0m, product.SellingPrice);
         }
@@ -131,10 +130,10 @@ namespace Catalog.Domain.Tests.Entities.Products
         [Fact]
         public void Create_CalledTwiceWithSameData_ShouldProduceDifferentIds()
         {
-            var (brandId, categoryId, name, price, barcode) = ValidData();
+            var (organizationId, categoryId, name, price, barcode) = ValidData();
 
-            var product1 = Product.Create(brandId, categoryId, name, price, barcode);
-            var product2 = Product.Create(brandId, categoryId, name, price, barcode);
+            var product1 = Product.Create(organizationId, categoryId, name, price, barcode);
+            var product2 = Product.Create(organizationId, categoryId, name, price, barcode);
 
             Assert.NotEqual(product1.Id, product2.Id);
         }
@@ -215,17 +214,17 @@ namespace Catalog.Domain.Tests.Entities.Products
 
         #endregion
 
-        #region ChangeBrand
+        #region ChangeOrganization
 
         [Fact]
-        public void ChangeBrand_WithNewBrandId_ShouldUpdateBrandId()
+        public void ChangeOrganization_WithNewOrganizationId_ShouldUpdateOrganizationId()
         {
             var product = CreateValidProduct();
-            var newBrandId = BrandId.New();
+            var newOrganizationId = Guid.NewGuid();
 
-            product.ChangeBrand(newBrandId);
+            product.ChangeOrganization(newOrganizationId);
 
-            Assert.Equal(newBrandId, product.BrandId);
+            Assert.Equal(newOrganizationId, product.OrganizationId);
         }
 
         #endregion
@@ -382,10 +381,10 @@ namespace Catalog.Domain.Tests.Entities.Products
         {
             var product = CreateValidProduct();
 
-            var newBrandId = BrandId.New();
+            var newOrganizationId = Guid.NewGuid();
             var newCategoryId = CategoryId.New();
 
-            product.ChangeBrand(newBrandId);
+            product.ChangeOrganization(newOrganizationId);
             product.ChangeCategory(newCategoryId);
             product.Rename("Updated Name");
             product.ChangeSellingPrice(500m);
@@ -393,7 +392,7 @@ namespace Catalog.Domain.Tests.Entities.Products
             product.ChangeImage("/img/new.png");
             product.Deactivate();
 
-            Assert.Equal(newBrandId, product.BrandId);
+            Assert.Equal(newOrganizationId, product.OrganizationId);
             Assert.Equal(newCategoryId, product.CategoryId);
             Assert.Equal("Updated Name", product.Name);
             Assert.Equal(500m, product.SellingPrice);
@@ -407,12 +406,12 @@ namespace Catalog.Domain.Tests.Entities.Products
         {
             var product = CreateValidProduct();
             var originalPrice = product.SellingPrice;
-            var originalBrandId = product.BrandId;
+            var originalOrganizationId = product.OrganizationId;
 
             Assert.Throws<ArgumentException>(() => product.Rename(""));
 
             Assert.Equal(originalPrice, product.SellingPrice);
-            Assert.Equal(originalBrandId, product.BrandId);
+            Assert.Equal(originalOrganizationId, product.OrganizationId);
         }
 
         #endregion
