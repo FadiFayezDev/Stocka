@@ -1,6 +1,5 @@
 ﻿using BuildingBlocks.Application.Common.Models;
-using BuildingBlocks.Application.Primitives.Identifiers;
-using Catalog.Application.DTOs.Category;
+using Catalog.Contracts.DTOs.Category;
 
 namespace Catalog.Application.Repositories.Queries.Category
 {
@@ -8,7 +7,7 @@ namespace Catalog.Application.Repositories.Queries.Category
     {
         Task<CategoryDto?> GetByIdAsync(Guid id);
         Task<CategoryDto?> GetByNameAsync(string name);
-        Task<IEnumerable<CategoryDto>> GetAllAsync(BrandId brandId);
-        Task<PaginatedResult<CategoryDto>> GetPagedAsync(BrandId brandId, int page, int pageSize);
+        Task<IEnumerable<CategoryDto>> GetAllAsync(Guid organizationId);
+        Task<PaginatedResult<CategoryDto>> GetPagedAsync(Guid organizationId, int page, int pageSize);
     }
 }

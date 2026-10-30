@@ -7,7 +7,7 @@ namespace Catalog.Domain.Entities;
 
 public partial class Category : AggregateRoot<CategoryId>/*, IMultiTenantEntity*/
 {
-    public BrandId BrandId { get; private set; }
+    public Guid OrganizationId { get; private set; }
 
     public string Name { get; private set; } = null!;
 
@@ -16,21 +16,21 @@ public partial class Category : AggregateRoot<CategoryId>/*, IMultiTenantEntity*
     private Category() { }
 
     [SetsRequiredMembers]
-    public Category(BrandId brandId, string name)
+    public Category(Guid organizationId, string name)
     {
         Id = CategoryId.New();
 
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Category name cannot be empty.", nameof(name));
 
-        BrandId = brandId;
+        OrganizationId = organizationId;
         Name = name.Trim();
         IsActive = true;
     }
 
-    public static Category Create(BrandId brandId, string name)
+    public static Category Create(Guid organizationId, string name)
     {
-        return new Category(brandId, name);
+        return new Category(organizationId, name);
     }
 
     public void UpdateActive(bool value) => IsActive = value;

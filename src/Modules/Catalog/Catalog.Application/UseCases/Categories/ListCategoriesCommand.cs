@@ -1,34 +1,34 @@
-using BuildingBlocks.Application.Abstractions;
-using BuildingBlocks.Application.Primitives.Identifiers;
+using BuildingBlocks.Application.Common.Interfaces;
+using Catalog.Application.Bindings.CategoryCases;
 using Catalog.Application.DTOs.Category;
 using Catalog.Application.Repositories.Queries.Category;
+using Catalog.Contracts.DTOs.Category;
+using Catalog.Contracts.UseCases.CategoryCases;
 using MediatR;
 
 namespace Catalog.Application.UseCases.Categories
 {
-    public record ListCategoriesCommand : IRequest<IEnumerable<CategoryDto>>
-    {
-        public Guid BrandId { get; set; } = Guid.Empty;
-    }
-
-    public class ListCategoriesCommandHandler : IRequestHandler<ListCategoriesCommand, IEnumerable<CategoryDto>>
+    /// <summary>
+    /// Lists categories of the current Organization (or an explicitly requested one).
+    /// </summary>
+    public class ListCategoriesQueryHandler : IRequestHandler<ListCategoriesQueryMediatR, IEnumerable<CategoryDto>>
     {
         private readonly ICategoryQueryRepository _categoryQueryRepository;
-        private readonly ITenantContext _tenantContext;
+        private readonly ICurrentUserContext _currentUserContext;
 
-        public ListCategoriesCommandHandler(ICategoryQueryRepository categoryQueryRepository, ITenantContext tenantContext)
+        public ListCategoriesQueryHandler(ICategoryQueryRepository categoryQueryRepository, ICurrentUserContext currentUserContext)
         {
             _categoryQueryRepository = categoryQueryRepository;
-            _tenantContext = tenantContext;
+            _currentUserContext = currentUserContext;
         }
 
-        public async Task<IEnumerable<CategoryDto>> Handle(ListCategoriesCommand request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<CategoryDto>> Handle(ListCategoriesQueryMediatR request, CancellationToken cancellationToken)
         {
-            var brandId = request.BrandId == Guid.Empty
-                ? _tenantContext.BrandId
-                : BrandId.FromGuid(request.BrandId);
+            var organizationId = request.Contract.OrganizationId == Guid.Empty
+                ? _currentUserContext.ActiveOrganizationId
+                : request.Contract.OrganizationId;
 
-            return await _categoryQueryRepository.GetAllAsync(brandId);
+            return await _categoryQueryRepository.GetAllAsync(organizationId);
         }
     }
 }

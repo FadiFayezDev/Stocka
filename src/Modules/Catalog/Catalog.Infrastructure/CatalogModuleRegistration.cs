@@ -4,16 +4,15 @@ using Catalog.Application.Repositories.Commands;
 using Catalog.Application.Repositories.Commands.Bases;
 using Catalog.Application.Repositories.Queries.Category;
 using Catalog.Application.Repositories.Queries.Product;
+using Catalog.Contracts.Services;
 using Catalog.Infrastructure.Contexts;
 using Catalog.Infrastructure.Repositories.Commands;
 using Catalog.Infrastructure.Repositories.Commands.Bases;
 using Catalog.Infrastructure.Repositories.Queries;
 using Catalog.Infrastructure.Services;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Data;
 
 
 namespace Catalog.Infrastructure;
@@ -29,11 +28,8 @@ public static class CatalogModuleRegistration
             option.UseSqlServer(connectionString);
         });
 
-        #region Dapper registration for IDbConnection
-        services.AddTransient<IDbConnection>(sp =>
-            new SqlConnection(connectionString)
-        );
-        #endregion
+        services.AddTransient<ICatalogDbConnection>(_ =>
+            new CatalogDbConnection(connectionString));
 
         #region Application Services Registrations
         services.AddCatalogApplicationServices();
@@ -52,6 +48,7 @@ public static class CatalogModuleRegistration
 
         #region Service Registrations
         services.AddScoped<ICatalogUnitOfWork, UnitOfWork>();
+        services.AddScoped<Catalog.Contracts.Services.ICatalogServices, Catalog.Application.Services.CatalogServices>();
         #endregion
 
         return services;

@@ -1,5 +1,4 @@
-﻿using BuildingBlocks.Application.Primitives.Identifiers;
-using Catalog.Domain.Entities;
+﻿using Catalog.Domain.Entities;
 using Catalog.Domain.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -24,9 +23,6 @@ namespace Catalog.Infrastructure.Configurations
                 .Property(c => c.Name)
                 .HasColumnType("NVARCHAR(20)");
 
-            builder
-                .Property(c => c.BrandId)
-                .HasConversion(c => c.Value, c => BrandId.FromGuid(c));
         }
     }
 }

@@ -17,17 +17,15 @@ namespace Catalog.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasDefaultSchema("Catalog")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Catalog.Domain.Entities.Products.Category", b =>
+            modelBuilder.Entity("Catalog.Domain.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsActive")
@@ -37,23 +35,22 @@ namespace Catalog.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("NVARCHAR(20)");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", "Catalog");
                 });
 
-            modelBuilder.Entity("Catalog.Domain.Entities.Products.Product", b =>
+            modelBuilder.Entity("Catalog.Domain.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Barcode")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-
-                    b.Property<Guid>("BrandId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
@@ -68,6 +65,9 @@ namespace Catalog.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("NVARCHAR(100)");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("SellingPrice")
                         .HasColumnType("DECIMAL(7,2)");
 
@@ -75,12 +75,12 @@ namespace Catalog.Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", "Catalog");
                 });
 
-            modelBuilder.Entity("Catalog.Domain.Entities.Products.Product", b =>
+            modelBuilder.Entity("Catalog.Domain.Entities.Product", b =>
                 {
-                    b.HasOne("Catalog.Domain.Entities.Products.Category", null)
+                    b.HasOne("Catalog.Domain.Entities.Category", null)
                         .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)

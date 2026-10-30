@@ -14,6 +14,7 @@ namespace Catalog.Infrastructure.Contexts
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogDbContext).Assembly);
+            modelBuilder.HasDefaultSchema("Catalog");
         }
 
         public DbSet<Product> Products { get; set; }

@@ -1,19 +1,17 @@
-using Catalog.Application.Common.Interfaces;
+using Catalog.Application.Bindings.CategoryCases;
 using Catalog.Application.DTOs.Category;
 using Catalog.Application.Repositories.Commands;
-using Catalog.Domain.Entities;
+using Catalog.Contracts.DTOs.Category;
+using Catalog.Contracts.UseCases.CategoryCases;
 using Catalog.Domain.Primitives;
 using MediatR;
 
 namespace Catalog.Application.UseCases.Categories
 {
-    public record UpdateCategoryCommand : ICommand<CategoryDto>
-    {
-        public Guid CategoryId { get; set; }
-        public string? Name { get; set; }
-    }
-
-    public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, CategoryDto>
+    /// <summary>
+    /// Renames an existing category.
+    /// </summary>
+    public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommandMediatR, CategoryDto>
     {
         private readonly ICategoryRepository _categoryRepository;
 
@@ -22,18 +20,18 @@ namespace Catalog.Application.UseCases.Categories
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<CategoryDto> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
+        public async Task<CategoryDto> Handle(UpdateCategoryCommandMediatR request, CancellationToken cancellationToken)
         {
-            if (request.CategoryId == Guid.Empty)
-                throw new ArgumentException("Category ID is required.", nameof(request.CategoryId));
+            if (request.Contract.CategoryId == Guid.Empty)
+                throw new ArgumentException("Category ID is required.", nameof(request.Contract.CategoryId));
 
-            if (string.IsNullOrWhiteSpace(request.Name))
-                throw new ArgumentException("A category name is required.", nameof(request.Name));
+            if (string.IsNullOrWhiteSpace(request.Contract.Name))
+                throw new ArgumentException("A category name is required.", nameof(request.Contract.Name));
 
-            var category = await _categoryRepository.GetByIdAsync(CategoryId.FromGuid(request.CategoryId))
-                ?? throw new KeyNotFoundException($"Category with id '{request.CategoryId}' was not found.");
+            var category = await _categoryRepository.GetByIdAsync(CategoryId.FromGuid(request.Contract.CategoryId))
+                ?? throw new KeyNotFoundException($"Category with id '{request.Contract.CategoryId}' was not found.");
 
-            category.UpdateName(request.Name);
+            category.UpdateName(request.Contract.Name);
 
             await _categoryRepository.UpdateAsync(category);
 

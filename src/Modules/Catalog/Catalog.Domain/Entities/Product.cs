@@ -15,7 +15,7 @@ namespace Catalog.Domain.Entities
 
         [SetsRequiredMembers]
         private Product(
-            BrandId brandId,
+            Guid organizationId,
             CategoryId categoryId,
             string name,
             decimal sellingPrice,
@@ -23,7 +23,7 @@ namespace Catalog.Domain.Entities
         {
             Id = ProductId.New();
 
-            ChangeBrand(brandId);
+            ChangeOrganization(organizationId);
             ChangeCategory(categoryId);
             Rename(name);
             ChangeSellingPrice(sellingPrice);
@@ -34,7 +34,7 @@ namespace Catalog.Domain.Entities
 
         #region Properties
 
-        public BrandId BrandId { get; private set; } = default!;
+        public Guid OrganizationId { get; private set; } = default!;
 
         public CategoryId CategoryId { get; private set; } = default!;
 
@@ -59,14 +59,14 @@ namespace Catalog.Domain.Entities
         #region Factory
 
         public static Product Create(
-            BrandId brandId,
+            Guid organizationId,
             CategoryId categoryId,
             string name,
             decimal sellingPrice,
             string? barcode = null)
         {
             return new Product(
-                brandId,
+                organizationId,
                 categoryId,
                 name,
                 sellingPrice,
@@ -93,9 +93,9 @@ namespace Catalog.Domain.Entities
             SellingPrice = sellingPrice;
         }
 
-        public void ChangeBrand(BrandId brandId)
+        public void ChangeOrganization(Guid organizationId)
         {
-            BrandId = brandId;
+            OrganizationId = organizationId;
         }
 
         public void ChangeCategory(CategoryId categoryId)

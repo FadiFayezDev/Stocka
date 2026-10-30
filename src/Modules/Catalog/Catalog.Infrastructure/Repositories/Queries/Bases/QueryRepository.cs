@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Catalog.Application.Common.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
@@ -9,13 +10,13 @@ namespace Catalog.Application.Repositories.Queries.Bases
     {
         protected readonly IDbConnection _connection;
         //protected readonly ICurrentUserContext? _userContext;
+        private const string Schema = "Catalog";
+        protected const string TableProducts = $"{Schema}.Products";
+        protected const string TableCategories = $"{Schema}.Categories";
 
-        protected const string TableProducts = "Products";
-        protected const string TableCategories = "Categories";
-
-        protected QueryRepository(IDbConnection connection /*, ICurrentUserContext? userContext = null*/ )
+        protected QueryRepository(ICatalogDbConnection connection /*, ICurrentUserContext? userContext = null*/ )
         {
-            _connection = connection;
+            _connection = connection.Connection;
             //_userContext = userContext;
         }
 

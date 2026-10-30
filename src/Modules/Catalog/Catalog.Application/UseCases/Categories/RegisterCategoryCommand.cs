@@ -1,40 +1,39 @@
-﻿using BuildingBlocks.Application.Abstractions;
-using BuildingBlocks.Application.Primitives.Identifiers;
-using Catalog.Application.Common.Interfaces;
+﻿using BuildingBlocks.Application.Common.Interfaces;
+using Catalog.Application.Bindings.CategoryCases;
 using Catalog.Application.DTOs.Category;
 using Catalog.Application.Repositories.Commands;
+using Catalog.Contracts.DTOs.Category;
+using Catalog.Contracts.UseCases.CategoryCases;
 using Catalog.Domain.Entities;
 using MediatR;
 
 namespace Catalog.Application.UseCases.Categories
 {
-    public record RegisterCategoryCommand : ICommand<CategoryDto?>
+    /// <summary>
+    /// Creates the category through the domain factory (which enforces name invariants)
+    /// and returns the created category data transfer object.
+    /// </summary>
+    public class RegisterCategoryCommandHandler : IRequestHandler<RegisterCategoryCommandMediatR, CategoryDto?>
     {
-        public string Name { get; set; } = default!;
-    }
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ICurrentUserContext _currentUserContext;
 
-    public class RegisterCategoryCommandHandler : IRequestHandler<RegisterCategoryCommand, CategoryDto?>
-    {
-        private readonly ICategoryRepository _CategoryRepository;
-        private readonly ITenantContext _tenantContext;
-
-        public RegisterCategoryCommandHandler(ICategoryRepository CategoryRepository, ITenantContext tenantContext)
+        public RegisterCategoryCommandHandler(ICategoryRepository categoryRepository, ICurrentUserContext currentUserContext)
         {
-            _CategoryRepository = CategoryRepository;
-            _tenantContext = tenantContext;
+            _categoryRepository = categoryRepository;
+            _currentUserContext = currentUserContext;
         }
 
-        public async Task<CategoryDto?> Handle(RegisterCategoryCommand request, CancellationToken cancellationToken)
+        public async Task<CategoryDto?> Handle(RegisterCategoryCommandMediatR request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(request.Name))
-                throw new ArgumentException("Name is empty, name cannot be empty.", nameof(request.Name));
-
+            if (string.IsNullOrWhiteSpace(request.Contract.Name))
+                throw new ArgumentException("Name is empty, name cannot be empty.", nameof(request.Contract.Name));
 
             var category = Category.Create(
-                _tenantContext.BrandId,
-                request.Name.Trim());
+                _currentUserContext.ActiveOrganizationId,
+                request.Contract.Name.Trim());
 
-            await _CategoryRepository.AddAsync(category);
+            await _categoryRepository.AddAsync(category);
 
             return category.ToDto();
         }

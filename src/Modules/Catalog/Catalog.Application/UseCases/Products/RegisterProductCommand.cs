@@ -1,54 +1,51 @@
-﻿using BuildingBlocks.Application.Abstractions;
-using BuildingBlocks.Application.Primitives.Identifiers;
-using Catalog.Application.Common.Interfaces;
+﻿using BuildingBlocks.Application.Common.Interfaces;
+using Catalog.Application.Bindings.ProductCases;
 using Catalog.Application.DTOs.Product;
 using Catalog.Application.Repositories.Commands;
-using Catalog.Application.Repositories.Queries.Product;
+using Catalog.Contracts.DTOs.Product;
+using Catalog.Contracts.UseCases.ProductCases;
 using Catalog.Domain.Entities;
 using Catalog.Domain.Primitives;
 using MediatR;
 
 namespace Catalog.Application.UseCases.Products
 {
-    public record RegisterProductCommand : ICommand<ProductDto?>
-    {
-        public string Name { get; set; } = default!;
-        public string Barcode { get; set; } = default!;
-        public decimal SellingPrice { get; set; }
-        public Guid CategoryId { get; set; }
-        public Stream? Image { get; set; }
-    }
-
-    public class RegisterProductCommandHandler : IRequestHandler<RegisterProductCommand, ProductDto?>
+    /// <summary>
+    /// Creates the product through the domain factory (which enforces name/price invariants)
+    /// and returns the created product data transfer object.
+    /// </summary>
+    public class RegisterProductCommandHandler : IRequestHandler<RegisterProductCommandMediatR, ProductDto?>
     {
         private readonly IProductRepository _productRepository;
-        private readonly ITenantContext _tenantContext;
+        private readonly ICurrentUserContext _currentUserContext;
 
-        public RegisterProductCommandHandler(IProductRepository productRepository, ITenantContext tenantContext)
+        public RegisterProductCommandHandler(IProductRepository productRepository, ICurrentUserContext currentUserContext)
         {
             _productRepository = productRepository;
-            _tenantContext = tenantContext;
+            _currentUserContext = currentUserContext;
         }
 
-        public async Task<ProductDto?> Handle(RegisterProductCommand request, CancellationToken cancellationToken)
+        public async Task<ProductDto?> Handle(RegisterProductCommandMediatR request, CancellationToken cancellationToken)
         {
             // Business validations
-            if (string.IsNullOrWhiteSpace(request.Name))
-                throw new ArgumentException("Name cannot be empty.", nameof(request.Name));
+            if (string.IsNullOrWhiteSpace(request.Contract.Name))
+                throw new ArgumentException("Name cannot be empty.", nameof(request.Contract.Name));
 
-            if (request.CategoryId == Guid.Empty)
-                throw new ArgumentException("Category ID cannot be empty.", nameof(request.CategoryId));
+            if (request.Contract.CategoryId == Guid.Empty)
+                throw new ArgumentException("Category ID cannot be empty.", nameof(request.Contract.CategoryId));
 
-            if (request.SellingPrice < 0)
-                throw new ArgumentOutOfRangeException(nameof(request.SellingPrice), "Selling price cannot be negative.");
+            if (request.Contract.SellingPrice < 0)
+                throw new ArgumentOutOfRangeException(nameof(request.Contract.SellingPrice), "Selling price cannot be negative.");
+
+            var organizationId = _currentUserContext.ActiveOrganizationId;
 
             // Ensure basic business rules before creating entity
             var product = Product.Create(
-                _tenantContext.BrandId,
-                CategoryId.FromGuid(request.CategoryId),
-                request.Name.Trim(),
-                request.SellingPrice,
-                string.IsNullOrWhiteSpace(request.Barcode) ? null : request.Barcode.Trim());
+                organizationId,
+                CategoryId.FromGuid(request.Contract.CategoryId),
+                request.Contract.Name.Trim(),
+                request.Contract.SellingPrice,
+                string.IsNullOrWhiteSpace(request.Contract.Barcode) ? null : request.Contract.Barcode.Trim());
 
             await _productRepository.AddAsync(product);
 

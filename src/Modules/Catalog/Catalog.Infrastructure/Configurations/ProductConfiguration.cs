@@ -1,5 +1,4 @@
-﻿using BuildingBlocks.Application.Primitives.Identifiers;
-using Catalog.Domain.Entities;
+﻿using Catalog.Domain.Entities;
 using Catalog.Domain.Primitives;
 using Catalog.Domain.Primitives.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -36,10 +35,6 @@ namespace Catalog.Infrastructure.Configurations
             builder
                 .Property(p => p.ImagePath)
                 .IsRequired(false);
-
-            builder
-                .Property(p => p.BrandId)
-                .HasConversion(p => p.Value, p => BrandId.FromGuid(p));
 
             builder
                 .Property(p => p.CategoryId)
