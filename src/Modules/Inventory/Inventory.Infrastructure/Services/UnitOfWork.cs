@@ -1,6 +1,5 @@
 ﻿using Inventory.Application.Common.Interfaces;
 using Inventory.Infrastructure.Contexts;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -43,12 +42,14 @@ namespace Inventory.Infrastructure.Services
             _transaction = _context.Database.BeginTransaction();
         }
 
-        public async Task BeginTransactionAsync()
+        public async Task BeginTransactionAsync(
+            CancellationToken cancellationToken = default)
         {
             if (_transaction != null)
                 return;
 
-            _transaction = await _context.Database.BeginTransactionAsync();
+            _transaction = await _context.Database
+                .BeginTransactionAsync(cancellationToken);
         }
 
         public void CommitTransaction()
@@ -64,12 +65,13 @@ namespace Inventory.Infrastructure.Services
             }
         }
 
-        public async Task CommitTransactionAsync()
+        public async Task CommitTransactionAsync(
+            CancellationToken cancellationToken = default)
         {
             try
             {
                 if (_transaction != null)
-                    await _transaction.CommitAsync();
+                    await _transaction.CommitAsync(cancellationToken);
             }
             finally
             {
@@ -93,12 +95,13 @@ namespace Inventory.Infrastructure.Services
             }
         }
 
-        public async Task RollbackTransactionAsync()
+        public async Task RollbackTransactionAsync(
+            CancellationToken cancellationToken = default)
         {
             try
             {
                 if (_transaction != null)
-                    await _transaction.RollbackAsync();
+                    await _transaction.RollbackAsync(cancellationToken);
             }
             finally
             {

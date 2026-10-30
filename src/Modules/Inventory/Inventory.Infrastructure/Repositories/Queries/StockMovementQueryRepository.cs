@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Inventory.Application.Common.Interfaces;
 using Inventory.Application.Repositories.Queries;
 using Inventory.Contracts.DTOs.StockMovement;
 using Inventory.Infrastructure.Repositories.Queries.Bases;
@@ -17,7 +18,7 @@ namespace Inventory.Infrastructure.Repositories.Queries
         private const string BaseSelect =
             "SELECT Id, ProductId, BatchId, WarehouseId, BrandId, Quantity, MovementType, ReferenceType, ReferenceId, CreatedAt, Reason FROM " + TableStockMovements;
 
-        public StockMovementQueryRepository(IDbConnection connection) : base(connection)
+        public StockMovementQueryRepository(IInventoryDbConnection connection) : base(connection)
         {
         }
 

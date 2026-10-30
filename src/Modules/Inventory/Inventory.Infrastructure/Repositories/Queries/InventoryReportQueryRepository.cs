@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Inventory.Application.Common.Interfaces;
 using Inventory.Application.Repositories.Queries;
 using Inventory.Contracts.DTOs.Batch;
 using Inventory.Contracts.DTOs.Reports;
@@ -19,7 +20,7 @@ namespace Inventory.Infrastructure.Repositories.Queries
     /// </summary>
     internal class InventoryReportQueryRepository : QueryRepository, IInventoryReportQueryRepository
     {
-        public InventoryReportQueryRepository(IDbConnection connection) : base(connection)
+        public InventoryReportQueryRepository(IInventoryDbConnection connection) : base(connection)
         {
         }
 

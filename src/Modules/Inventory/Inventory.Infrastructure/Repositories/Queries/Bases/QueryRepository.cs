@@ -1,3 +1,4 @@
+using Inventory.Application.Common.Interfaces;
 using System.Data;
 
 namespace Inventory.Infrastructure.Repositories.Queries.Bases
@@ -11,9 +12,9 @@ namespace Inventory.Infrastructure.Repositories.Queries.Bases
         protected const string TableWarehouseBatches = "Inventory.WarehouseBatches";
         protected const string TableStockMovements = "Inventory.StockMovements";
 
-        protected QueryRepository(IDbConnection connection)
+        protected QueryRepository(IInventoryDbConnection connection)
         {
-            _connection = connection;
+            _connection = connection.Connection;
         }
 
         protected IDbConnection GetConnection() => _connection;

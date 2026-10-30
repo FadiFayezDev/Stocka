@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Inventory.Application.Common.Interfaces;
 using Inventory.Application.Repositories.Queries;
 using Inventory.Contracts.DTOs.WarehouseBatch;
 using Inventory.Infrastructure.Repositories.Queries.Bases;
@@ -15,7 +16,7 @@ namespace Inventory.Infrastructure.Repositories.Queries
         private const string BaseSelect =
             "SELECT Id, WarehouseId, BatchId, Quantity, BrandId FROM " + TableWarehouseBatches;
 
-        public WarehouseBatchQueryRepository(IDbConnection connection) : base(connection)
+        public WarehouseBatchQueryRepository(IInventoryDbConnection connection) : base(connection)
         {
         }
 

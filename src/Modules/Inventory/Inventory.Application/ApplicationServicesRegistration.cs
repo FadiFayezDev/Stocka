@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Inventory.Application.Behaviors;
-using Inventory.Application.Common.Interfaces;
 using Inventory.Contracts.UseCases.BatchCases;
 using Inventory.Contracts.UseCases.ReportCases;
 using Inventory.Contracts.UseCases.StockCases;

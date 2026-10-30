@@ -4,11 +4,9 @@ using Inventory.Application.Common.Interfaces;
 using Inventory.Infrastructure.Contexts;
 using Inventory.Infrastructure.Services;
 using Inventory.Infrastructure.Repositories.Commands.Bases;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Data;
 
 namespace Inventory.Infrastructure;
 
@@ -23,11 +21,8 @@ public static class InventoryModuleRegistration
             option.UseSqlServer(connectionString);
         });
 
-        #region Dapper registration for IDbConnection
-        services.AddTransient<IDbConnection>(sp =>
-            new SqlConnection(connectionString)
-        );
-        #endregion
+        services.AddTransient<IInventoryDbConnection>(_ =>
+            new InventoryDbConnection(connectionString));
 
         #region Application Services Registrations
         services.AddInventoryApplicationServices();
