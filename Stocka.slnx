@@ -17,7 +17,12 @@
     <Project Path="src/Modules/Core/Core.Domain/Core.Domain.csproj" Id="ce09bc18-c10b-4d77-b7d9-7753aba26cb7" />
     <Project Path="src/Modules/Core/Core.Infrastructure/Core.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/src/Modules/Identity/" />
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/Identity.Application/Identity.Application.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Contracts/Identity.Contracts.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Domain/Identity.Domain.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Infrastructure/Identity.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Inventory/">
     <Project Path="src/Modules/Inventory/Inventory.Application/Inventory.Application.csproj" Id="6683794a-5343-421f-ac73-d5c8beb95767" />
     <Project Path="src/Modules/Inventory/Inventory.Contracts/Inventory.Contracts.csproj" Id="95368008-4eda-41c3-b02d-4f127825c41e" />
